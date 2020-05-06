@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 2114448406
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: custombuilding_ed847f93c115a716396c2cfcf9d4905c
+      Dependencies: {}
+    Info_1:
+      Name: buildingreplacemodeltest_c6c46251df7a2e414078ac662ad41058
+      Dependencies: {}
+    Info_2:
+      Name: insanedifficultyassets_d6e589e705c6b53a061c929a28278dc6
+      Dependencies: {}
+    Info_3:
+      Name: naturaldisastersassets_ec510a3212f1198a059ded0fab5dd143
+      Dependencies: {}
+    Info_4:
+      Name: elevationmodassets_5d3043d416fb000c3386e8dbcb70ef91
+      Dependencies: {}
+    Info_5:
+      Name: profgreskin_7ed65aa787927cb0f82a314f1e074dec
+      Dependencies: {}
