@@ -19,14 +19,14 @@ namespace ElevationExperiment.Patches
 	}
 
 
-	//[HarmonyPatch(typeof(Pathfinder),
-	//	"AddToOpenSet",
-	//	new Type[] {
-	//		typeof(Pathfinder.Node),
-	//		typeof(Pathfinder.Node),
-	//		typeof(int),
-	//		typeof(int)
-	//	})]
+	[HarmonyPatch(typeof(Pathfinder),
+		"AddToOpenSet",
+		new Type[] {
+			typeof(Pathfinder.Node),
+			typeof(Pathfinder.Node),
+			typeof(int),
+			typeof(int)
+		})]
 	public class PathfindingBlockerCheckPatch
 	{
 		static bool Prefix(Pathfinder.Node node, Pathfinder.Node parent)
@@ -78,13 +78,16 @@ namespace ElevationExperiment.Patches
 							dir = dirs[diffNormalized];
 						}
 
-						bool diagonal = diagonals.ContainsKey(diffNormalized);
 
-						if (validCardinal && !diagonal)
+						if (validCardinal)
 						{
 							if (markFrom.blockers.Contains(dir) || markTo.blockers.Contains(dir))
 								return true;
+							else
+								return false;
 						}
+						else
+							return true;
 					}
 				}
 			}
@@ -96,7 +99,7 @@ namespace ElevationExperiment.Patches
 		}
 	}
 
-	//[HarmonyPatch(typeof(Pathfinder), "SearchForClosestUnblockedCell")]
+	[HarmonyPatch(typeof(Pathfinder), "SearchForClosestUnblockedCell")]
 	public class BlockedSearchCellPatch
 	{
 		static void Postfix(Pathfinder __instance, ref Pathfinder.Node __result, int sx, int sz, Vector3 start, Vector3 end, int teamId)
@@ -165,7 +168,7 @@ namespace ElevationExperiment.Patches
 
 
 
-	//[HarmonyPatch(typeof(Pathfinder),"FindPath")]
+	[HarmonyPatch(typeof(Pathfinder), "FindPath")]
 	class FindPathRecalculatePatch
 	{
 		static void Prefix(Pathfinder __instance, ref Vector3 startPos, ref Vector3 endPos, int teamId)
@@ -235,7 +238,7 @@ namespace ElevationExperiment.Patches
 	}
 
 
-	//[HarmonyPatch(typeof(Pathfinder), "FindPathRaw")]
+	[HarmonyPatch(typeof(Pathfinder), "FindPathRaw")]
 	class FindPathRawRecalculatePatch
 	{
 		static void Prefix(Pathfinder __instance, ref Vector3 startPos, ref Vector3 endPos, int teamId)
@@ -302,7 +305,7 @@ namespace ElevationExperiment.Patches
 
 	#region Path Blockers
 
-	//[HarmonyPatch(typeof(World),"GetBlocksFootPath")]
+	[HarmonyPatch(typeof(World), "GetBlocksFootPath")]
 	class WorldFootPathBlockerPatch
 	{
 		static void Postfix(ref bool __result, Cell cell)
@@ -312,7 +315,7 @@ namespace ElevationExperiment.Patches
 		}
 	}
 
-	//[HarmonyPatch(typeof(World), "GetBlocksFootPathForArmies")]
+	[HarmonyPatch(typeof(World), "GetBlocksFootPathForArmies")]
 	class WorldArmyPathBlockerPatch
 	{
 		static void Postfix(ref bool __result, Cell c)
@@ -321,7 +324,7 @@ namespace ElevationExperiment.Patches
 		}
 	}
 
-	//[HarmonyPatch(typeof(World), "GetBlocksFootPathForOgres")]
+	[HarmonyPatch(typeof(World), "GetBlocksFootPathForOgres")]
 	class WorldOgreFootPathBlockerPatch
 	{
 		static void Postfix(ref bool __result, Cell cell)
@@ -331,7 +334,7 @@ namespace ElevationExperiment.Patches
 		}
 	}
 
-	//[HarmonyPatch(typeof(PlacementMode), "blocksPath")]
+	[HarmonyPatch(typeof(PlacementMode), "blocksPath")]
 	class PlacementModePathBlockerPatch
 	{
 		static void Postfix(ref bool __result, Cell c)

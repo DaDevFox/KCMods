@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace ElevationExperiment.Patches
 {
-    //[HarmonyPatch(typeof(CastleBlock),"PlaceDoor")]
+    [HarmonyPatch(typeof(CastleBlock), "PlaceDoor")]
     class CastleBlockDoorPatch
     {
         static void Prefix(CastleBlock __instance, ref Vector3 position, ref Vector3 faceDirection)
@@ -24,7 +24,7 @@ namespace ElevationExperiment.Patches
     }
 
 
-    //[HarmonyPatch(typeof(CastleBlock), "UpdateBlock")]
+    [HarmonyPatch(typeof(CastleBlock), "UpdateBlock")]
     class CastleBlockUpdateDoorPatch
     {
         static void Postfix(CastleBlock __instance)

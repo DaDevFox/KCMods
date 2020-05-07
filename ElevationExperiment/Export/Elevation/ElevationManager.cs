@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace ElevationExperiment
 {
@@ -164,7 +165,40 @@ namespace ElevationExperiment
         }
 
 
+        public static string Save()
+        {
+            SerializableDictionary<string, int> all = new SerializableDictionary<string, int>();
 
+            foreach(CellMark mark in cellMarkLookup.Values)
+            {
+                all.Add(GetCellMarkID(mark.cell), mark.elevationTier);
+            }
+
+            return JsonConvert.SerializeObject(all);
+        }
+
+        public static void ReadFromLoad(string json)
+        {
+            Reset();
+            SerializableDictionary<string, int> all = JsonConvert.DeserializeObject<SerializableDictionary<string, int>>(json);
+
+            foreach(string id in all.Keys)
+            {
+                string[] split = id.Split(new char[]
+                    {
+                        '_'
+                    });
+
+                Vector3 pos = new Vector3(float.Parse(split[0]), 0f, float.Parse(split[1]));
+                Cell cell = World.inst.GetCellData(pos);
+
+                CellMark mark = new CellMark(cell);
+                mark.elevationTier = all[id];
+                cellMarkLookup.Add(GetCellMarkID(cell), mark);
+            }
+
+            RefreshTerrain();
+        }
 
 
     }

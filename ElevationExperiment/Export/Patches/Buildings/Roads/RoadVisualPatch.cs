@@ -68,7 +68,7 @@ namespace ElevationExperiment.Patches
     }
 
 
-    //[HarmonyPatch(typeof(Road),"ShouldConnect")]
+    [HarmonyPatch(typeof(Road), "ShouldConnect")]
     public class RoadShouldConnectPatch
     {
         static void Postfix(Road __instance, ref bool __result, Cell c)

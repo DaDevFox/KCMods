@@ -7,7 +7,7 @@ using Harmony;
 
 namespace ElevationExperiment.Patches
 {
-    //[HarmonyPatch(typeof(World), "CanPlace")]
+    [HarmonyPatch(typeof(World), "CanPlace")]
     class PlacementValidationPatch
     {
 
@@ -35,7 +35,7 @@ namespace ElevationExperiment.Patches
         }
     }
 
-    //[HarmonyPatch(typeof(BuildInfoUI),"Update")]
+    [HarmonyPatch(typeof(BuildInfoUI), "Update")]
     class BuildInfoUIPatch
     {
         static void Postfix(BuildInfoUI __instance)

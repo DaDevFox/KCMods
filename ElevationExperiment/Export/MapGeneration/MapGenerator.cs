@@ -30,19 +30,44 @@ namespace ElevationExperiment
         public static float fertilityWeightage = 0.3f;
 
         public static int terracing = 1;
-        
-        public static float amplitude = 0.7f;
-        public static float scale = 50f;
+
+        public static float Amplitude {
+            get;
+            set;
+        } = 0.7f;
+        //{
+        //    get
+        //    {
+        //        return Settings.inst.c_Generator.c_Advanced.c_Noise.Amplitude;
+        //    }
+        //}
+
+        public static float Scale{
+            get;
+            set; 
+        } = 50f;
+        //{
+        //    get
+        //    {
+        //        return Settings.inst.c_Generator.c_Advanced.c_Noise.Scale;
+        //    }
+        //}
 
         public static bool doSmoothing = true;
+        //{
+        //    get
+        //    {
+        //        return Settings.inst.c_Generator.c_Advanced.c_Noise.Smoothing;
+        //    }
+        //}
 
         public static void Generate()
         {
             Mod.Log("--- Generating ---");
             
             SRand.SetSeed(World.inst.seed);
-
             generatorSeededState = SRand.value;
+
             try
             {
                 GenerateBase();
@@ -86,7 +111,7 @@ namespace ElevationExperiment
                             data.valid = true;
                             data.cell = cell;
                             float yValue = 0f;
-                            float noiseValue = Mathf.PerlinNoise(cell.x/scale + generatorSeededState, cell.z/scale + generatorSeededState) * amplitude;
+                            float noiseValue = Mathf.PerlinNoise(cell.x/Scale + generatorSeededState, cell.z/Scale + generatorSeededState) * Amplitude;
                            
                             float weightage = GetFertilityDistanceWeightage(cell);
                             yValue = noiseValue * weightage * (ElevationManager.maxElevation - ElevationManager.minElevation) + ElevationManager.minElevation;
@@ -297,7 +322,7 @@ namespace ElevationExperiment
 
 
 
-        //[HarmonyPatch(typeof(World), "Generate")]
+        [HarmonyPatch(typeof(World), "Generate")]
         public class PostGeneratePatch
         {
             static void Postfix()

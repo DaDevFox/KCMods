@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ElevationExperiment.Patches
 {
-    //[HarmonyPatch(typeof(ProjectileDefense),"GetHeight")]
+    [HarmonyPatch(typeof(ProjectileDefense), "GetHeight")]
     class ProjectileDefenseRangePatch
     {
         static void Postfix(ProjectileDefense __instance, ref int __result)
@@ -32,7 +32,7 @@ namespace ElevationExperiment.Patches
         }
     }
 
-    //[HarmonyPatch(typeof(ArcherTower), "GetHeight")]
+    [HarmonyPatch(typeof(ArcherTower), "GetHeight")]
     class ArcherTowerRangePatch
     {
         static void Postfix(ArcherTower __instance, ref int __result, int maxHeight)

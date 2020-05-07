@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ElevationExperiment.Patches
 {
-    //[HarmonyPatch(typeof(PlacementMode), "UpdateBuildingAtPosition")]
+    [HarmonyPatch(typeof(PlacementMode), "UpdateBuildingAtPosition")]
     class BuildingPlacementPatch
     {
         static void Postfix(Building b)
@@ -18,11 +18,11 @@ namespace ElevationExperiment.Patches
             float leveling = GetLevellingForBuilding(b);
             if (cell != null && mark != null)
             {
-                b.transform.position = new Vector3(b.transform.position.x, b.transform.position.y + leveling, b.transform.position.z);
+                b.transform.position = new Vector3(b.transform.position.x, leveling, b.transform.position.z);
             }
         }
 
-        static float GetLevellingForBuilding(Building b)
+        public static float GetLevellingForBuilding(Building b)
         {
             float max = 0f;
             b.ForEachTileInBounds(delegate(int x, int z, Cell cell)

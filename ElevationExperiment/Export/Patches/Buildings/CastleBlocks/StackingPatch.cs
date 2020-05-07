@@ -10,7 +10,7 @@ namespace ElevationExperiment.Patches
 
 
     //Patch stack height to match elevation
-    //[HarmonyPatch(typeof(Cell), "CurrentStackHeight")]
+    [HarmonyPatch(typeof(Cell), "CurrentStackHeight")]
     public class StackHeightPatch
     {
         static void Postfix(Cell __instance, ref int __result)
@@ -30,7 +30,7 @@ namespace ElevationExperiment.Patches
     }
 
     //Patch method to find building at stack height
-    //[HarmonyPatch(typeof(CastleBlock),"GetBuildingAtStackHeight")]
+    [HarmonyPatch(typeof(CastleBlock), "GetBuildingAtStackHeight")]
     public class CastleBlockRelativityPatch
     {
         static bool Prefix(Cell c, ref int stackHeight)

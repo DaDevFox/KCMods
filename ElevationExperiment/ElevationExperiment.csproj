@@ -79,6 +79,7 @@
     <Compile Include="Export\External\Zat\Utils\Zat.Debugging.cs" />
     <Compile Include="Export\MapGeneration\BlockedTilePruner.cs" />
     <Compile Include="Export\Patches\Environmental\WolfPatch.cs" />
+    <Compile Include="Export\Patches\Game\CameraPatch.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />
     <Compile Include="Export\Elevation\CellElevationMesh.cs" />
     <Compile Include="Export\Elevation\ElevationManager.cs" />
@@ -97,7 +98,7 @@
     <Compile Include="Export\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
     <Compile Include="Export\Patches\Game\CellPatch.cs" />
     <Compile Include="Export\Patches\Game\PathfindingPatch.cs" />
-    <Compile Include="Export\Patches\Buildings\Placement\PlacementModePatch.cs" />
+    <Compile Include="Export\Patches\Buildings\Placement\PathfindingVisualIndicator.cs" />
     <Compile Include="Export\Patches\Buildings\Placement\PlacementValidationPatch.cs" />
     <Compile Include="Export\Patches\Buildings\CastleBlocks\TowerRangePatch.cs" />
     <Compile Include="Export\Patches\Environmental\WolfWitchRockPatches.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Export\Utils\ReflectionExtensions.cs" />
     <Compile Include="Export\External\Zat\Frameworks\Zat.InterModComm.cs" />
     <Compile Include="Export\External\Zat\Frameworks\Zat.ModMenu.API.cs" />
+    <Compile Include="Export\Utils\Renderer.cs" />
     <Compile Include="Export\Utils\Util.cs" />
     <Compile Include="Export\External\Zat\Utils\Zat.Rendering.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -114,7 +114,6 @@ namespace ElevationExperiment
 
             if (mat != null)
             {
-                //mat.color = ColorManager.GetColor(cellMark.elevationTier);
                 mat.mainTexture = ColorManager.elevationMap;
                 mat.mainTextureScale = new Vector2(1f, ColorManager.tilingConstant * cellMark.elevationTier - tierColorBuffer);
             }

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ElevationExperiment.Patches
 {
-    //[HarmonyPatch(typeof(World),"PlaceStone")]
+    [HarmonyPatch(typeof(World), "PlaceStone")]
     class RockPatch
     {
         static void Postfix(int x, int z)
@@ -17,7 +17,7 @@ namespace ElevationExperiment.Patches
             if (cell != null)
             {
                 CellMark mark = ElevationManager.GetCellMark(cell);
-                if (mark != null)
+                if (mark != null && cell.Models != null)
                 {
                     foreach (GameObject obj in cell.Models)
                     {
@@ -65,7 +65,7 @@ namespace ElevationExperiment.Patches
 
     }
 
-    //[HarmonyPatch(typeof(World), "AddWitchHut")]
+    [HarmonyPatch(typeof(World), "AddWitchHut")]
     class WitchHutPatch
     {
         static void Postfix(WitchHut __result)
@@ -101,14 +101,20 @@ namespace ElevationExperiment.Patches
 
             foreach (Cell cell in tracked)
             {
-                World.inst.AddWitchHut(cell.x,cell.z);
+                WitchHut witch = World.inst.GetWitchHutAt(cell);
+                if (witch)
+                {
+                    GameObject.Destroy(witch);
+
+                    World.inst.AddWitchHut(cell.x, cell.z);
+                }
             }
         }
     }
 
 
 
-    //[HarmonyPatch(typeof(World), "AddWolfDen")]
+    [HarmonyPatch(typeof(World), "AddWolfDen")]
     class WoflDenPatch
     {
         static void Postfix(WolfDen __result)
@@ -144,13 +150,19 @@ namespace ElevationExperiment.Patches
 
             foreach (Cell cell in tracked)
             {
-                World.inst.AddWolfDen(cell.x, cell.z);
+                GameObject cave = World.inst.GetCaveAt(cell);
+                if (cave)
+                {
+                    GameObject.Destroy(cave);
+
+                    World.inst.AddWolfDen(cell.x, cell.z);
+                }
             }
         }
     }
 
 
-    //[HarmonyPatch(typeof(World), "AddEmptyCave")]
+    [HarmonyPatch(typeof(World), "AddEmptyCave")]
     class EmptyCavePatch
     {
         static void Postfix(EmptyCave __result)
@@ -186,7 +198,13 @@ namespace ElevationExperiment.Patches
 
             foreach (Cell cell in tracked)
             {
-                World.inst.AddEmptyCave(cell.x, cell.z);
+                GameObject cave = World.inst.GetCaveAt(cell);
+                if (cave)
+                {
+                    GameObject.Destroy(cave);
+
+                    World.inst.AddEmptyCave(cell.x, cell.z);
+                }
             }
         }
     }

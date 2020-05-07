@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace ElevationExperiment
 {
@@ -10,6 +11,31 @@ namespace ElevationExperiment
     {
         public static int tierPathingCost = 50;
         public static int tierPathingMin = 40;
+
+		public static bool GetCardinal(Cell from, Cell to, out Direction direction)
+		{
+			Dictionary<Vector3, Direction> dirs = new Dictionary<Vector3, Direction>()
+			{
+				{ new Vector3(1f, 0f, 0f), Direction.East },
+				{ new Vector3(0f, 0f, 1f), Direction.South },
+				{ new Vector3(-1f, 0f, 0f), Direction.West },
+				{ new Vector3(0f, 0f, -1f), Direction.North },
+			};
+
+			Vector3 diff = from.Center.xz() - to.Center.xz();
+			diff = Vector3.ClampMagnitude(diff, 1f);
+
+			if (dirs.ContainsKey(diff))
+			{
+				direction = dirs[diff];
+				return true;
+			}
+			direction = Direction.North;
+			return false;
+		}
+
+
+
 
 		public static bool BlockedCompletely(Cell cell)
 		{

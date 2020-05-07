@@ -9,10 +9,10 @@ using UnityEngine;
 namespace ElevationExperiment.Patches
 {
 
-    
 
 
-    //[HarmonyPatch(typeof(World), "PlaceInternal")]
+
+    [HarmonyPatch(typeof(World), "PlaceInternal")]
     public class BuildingPlacePatch
     {
         static Dictionary<string, float> buildingRealStackHeights = new Dictionary<string, float>() 

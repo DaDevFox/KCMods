@@ -13,7 +13,7 @@ namespace ElevationExperiment
     {
         //A Message to anybody reading this code:
         //Don't judge, this code has been butchered and is awful, it contains some terrible practices and 
-        //All the class members are public, this is because harmony decided to not work in subclasses specifically for this file,
+        //All the class members are public, this is because harmony decided to not work in subclasses specifically for this file, idk why
         //So I had to adjust my code, and it is now awful. 
 
         public static float maxCamHeight = 100f;
@@ -25,8 +25,28 @@ namespace ElevationExperiment
 
         public static float camHeightSpeedModifierBuffer = 0.8f;
 
-        public static float normalSpeed = 0.5f;
-        public static float shiftSpeedBoost = 2f;
+        public static float normalSpeed 
+        {
+            get 
+            {
+                return Settings.inst.c_CameraControls.s_speed.Value;
+            } 
+        }
+        public static float shiftSpeedBoost
+        {
+            get
+            {
+                return Settings.inst.c_CameraControls.s_shiftSpeed.Value;
+            }
+        }
+
+        public static float snap
+        {
+            get
+            {
+                return Settings.inst.c_CameraControls.s_snap.Value;
+            }
+        }
 
         public static float velocityAcceleration = 4f;
         public static float velocityDeceleration = 5f;
@@ -57,7 +77,7 @@ namespace ElevationExperiment
     }
 
 
-    //[HarmonyPatch(typeof(Cam), "MoveRight")]
+    [HarmonyPatch(typeof(Cam), "MoveRight")]
     public static class CamMoveRightPatch
     {
         static bool Prefix()
@@ -66,7 +86,7 @@ namespace ElevationExperiment
         }
     }
 
-    //[HarmonyPatch(typeof(Cam), "MoveForward")]
+    [HarmonyPatch(typeof(Cam), "MoveForward")]
     public static class CamMoveForwardPatch
     {
         static bool Prefix()
@@ -76,7 +96,7 @@ namespace ElevationExperiment
     }
 
 
-    //[HarmonyPatch(typeof(Cam), "Zoom")]
+    [HarmonyPatch(typeof(Cam), "Zoom")]
     public static class CamZoomPatch
     {
         static bool Prefix()
@@ -85,7 +105,7 @@ namespace ElevationExperiment
         }
     }
 
-    //[HarmonyPatch(typeof(Cam), "Rotate")]
+    [HarmonyPatch(typeof(Cam), "Rotate")]
     public static class CamRotatePatch
     {
         static bool Prefix()
@@ -95,7 +115,7 @@ namespace ElevationExperiment
     }
 
 
-    //[HarmonyPatch(typeof(Cam), "Update")]
+    [HarmonyPatch(typeof(Cam), "Update")]
     public static class MainCamMovementPatch
     {
         static bool Prefix()
@@ -104,12 +124,15 @@ namespace ElevationExperiment
             {
                 Camera cam = Cam.inst.cam;
 
+                if (Cam.inst.OverrideTrack != null && !Cam.inst.OverrideTrack.Equals(null))
+                    Cam.inst.DesiredTrackingPos = Cam.inst.OverrideTrack.GetDesiredTrackingPos();
+
                 Vector3 pos = new Vector3(Cam.inst.DesiredTrackingPos.x, TopDownModeCamera.camHeight, Cam.inst.DesiredTrackingPos.z);
 
-                if (Settings.topDownViewCamSnap > 0f)
+                if (TopDownModeCamera.snap > 0f)
                 {
-                    pos.x = Utils.Util.RoundToFactor(pos.x, Settings.topDownViewCamSnap);
-                    pos.z = Utils.Util.RoundToFactor(pos.z, Settings.topDownViewCamSnap);
+                    pos.x = Utils.Util.RoundToFactor(pos.x, TopDownModeCamera.snap);
+                    pos.z = Utils.Util.RoundToFactor(pos.z, TopDownModeCamera.snap);
                 }
 
                 cam.transform.rotation = Quaternion.AngleAxis(90f, new Vector3(1f, 0f, 0f));

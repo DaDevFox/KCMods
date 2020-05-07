@@ -70,7 +70,7 @@ namespace ElevationExperiment
                 if (Input.GetKeyDown(KeyCode.H))
                     BlockedTilePruner.DoRegionSearch(ElevationManager.GetAll());
             }
-            if (Input.GetKeyDown(Settings.keycode_topDownView))
+            if (Input.GetKeyDown(Settings.inst.c_CameraControls.s_activateKey.Key))
             {
                 TopDownModeCamera.ToggleTopDownView();
             }

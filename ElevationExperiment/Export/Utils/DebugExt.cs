@@ -32,7 +32,14 @@ namespace ElevationExperiment
 
         public static void HandleException(Exception ex)
         {
-            Mod.helper.Log(ex.Message + "\n" + ex.StackTrace);
+            try
+            {
+                Log(ex.Message + "\n" + ex.StackTrace);
+            }
+            catch
+            {
+                Mod.Log(ex.Message + "\n" + ex.StackTrace);
+            }
         }
 
         public static void DrawLine(Vector3 from, Vector3 to, float duration = 10)

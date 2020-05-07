@@ -10,7 +10,7 @@ using System.Reflection;
 namespace ElevationExperiment.Patches
 {
 
-	//[HarmonyPatch(typeof(TreeSystem),"SetTree")]
+	[HarmonyPatch(typeof(TreeSystem), "SetTree")]
 	class TreeSystemPatch
 	{
 		static void Prefix(Cell cell, ref Vector3 pos)
@@ -24,11 +24,11 @@ namespace ElevationExperiment.Patches
 
 		public static void UpdateTrees()
 		{
-			TreeSystem.inst.Reset();
+			
 			List<Cell> tracked = new List<Cell>();
-			foreach(ArrayExt<Cell> landmass in World.inst.cellsToLandmass)
+			foreach (ArrayExt<Cell> landmass in World.inst.cellsToLandmass)
 			{
-				foreach(Cell cell in landmass.data)
+				foreach (Cell cell in landmass.data)
 				{
 					if (cell != null)
 					{
@@ -41,7 +41,7 @@ namespace ElevationExperiment.Patches
 					}
 				}
 			}
-			foreach(Cell cell in tracked)
+			foreach (Cell cell in tracked)
 			{
 				TreeSystem.inst.PlaceTree(cell);
 			}

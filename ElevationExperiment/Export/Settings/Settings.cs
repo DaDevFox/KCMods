@@ -41,6 +41,18 @@ namespace ElevationExperiment
         [Category("Camera Controls")]
         public CameraControls c_CameraControls { get; private set; }
 
+        //[Category("Visual")]
+        public Visual c_Visual { get; private set; }
+
+        public class Visual
+        {
+
+            [Setting("Pathfinding Indicator Enabled", "Wether or not the pathfinding indicator shown while building is enabled")]
+            [Toggle(false,"")]
+            public InteractiveToggleSetting s_VisualPathfindingIndicatorEnabled { get; private set; }
+
+        }
+
         public class Generator
         {
             [Setting("Regenerate Terrain", "Regenerates elevated terrain")]
@@ -71,35 +83,56 @@ namespace ElevationExperiment
 
                 public class Noise
                 {
-                    [Setting("Scale", "The scale of the noise used to generate elevation")]
-                    [Slider(0.1f, 100f, 50f, "50", false)]
-                    public InteractiveSliderSetting s_Scale { get; private set; }
-                    public float Scale
-                    {
-                        get
-                        {
-                            return s_Scale.Value;
-                        }
-                        set
-                        {
-                            s_Scale.Value = value;
-                        }
-                    }
+                    //[Setting("Scale", "The scale of the noise used to generate elevation")]
+                    //[Slider(0.1f, 100f, 50f, "50", false)]
+                    //public InteractiveSliderSetting s_Scale { get; private set; }
+                    //public float Scale
+                    //{
+                    //    get
+                    //    {
 
-                    [Setting("Amplitude", "The amplitude multiplier of the y-values")]
-                    [Slider(0.1f, 2f, 0.7f, "0.7", false)]
-                    public InteractiveSliderSetting s_Amplitue { get; private set; }
-                    public float Amplitude
-                    {
-                        get
-                        {
-                            return s_Amplitue.Value;
-                        }
-                        set
-                        {
-                            s_Amplitue.Value = value;
-                        }
-                    }
+                    //        return s_Scale.Value;
+                    //    }
+                    //    set
+                    //    {
+                    //        s_Scale.Value = value;
+                    //        MapGenerator.Scale = value;
+                    //    }
+                    //}
+
+                    //[Setting("Amplitude", "The amplitude multiplier of the y-values")]
+                    //[Slider(0.1f, 2f, 0.7f, "0.7", false)]
+                    //public InteractiveSliderSetting s_Amplitue { get; private set; }
+                    //public float Amplitude
+                    //{
+                    //    get
+                    //    {
+                    //        return s_Amplitue.Value;
+                            
+                    //    }
+                    //    set
+                    //    {
+                    //        s_Amplitue.Value = value;
+                    //        MapGenerator.Amplitude = value;
+                    //    }
+                    //}
+
+                    //[Setting("Smoothing", "Whether or not to smooth elevated terrain after generation; disabling can provide small performance boosts. ")]
+                    //[Toggle(true,"")]
+                    //public InteractiveToggleSetting s_Smoothing { get; private set; }
+                    //public bool Smoothing 
+                    //{
+                    //    get
+                    //    {
+                    //        return s_Smoothing.Value;
+                    //    }
+                    //    set
+                    //    {
+                    //        s_Smoothing.Value = value;
+                    //        MapGenerator.doSmoothing = value;
+                    //    }
+                    //}
+
 
                 }
             }
@@ -114,7 +147,7 @@ namespace ElevationExperiment
 
             //[Setting("Paste Colors", "Updates your color configuration to match the one copied. ")]
             //[Button("Paste")]
-            //public InteractiveButtonSetting s_PasteColorsFromClipboard{ get; private set; }
+            //public InteractiveButtonSetting s_PasteColorsFromClipboard { get; private set; }
 
 
             [Setting("Color Preset", "A set of predetremined colors that can be used for elevation coloring")]
@@ -400,11 +433,13 @@ namespace ElevationExperiment
             // Generator
             Settings.inst.c_Generator.s_Regenerate.OnButtonPressed.AddListener(OnRegenerateButtonClicked);
 
-            Settings.inst.c_Generator.c_Advanced.c_Noise.s_Amplitue.OnUpdate.AddListener(UpdateSlider);
-            Settings.inst.c_Generator.c_Advanced.c_Noise.s_Scale.OnUpdate.AddListener(UpdateSlider);
+            //Settings.inst.c_Generator.c_Advanced.c_Noise.s_Amplitue.OnUpdate.AddListener(UpdateSlider);
+            //Settings.inst.c_Generator.c_Advanced.c_Noise.s_Scale.OnUpdate.AddListener(UpdateSlider);
 
             // Coloring
-            //Settings.inst.c_Coloring.s_copyColorsToClipboard.OnButtonPressed.AddListener(CopyColorsFromClipboard);
+            //Settings.inst.c_Coloring.s_copyColorsToClipboard.OnButtonPressed.AddListener(CopyColorsToClipboard);
+            //Settings.inst.c_Coloring.s_PasteColorsFromClipboard.OnButtonPressed.AddListener(PasteColorsFromClipboard);
+
 
             Settings.inst.c_Coloring.s_preset.OnUpdate.AddListener(OnColorPresetChanged);
 
@@ -438,6 +473,7 @@ namespace ElevationExperiment
             Dictionary<int, UnityEngine.Color> preset = inst.c_Coloring.preset;
             foreach(int tier in preset.Keys)
             {
+                Settings.inst.c_Coloring.c_Tiers.GetType().GetProperty("color" + tier.ToString()).SetValue(Settings.inst.c_Coloring.c_Tiers, preset[tier]);
                 ColorManager.SetColor(tier, preset[tier]);
             }
 
@@ -460,19 +496,26 @@ namespace ElevationExperiment
 
         private static void UpdateSlider(SettingsEntry entry)
         {
-            entry.slider.label = entry.slider.value.ToString();
+            entry.slider.label = Utils.Util.RoundToFactor(entry.slider.value, 0.01f).ToString();
             Update(entry);
         }
 
-        private static void CopyColorsFromClipboard()
+        private static void CopyColorsToClipboard()
         {
             string json = "{";
             json += JsonConvert.SerializeObject(Settings.inst.c_Coloring.c_Tiers.color1);
             json += "}";
 
-            //Mod.dLog(json);
+            Clipboard = "sample text";
         }
 
+
+        private static void PasteColorsFromClipboard()
+        {
+            string json = Clipboard;
+
+            DebugExt.dLog(json);
+        }
 
         #endregion
 

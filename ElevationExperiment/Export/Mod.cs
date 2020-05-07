@@ -19,25 +19,21 @@ namespace ElevationExperiment
         {
             Mod.helper = helper;
 
-            try
-            {
+            var harmony = HarmonyInstance.Create("harmony");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                var harmony = HarmonyInstance.Create("harmony");
-                harmony.PatchAll(Assembly.GetExecutingAssembly());
-                //Mod.Log("test");
-            }
-            catch(Exception ex)
-            {
-                DebugExt.HandleException(ex);
-            }
+            Mod.dLog("test");
         }
 
-        public void SceneLoaded()
+        public void SceneLoaded(KCModHelper helper)
         {
             try
             {
+                Mod.helper = helper;
                 Settings.Setup();
-                
+
+                Broadcast.OnSaveEvent.Listen(OnSave);
+                Broadcast.OnLoadedEvent.Listen(OnLoad);
             }
             catch (Exception ex)
             {
@@ -52,11 +48,10 @@ namespace ElevationExperiment
         }
 
         public static void dLog(object msg)
-        {
+        {   
             if (Settings.debug)
                 Mod.helper.Log(msg.ToString());
         }
-
 
         public static void Log(object msg)
         {
@@ -83,6 +78,19 @@ namespace ElevationExperiment
             }
         }
 
+        #region SaveLoad
+
+        public static void OnSave(object sender, OnSaveEvent loadedEvent)
+        {
+            LoadSave.SaveDataGeneric("elevation", "cellMarks", ElevationManager.Save());
+        }
+
+        public static void OnLoad(object sender, OnLoadedEvent loadedEvent)
+        {
+           ElevationManager.ReadFromLoad(LoadSave.ReadDataGeneric("elevation", "cellMarks"));
+        }
+
+        #endregion
 
     }
 }
