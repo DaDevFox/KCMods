@@ -24,7 +24,7 @@ namespace ElevationExperiment.Patches
             {"castlestairs",0.5f }
         };
 
-        static void Postfix(Building PendingObj)
+        static void Postfix(Building PendingObj, bool fromLoad)
         {
             try
             {
@@ -34,6 +34,7 @@ namespace ElevationExperiment.Patches
                 }
                 else
                 {
+                    DebugExt.dLog("building: " + fromLoad.ToString());
                     Vector3 pos = PendingObj.transform.localPosition;
                     Cell cell = PendingObj.GetCell();
                     CellMark mark = ElevationManager.GetCellMark(cell);
@@ -54,6 +55,9 @@ namespace ElevationExperiment.Patches
                         PendingObj.UpdateShaderHeight();
                     }
                 }
+
+                
+                
             }
             catch (Exception ex)
             {

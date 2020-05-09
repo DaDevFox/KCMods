@@ -86,10 +86,7 @@ namespace ElevationExperiment
         public static void SetTerrainMat()
         {
             tilingConstant = 1f / (ElevationManager.maxElevation - ElevationManager.minElevation);
-            terrainMat = new Material(Shader.Find("Custom/Snow2"))
-            {
-                color = Color.white
-            };
+            terrainMat = new Material(TreeSystem.inst.material);
             elevationMap.filterMode = FilterMode.Point;
 
             terrainMat.mainTexture = elevationMap;

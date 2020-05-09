@@ -80,6 +80,8 @@
     <Compile Include="Export\MapGeneration\BlockedTilePruner.cs" />
     <Compile Include="Export\Patches\Environmental\WolfPatch.cs" />
     <Compile Include="Export\Patches\Game\CameraPatch.cs" />
+    <Compile Include="Export\Patches\Game\WorldGridPatch.cs" />
+    <Compile Include="Export\Patches\Placement\DragSelectPatch.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />
     <Compile Include="Export\Elevation\CellElevationMesh.cs" />
     <Compile Include="Export\Elevation\ElevationManager.cs" />
@@ -90,16 +92,16 @@
     <Compile Include="Export\MapGeneration\TerrainFeatures\Mountain.cs" />
     <Compile Include="Export\MapGeneration\TerrainFeatures\TerrainFeature.cs" />
     <Compile Include="Export\Mod.cs" />
-    <Compile Include="Export\Patches\Buildings\Placement\BuildingPatch.cs" />
-    <Compile Include="Export\Patches\Buildings\Placement\BuildingPlacementPatch.cs" />
+    <Compile Include="Export\Patches\Buildings\YCorrection\BuildingPlacePatch.cs" />
+    <Compile Include="Export\Patches\Placement\BuildingPlacementModePatch.cs" />
     <Compile Include="Export\Patches\Buildings\Roads\RoadAssets.cs" />
     <Compile Include="Export\Patches\Buildings\Roads\RoadVisualPatch.cs" />
     <Compile Include="Export\TopDownModeCamera\TopDownModeCamera.cs" />
     <Compile Include="Export\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
     <Compile Include="Export\Patches\Game\CellPatch.cs" />
     <Compile Include="Export\Patches\Game\PathfindingPatch.cs" />
-    <Compile Include="Export\Patches\Buildings\Placement\PathfindingVisualIndicator.cs" />
-    <Compile Include="Export\Patches\Buildings\Placement\PlacementValidationPatch.cs" />
+    <Compile Include="Export\Patches\Placement\PathfindingVisualIndicator.cs" />
+    <Compile Include="Export\Patches\Placement\PlacementValidationPatch.cs" />
     <Compile Include="Export\Patches\Buildings\CastleBlocks\TowerRangePatch.cs" />
     <Compile Include="Export\Patches\Environmental\WolfWitchRockPatches.cs" />
     <Compile Include="Export\Patches\Buildings\CastleBlocks\StackingPatch.cs" />
@@ -119,5 +121,6 @@
   <ItemGroup>
     <Compile Include="Export\Settings\Settings.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

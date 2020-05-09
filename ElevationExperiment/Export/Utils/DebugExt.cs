@@ -15,18 +15,18 @@ namespace ElevationExperiment
         private static List<LineRenderer> drawnLines = new List<LineRenderer>();
         private static List<float> drawnLineDurations = new List<float>();
 
-        public static void dLog(string message, bool repeatable = false, object GameObjectOrVector3 = null)
+        public static void dLog(object message, bool repeatable = false, object GameObjectOrVector3 = null)
         {
             if (Settings.debug)
             {
-                KingdomLog.TryLog(Mod.modID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message, KingdomLog.LogStatus.Neutral, (repeatable ? 1 : 20), GameObjectOrVector3);
+                KingdomLog.TryLog(Mod.modID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 1 : 20), GameObjectOrVector3);
                 IDs.Add(1);
             }
         }
 
-        public static void Log(string message, bool repeatable = false, KingdomLog.LogStatus type = KingdomLog.LogStatus.Neutral, object GameObjectOrVector3 = null)
+        public static void Log(object message, bool repeatable = false, KingdomLog.LogStatus type = KingdomLog.LogStatus.Neutral, object GameObjectOrVector3 = null)
         {
-            KingdomLog.TryLog(Mod.modID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message, type, (repeatable ? 1 : 20), GameObjectOrVector3);
+            KingdomLog.TryLog(Mod.modID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), type, (repeatable ? 1 : 20), GameObjectOrVector3);
             IDs.Add(1);
         }
 

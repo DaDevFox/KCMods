@@ -22,7 +22,16 @@ namespace ElevationExperiment
             var harmony = HarmonyInstance.Create("harmony");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            Mod.dLog("test");
+            Mod.dLog(helper.modPath);
+
+            if(Settings.debug)
+                Application.logMessageReceived += onLogMessageReceived;
+        }
+
+        private void onLogMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Exception)
+                Mod.dLog("Unhandled Exception: " + condition + stackTrace);
         }
 
         public void SceneLoaded(KCModHelper helper)
@@ -30,6 +39,7 @@ namespace ElevationExperiment
             try
             {
                 Mod.helper = helper;
+                Mod.dLog("test2");
                 Settings.Setup();
 
                 Broadcast.OnSaveEvent.Listen(OnSave);

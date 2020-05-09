@@ -8,13 +8,12 @@ using UnityEngine;
 
 namespace ElevationExperiment.Patches
 {
-    [HarmonyPatch(typeof(World), "PlaceStone")]
+    [HarmonyPatch(typeof(World), "SetupStoneForCell")]
     class RockPatch
     {
-        static void Postfix(int x, int z)
+        static void Postfix(Cell cell)
         {
-            Cell cell = World.inst.GetCellData(x, z);
-            if (cell != null)
+            try
             {
                 CellMark mark = ElevationManager.GetCellMark(cell);
                 if (mark != null && cell.Models != null)
@@ -24,6 +23,10 @@ namespace ElevationExperiment.Patches
                         obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y + mark.Elevation, obj.transform.position.z);
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                DebugExt.HandleException(ex);
             }
         }
 
@@ -54,6 +57,7 @@ namespace ElevationExperiment.Patches
 
             foreach(TrackedRock rock in tracked)
             {
+                World.inst.RemoveStone(rock.cell);
                 World.inst.PlaceStone(rock.cell.x, rock.cell.z, rock.type);
             }
         }

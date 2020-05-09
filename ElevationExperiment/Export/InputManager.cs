@@ -68,7 +68,9 @@ namespace ElevationExperiment
                     DebugExt.dLog(text);
                 }
                 if (Input.GetKeyDown(KeyCode.H))
-                    BlockedTilePruner.DoRegionSearch(ElevationManager.GetAll());
+                {
+                    BlockedTilePruner.DoRegionSearch();
+                }
             }
             if (Input.GetKeyDown(Settings.inst.c_CameraControls.s_activateKey.Key))
             {

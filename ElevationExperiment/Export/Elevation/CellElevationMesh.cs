@@ -15,6 +15,8 @@ namespace ElevationExperiment
         public CellMark cellMark;
         public Cell cell;
 
+        //public readonly float SnowBrightness = 2f;
+
         int lastTier = 0;
 
         #region Mesh Info
@@ -116,6 +118,12 @@ namespace ElevationExperiment
             {
                 mat.mainTexture = ColorManager.elevationMap;
                 mat.mainTextureScale = new Vector2(1f, ColorManager.tilingConstant * cellMark.elevationTier - tierColorBuffer);
+
+
+                if(mat.GetFloat("_Glossiness") != 0f)
+                    mat.SetFloat("_Glossiness", 0f);
+                mat.SetFloat("_Metallic", 0f);
+
             }
             else
             {
@@ -124,6 +132,9 @@ namespace ElevationExperiment
                     mainTexture = ColorManager.elevationMap,
                     mainTextureScale = new Vector2(1f, ColorManager.tilingConstant * cellMark.elevationTier - tierColorBuffer)
                 };
+
+                mat.SetFloat("_Glossiness", 0f);
+                mat.SetFloat("_Metallic", 0f);
             }
             if(renderer == null)
             {
@@ -137,6 +148,16 @@ namespace ElevationExperiment
         {
             mat.SetFloat("_Snow", TerrainGen.inst.GetSnowFade());
             mat.SetVector("_SnowColor", TerrainGen.inst.snowColor);
+
+            //mat.color = Color.white + (Color.white * TerrainGen.inst.GetSnowFade() * SnowBrightness);
+
+            //if (mat.GetFloat("_Snow") > 0f)
+            //    DebugExt.dLog(mat.GetFloat("_Snow"));
+        }
+
+        private void UpdateOverlayColor()
+        {
+            mat.color = Color.white + TerrainGen.inst.GetOverlayPixelColor(cell.x, cell.z);
         }
 
 
@@ -155,6 +176,7 @@ namespace ElevationExperiment
         void Update()
         {
             UpdateSnow();
+            UpdateOverlayColor();
         }
 
 

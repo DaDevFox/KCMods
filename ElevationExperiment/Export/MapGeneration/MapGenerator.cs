@@ -77,7 +77,7 @@ namespace ElevationExperiment
 
                 ElevationManager.RefreshTerrain();
 
-                BlockedTilePruner.DoRegionSearch(ElevationManager.GetAll());
+                //BlockedTilePruner.DoRegionSearch(ElevationManager.GetAll());
             }
             catch(Exception ex)
             {

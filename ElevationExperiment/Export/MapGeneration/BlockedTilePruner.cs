@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ElevationExperiment.Patches;
 using UnityEngine;
+using Harmony;
 
 namespace ElevationExperiment
 {
@@ -13,6 +14,7 @@ namespace ElevationExperiment
         public static bool Pruned { get; private set; } = false;
 
         public static List<Cell> Unreachable { get; private set; } = new List<Cell>();
+        public static List<Cell> BeginSearchPositions { get; private set; } = new List<Cell>();
 
         private static Dictionary<string, CellData> cellsData = new Dictionary<string, CellData>();
         private static Dictionary<int, List<CellData>> regionData = new Dictionary<int, List<CellData>>();
@@ -27,30 +29,17 @@ namespace ElevationExperiment
         }
 
 
-        public static void DoRegionSearch(List<CellMark> data)
+        public static void DoRegionSearch()
         {
+            
+            
             Pruned = false;
             regionData.Clear();
             cellsData.Clear();
 
-            List<CellMark> groundLevel = new List<CellMark>();
-            for (int landmass = 0; landmass < World.inst.NumLandMasses; landmass++)
-            {
-                foreach(Cell cell in World.inst.cellsToLandmass[landmass].data)
-                {
-                    if (cell != null)
-                    {
-                        CellMark mark = ElevationManager.GetCellMark(cell);
-                        if(mark != null)
-                            if(mark.elevationTier == 0)
-                                groundLevel.Add(mark);
-                    }
-                }
-            }
-
-
             // Preperation
-            foreach (CellMark node in data)
+            // Mark all cells that support elevation as nodes
+            foreach (CellMark node in ElevationManager.GetAll())
             {
                 CellData nodeData = new CellData()
                 {
@@ -58,24 +47,28 @@ namespace ElevationExperiment
                     mark = node,
                     region = -1
                 };
-
+                    
                 cellsData.Add(ElevationManager.GetCellMarkID(node.cell), nodeData);
+
+                DebugExt.dLog("search pos: ", true, node.Center);
             }
 
-            
-
-            // First Pass: Assigning all ground-level tiles their own region
-            regionData.Add(0, new List<CellData>());
-            foreach(CellData node in cellsData.Values)
+            //Mark the starting nodes and tag them as region 0
+            List<CellData> startingNodes = new List<CellData>();
+            foreach (Cell cell in BeginSearchPositions)
             {
-                if(node.mark.elevationTier == 0)
-                {
-                    node.region = 0;
-                }
+                CellMark mark = ElevationManager.GetCellMark(cell);
+                if (mark != null)
+                    startingNodes.Add(new CellData()
+                    {
+                        cell = cell,
+                        mark = mark,
+                        region = 0
+                    }); 
             }
 
-            // Second Pass: Iterate on all ground-level nodes. 
-            foreach (CellData node in cellsData.Values)
+            // Iterate on all starting nodes, eventually spreading to everywhere that can be reached, anywhere else will be pruned.  
+            foreach (CellData node in startingNodes)
             {
                 IterateNode(node);
             }
@@ -192,5 +185,52 @@ namespace ElevationExperiment
                 };
             }
         }
+
+
+        [HarmonyPatch(typeof(Keep), "OnBuildingPlacement")]
+        static class OnKeepBuiltPatch
+        {
+            static void Postfix(Keep __instance)
+            {
+                Building b = __instance.GetComponent<Building>();
+                List<Cell> cells = new List<Cell>();
+
+                b.ForEachTileInBounds(
+                    (x, z, cell) =>
+                    {
+                        cells.Add(cell);
+                    });
+
+
+                BeginSearchPositions.AddRange(cells.AsEnumerable());
+                DoRegionSearch();
+            }
+        }
+
+
+        [HarmonyPatch(typeof(Outpost), "OnBuildingPlacement")]
+        static class OnOutpostBuiltPatch
+        {
+            static void Postfix(Outpost __instance)
+            {
+                Building b = __instance.GetComponent<Building>();
+                List<Cell> cells = new List<Cell>();
+
+                b.ForEachTileInBounds(
+                    (x, z, cell) =>
+                    {
+                        cells.Add(cell);
+                    });
+
+
+                BeginSearchPositions.AddRange(cells.AsEnumerable());
+                DoRegionSearch();
+            }
+        }
+
+
+
+
+
     }
 }

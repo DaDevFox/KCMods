@@ -22,7 +22,7 @@ namespace ElevationExperiment.Patches
                 {
                     __result = PlacementValidationResult.MustBeOnFlatLand;
                 }
-                if (PathingManager.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)))
+                if (PathingManager.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)) && PendingObj.UniqueName != "outpost" && PendingObj.UniqueName != "keep")
                 {
                     __result = PlacementValidationResult.OutsideOfTerritory;
                     CurrentPlacementOnBlockedCell = true;
