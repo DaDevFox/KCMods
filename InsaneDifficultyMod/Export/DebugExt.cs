@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace KCModUtils.Debugging;
+namespace InsaneDifficultyMod
 {
     class DebugExt
     {
@@ -17,7 +17,11 @@ namespace KCModUtils.Debugging;
             KingdomLog.TryLog(Mod.modID + "_debugmsg-" + IDs.Count + (repeatable ? Util.Randi().ToString() : ""), message, type, (repeatable ? 1 : 20), GameObjectOrVector3);
             IDs.Add(1);
         }
-
+        
+        public static void HandleException(Exception ex)
+        {
+            Mod.helper.Log(ex.ToString());
+        }
 
     }
 }

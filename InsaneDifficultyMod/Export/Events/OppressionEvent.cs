@@ -6,10 +6,26 @@ using System.Threading.Tasks;
 
 namespace InsaneDifficultyMod.Events
 {
-    class OppressionEvent : IDModEvent
+    public class OppressionEvent : IDModEvent
     {
-        int timeElapsed = 0;
-        int happiness = 40;
+        private int timeElapsed = 0;
+        private int happiness = 40;
+
+        public static List<string> OppressionDescriptions { get; private set; } = new List<string>()
+        {
+            "Anger stirs against the throne!",
+            "Our soldiers no longer have much effect against people",
+            "Small bands of peasants have begun speaking out",
+            "The peasants grow braver than they once were",
+            "The lord's name is whispered on the streets",
+            "The crown is feared",
+            "Military presence has suppresed any of the peoples' grievences"
+        };
+
+        public static string oppressionHappinessModId = "oppression";
+
+
+
 
         public override void Init()
         {
@@ -26,24 +42,29 @@ namespace InsaneDifficultyMod.Events
             base.Test();
 
             int total = UnitSystem.inst.GetPlayerArmies();
-            int MilitaryPresenceThresh = Math.Max(Player.inst.TotalWorkers() / 100, Settings.minArmyAmountForOppression);
+            int MilitaryPresenceThresh = Math.Max(Player.inst.TotalWorkers() / Settings.PopulationOppressionUnit, Settings.minArmyAmountForOppression);
 
             if (total >= MilitaryPresenceThresh)
             {
                 timeElapsed += 1;
-                happiness -= Math.Max(Settings.oppresssionRamp,-40);
+                happiness -= Settings.oppresssionRamp;
+
+                happiness = Math.Max(happiness, Settings.MinOppressionHappiness);
 
                 return true;
             }
             else 
             {
                 timeElapsed = 0;
-                happiness += Math.Min(Settings.oppresssionRamp,40);
+                happiness += Settings.oppresssionRamp;
+
+                happiness = Math.Min(happiness, Settings.MaxOppressionHappiness);
 
                 List<Player.HappinessMod> mods = Player.inst.happinessMods;
+
                 for(int i = 0; i < mods.Count; i++)
                 {
-                    if(mods[i].id == "oppression")
+                    if(mods[i].id == oppressionHappinessModId)
                     {
                         Player.inst.happinessMods.RemoveAt(i);
                     }
@@ -57,33 +78,34 @@ namespace InsaneDifficultyMod.Events
         {
             base.Run();
 
-            Player.inst.AddHappinessMod("oppression", 1000, happiness, "Oprression: " + getDescription(happiness), Util.GetPlayerStartLandmass(), false, 40, -40);
+            Player.inst.AddHappinessMod(oppressionHappinessModId, 1000, happiness, "Oppression: " + GetDescription(happiness), Util.GetPlayerStartLandmass(), false, Settings.MaxOppressionHappiness, -Settings.MinOppressionHappiness);
 
         }
 
-        private String getDescription(int amount)
+        private string GetDescription(int amount)
         {
-            String description = "";
-            if(30 < amount && amount <= 40)
+            string description = "";
+
+            float normalizedAmount = amount - Settings.MinOppressionHappiness;
+            float normalizedFactor = normalizedAmount / (Settings.MaxOppressionHappiness - Settings.MinOppressionHappiness);
+
+            float min = float.MaxValue;
+            int idx = -1;
+
+            for(int i = 0; i < OppressionDescriptions.Count; i++)
             {
-                description = "The peasants fear the lord's military presence!";
+                float normalized = ((float)i) / OppressionDescriptions.Count;
+                if(Math.Abs(normalized - normalizedFactor) < min)
+                {
+                    min = Math.Abs(normalized - normalizedAmount);
+                    idx = i;
+                }
             }
-            if(20 < amount && amount <= 30)
-            {
-                description = "Most fear the crown, though some rebel";
-            }
-            if(10 < amount && amount <= 20)
-            {
-                description = "The Peasants grow braver than they once were";
-            }
-            if(0 < amount && amount <= 10)
-            {
-                description = "Our soldiers no longer have much effect against the people";
-            }
-            if(amount <= 0)
-            {
-                description = "Anger stirs against the throne!";
-            }
+
+            if (idx != -1)
+                description = OppressionDescriptions[idx];
+            else
+                description = "No descriptions found for oppression event";
 
             return description;
         }

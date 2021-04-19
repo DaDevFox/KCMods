@@ -119,8 +119,8 @@ namespace StatisticsMod.Data
                 " people: " + 
                 Environment.NewLine +
                 (-Analyzer.GetPredictedFoodInsufficiencyForPeople(Analytics.GetPlayerKingdomPopulation(), DataContainer.GetAllYearData())).ToString() +
-                Environment.NewLine):
-                "Not enough sample data to predict food consumption";
+                Environment.NewLine) :
+                "Not enough sample data to predict food consumption" + Environment.NewLine;
         }
 
 
@@ -133,7 +133,7 @@ namespace StatisticsMod.Data
                 Environment.NewLine +
                 (-Analyzer.GetPredictedFoodInsufficiencyForPeople(Analytics.GetHousingForKingdom(), DataContainer.GetAllYearData())).ToString() +
                 Environment.NewLine):
-                "Not enough sample data to predict food consumption";
+                "Not enough sample data to predict food consumption" + Environment.NewLine;
         }
 
         #endregion
@@ -145,7 +145,7 @@ namespace StatisticsMod.Data
 
         private static string Stringify(float val)
         {
-            return Utils.Util.RoundToFactor(val, 0.1f).ToString();
+            return Util.RoundToFactor(val, 0.1f).ToString();
         }
     }
 }

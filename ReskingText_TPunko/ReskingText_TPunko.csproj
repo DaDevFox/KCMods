@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Export\BuildingFramework\Engine\BuildingSkinBinders\Base\SkinBinder.cs</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
@@ -46,6 +49,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -70,15 +74,38 @@
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\BuildingFramework\BuildingSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\AdvTownSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\Base\BaseSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\CastleSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\SpecialSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\TownSkins.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\AdvTown\Church.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Base\HiddenBinderAttribute.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Base\SkinBinder.cs" />
+    <Compile Include="Export\BuildingFramework\API\ReskinProfile.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Base\Collection.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Castle\CastleBlocks.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Castle\Towers.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Special\Environmental.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Town\Buildings.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Town\Paths.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\Engine.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\BuildingSkinBinders\Castle\CastleBuildings.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\Settings.cs" />
     <Compile Include="Export\BuildingFramework\Procedures.cs" />
     <Compile Include="Export\BuildingFramework\ReskinHelper.cs" />
+    <Compile Include="Export\BuildingFramework\Utils\InfoFileGenerator.cs" />
+    <Compile Include="Export\Mod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

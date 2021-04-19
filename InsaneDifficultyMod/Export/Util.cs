@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using KCModUtils.Debugging;
 
-namespace KCModUtils
+namespace InsaneDifficultyMod
 {
     static class Util
     {

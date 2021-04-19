@@ -30,7 +30,28 @@ namespace InsaneDifficultyMod
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             AssetBundleManager.UnpackAssetBundle();
+            if (Settings.debug)
+                Application.logMessageReceived += onLogMessageReceived;
         }
+
+        private void onLogMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            if (type == LogType.Exception)
+                Mod.dLog("Unhandled Exception: " + condition + "\n" + stackTrace);
+        }
+
+
+        public static void dLog(object message)
+        {
+            if(Settings.debug)
+                Mod.Log(message);
+        }
+
+        public static void Log(object message)
+        {
+            Mod.helper.Log(message.ToString());
+        }
+
 
 
         void SceneLoaded(KCModHelper _helper)
@@ -40,6 +61,7 @@ namespace InsaneDifficultyMod
 
         void Setup() 
         {
+            Settings.Setup();
             Settings.ApplyGameVars();
             UI.Setup();
             Events.EventManager.Init();

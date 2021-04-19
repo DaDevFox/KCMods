@@ -99,6 +99,10 @@
     <Compile Include="Export\UI\RiotDemandsUI.cs" />
     <Compile Include="Export\UI\UI.cs" />
     <Compile Include="Export\Util.cs" />
+    <Compile Include="Export\External\Zat\Frameworks\Zat.InterModComm.cs" />
+    <Compile Include="Export\External\Zat\Frameworks\Zat.ModMenu.API.cs" />
+    <Compile Include="Export\External\Zat\Utils\Zat.Debugging.cs" />
+    <Compile Include="Export\External\Zat\Utils\Zat.Rendering.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

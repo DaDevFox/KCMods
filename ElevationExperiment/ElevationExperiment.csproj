@@ -40,6 +40,9 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="DOTween">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\DOTween.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Newtonsoft.Json.dll</HintPath>
@@ -61,6 +64,9 @@
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -70,56 +76,124 @@
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\Elevation\CellMark.cs" />
-    <Compile Include="Export\External\Zat\Utils\Zat.Debugging.cs" />
-    <Compile Include="Export\MapGeneration\BlockedTilePruner.cs" />
-    <Compile Include="Export\Patches\Environmental\WolfPatch.cs" />
-    <Compile Include="Export\Patches\Game\CameraPatch.cs" />
-    <Compile Include="Export\Patches\Game\WorldGridPatch.cs" />
-    <Compile Include="Export\Patches\Placement\DragSelectPatch.cs" />
+    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%282%29.cs" />
+    <Compile Include="Export\External\API\API.cs" />
+    <Compile Include="Export\Content\Assets\AssetBundleManager.cs" />
+    <Compile Include="Export\Content\Buildings\Buildings.cs" />
+    <Compile Include="Export\External\Submods\Submods.cs" />
+    <Compile Include="Export\Libraries\BuildingFramework\BuildingHelper.cs" />
+    <Compile Include="Export\Libraries\BuildingFramework\BuildingInfo.cs" />
+    <Compile Include="Export\Content\Buildings\Dugout.cs" />
+    <Compile Include="Export\Core\Grid\MetaStructures.cs" />
+    <Compile Include="Export\Libraries\Fox\Debugging\DebugLines.cs" />
+    <Compile Include="Export\Utils\RendererUtil.cs" />
+    <Compile Include="Export\Core\Rendering\Rendering.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Base\Analyzer.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Base\MethodCall.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Selective\ProfileAttribute.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Selective\SelectiveProfiler.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Base\ProfilerBase.cs" />
+    <Compile Include="Export\Libraries\Fox\Profiling\Base\ProfilerData.cs" />
+    <Compile Include="Export\Libraries\Fox\Rendering\InstanceMeshSystem.cs" />
+    <Compile Include="Export\Libraries\Fox\UI\UI.cs" />
+    <Compile Include="Export\Libraries\Fox\Utils\ArrayExtensions.cs" />
+    <Compile Include="Export\Libraries\Zat\Utils\Zat.Debugging.cs" />
+    <Compile Include="Export\Core\Grid\Grid.cs" />
+    <Compile Include="Export\Content\MapGeneration\WorldRegions.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\WolfPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\WorldGridPatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\DragSelectPatch.cs" />
+    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinder.cs" />
+    <Compile Include="Export\Core\Pathfinding\RuntimePathfinder.cs" />
+    <Compile Include="Export\Content\Settings\Settings.cs" />
+    <Compile Include="Export\Content\UI\Generic\LoadingDialog.cs" />
+    <Compile Include="Export\Content\UI\MapEdit\RaiseLowerUI.cs" />
+    <Compile Include="Export\Content\UI\UI.cs" />
+    <Compile Include="Export\Utils\ArrayExtensions.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />
-    <Compile Include="Export\Elevation\CellElevationMesh.cs" />
-    <Compile Include="Export\Elevation\ElevationManager.cs" />
-    <Compile Include="Export\Elevation\ColorManager.cs" />
-    <Compile Include="Export\Elevation\PathingManager.cs" />
-    <Compile Include="Export\MapGeneration\MapGenerator.cs" />
-    <Compile Include="Export\InputManager.cs" />
-    <Compile Include="Export\MapGeneration\TerrainFeatures\Mountain.cs" />
-    <Compile Include="Export\MapGeneration\TerrainFeatures\TerrainFeature.cs" />
-    <Compile Include="Export\Mod.cs" />
-    <Compile Include="Export\Patches\Buildings\YCorrection\BuildingPlacePatch.cs" />
-    <Compile Include="Export\Patches\Placement\BuildingPlacementModePatch.cs" />
-    <Compile Include="Export\Patches\Buildings\Roads\RoadAssets.cs" />
-    <Compile Include="Export\Patches\Buildings\Roads\RoadVisualPatch.cs" />
-    <Compile Include="Export\TopDownModeCamera\TopDownModeCamera.cs" />
-    <Compile Include="Export\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
-    <Compile Include="Export\Patches\Game\CellPatch.cs" />
-    <Compile Include="Export\Patches\Game\PathfindingPatch.cs" />
-    <Compile Include="Export\Patches\Placement\PathfindingVisualIndicator.cs" />
-    <Compile Include="Export\Patches\Placement\PlacementValidationPatch.cs" />
-    <Compile Include="Export\Patches\Buildings\CastleBlocks\TowerRangePatch.cs" />
-    <Compile Include="Export\Patches\Environmental\WolfWitchRockPatches.cs" />
-    <Compile Include="Export\Patches\Buildings\CastleBlocks\StackingPatch.cs" />
-    <Compile Include="Export\Elevation\Terraformer.cs" />
-    <Compile Include="Export\Patches\Environmental\TreeSystemPatch.cs" />
-    <Compile Include="Export\Utils\ReflectionExtensions.cs" />
-    <Compile Include="Export\External\Zat\Frameworks\Zat.InterModComm.cs" />
-    <Compile Include="Export\External\Zat\Frameworks\Zat.ModMenu.API.cs" />
-    <Compile Include="Export\Utils\Renderer.cs" />
+    <Compile Include="Export\Core\ElevationManager.cs" />
+    <Compile Include="Export\Core\Rendering\ColorManager.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathing.cs" />
+    <Compile Include="Export\Content\MapGeneration\MapGenerator.cs" />
+    <Compile Include="Export\Content\InputManager.cs" />
+    <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Pillar.cs" />
+    <Compile Include="Export\Content\MapGeneration\TerrainFeatures\TerrainFeature.cs" />
+    <Compile Include="Export\Core\Mod.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\BuildingPlacePatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\BuildingPlacementModePatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadAssets.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadVisualPatch.cs" />
+    <Compile Include="Export\Content\TopDownModeCamera\TopDownModeCamera.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\CellPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\PathfindingPatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\PathfindingVisualIndicator.cs" />
+    <Compile Include="Export\Core\Patches\Placement\PlacementValidationPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\CastleBlocks\TowerRangePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\WolfWitchRockPatches.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\CastleBlocks\StackingPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\TreeSystemPatch.cs" />
+    <Compile Include="Export\Libraries\Fox\Localization\Localization.cs" />
+    <Compile Include="Export\Utils\ExceptionHelpers.cs" />
+    <Compile Include="Export\Utils\Old\GameObjectExtensions.cs" />
+    <Compile Include="Export\Utils\Old\ReflectionExtensions.cs" />
+    <Compile Include="Export\Libraries\Zat\Frameworks\Zat.InterModComm.cs" />
+    <Compile Include="Export\Libraries\Zat\Frameworks\Zat.ModMenu.API.cs" />
+    <Compile Include="Export\Utils\Old\FoxRenderer.cs" />
     <Compile Include="Export\Utils\Util.cs" />
-    <Compile Include="Export\External\Zat\Utils\Zat.Rendering.cs" />
+    <Compile Include="Export\Libraries\Zat\Utils\Zat.Rendering.cs" />
+    <Compile Include="Export\Utils\Vector3Extensions.cs" />
+    <Compile Include="Export\Core\Rendering\VoxelDataRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\Settings\Settings.cs" />
+    <None Include="Export\Content\Assets\assetbundle\linux\elevationmodassets" />
+    <None Include="Export\Content\Assets\assetbundle\linux\elevationmodassets.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\linux\elevationmodassets.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\linux\elevationmodassets.meta" />
+    <None Include="Export\Content\Assets\assetbundle\linux\linux" />
+    <None Include="Export\Content\Assets\assetbundle\linux\linux.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\linux\linux.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\linux\linux.meta" />
+    <None Include="Export\Content\Assets\assetbundle\osx\elevationmodassets" />
+    <None Include="Export\Content\Assets\assetbundle\osx\elevationmodassets.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\osx\elevationmodassets.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\osx\elevationmodassets.meta" />
+    <None Include="Export\Content\Assets\assetbundle\osx\osx" />
+    <None Include="Export\Content\Assets\assetbundle\osx\osx.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\osx\osx.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\osx\osx.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win32\elevationmodassets" />
+    <None Include="Export\Content\Assets\assetbundle\win32\elevationmodassets.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\win32\elevationmodassets.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win32\elevationmodassets.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win32\win32" />
+    <None Include="Export\Content\Assets\assetbundle\win32\win32.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\win32\win32.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win32\win32.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win64\elevationmodassets" />
+    <None Include="Export\Content\Assets\assetbundle\win64\elevationmodassets.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\win64\elevationmodassets.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win64\elevationmodassets.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win64\win64" />
+    <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest" />
+    <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest.meta" />
+    <None Include="Export\Content\Assets\assetbundle\win64\win64.meta" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

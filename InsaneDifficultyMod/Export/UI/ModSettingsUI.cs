@@ -79,8 +79,8 @@ namespace InsaneDifficultyMod
                     label.color = l4Color;
                     break;
             }
-            Settings.mode = value;
-            Settings.Update();
+            Settings.Mode = value;
+            Settings.UpdateMode(value);
         }
 
 
