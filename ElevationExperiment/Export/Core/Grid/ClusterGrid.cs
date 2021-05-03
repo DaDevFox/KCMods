@@ -25,7 +25,8 @@ namespace Elevation
             for(int i = 0; i < size; i++){
 
                 for(int j = 0; j < size; j++){
-
+                    
+                    Clusters[i][j] = new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)); 
                 }
             }
         }
