@@ -76,12 +76,6 @@ namespace Elevation
             
             // Init all grids
             ClusterGrid clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
-            
-            // Letting a dictionary know its capacaity before adding any elements to it can increase efficiency. 
-            if (_pathGrid == null)
-                _pathGrid = new Dictionary<string, Node>(width * height);
-            if (_upperGrid == null)
-                _upperGrid = new Dictionary<string, Node>(width * height);
                 
             // For loop handling setting up the cluster grid using World.inst.GetCellData(i, j) to 
             // iterate through the world grid and clusterRow and clusterColumn to place them in the 
@@ -114,21 +108,18 @@ namespace Elevation
                     
                     string id = CellMetadata.GetPositionalID(cell);
 
-                    if (!_pathGrid.ContainsKey(id))
-                        _pathGrid.Add(id, pathGridNode);
-                    else
-                        _pathGrid[id] = pathGridNode;
-                    //Mod.Log($"Duplicate key for path grid {id}");
-                    if (!_upperGrid.ContainsKey(id))
-                        _upperGrid.Add(id, upperGridNode);
-                    else
-                        _upperGrid[id] = upperGridNode;
-                    //Mod.Log($"Duplicate key for upper grid {id}");
-
-                    //clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].
-
                     currentClusterRow++;
 
+                    if (!clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid.ContainsKey(id))
+                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid.Add(id, pathGridNode);
+                    else
+                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid[id] = pathGridNode;
+                       
+                    if (!clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid.ContainsKey(id))
+                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid.Add(id, upperGridNode);
+                    else
+                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid[id] = upperGridNode;
+                        
                     // if checking if it is time to change cluster grid column.
                     if((j + 1) % (height / clusterGridClusterDimentions) == 0){
 
@@ -153,6 +144,8 @@ namespace Elevation
 
             }
 
+
+            // checking ouside ring of clusters open paths to neighboring clusters
             foreach(Cluster cluster in clusters){ 
                 for(int i = 0; i < cluster.length; i++){ 
                     for(int j = 0; j < cluster.width && (i == 0 || i = cluster.length); j++){
