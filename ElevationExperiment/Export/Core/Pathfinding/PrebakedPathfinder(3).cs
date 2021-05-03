@@ -12,8 +12,8 @@ namespace Elevation
 
     public class PrebakedPathfinder : ElevationPathfinder
     {
-        private static Dictionary<string, Node> _pathGrid;
-        private static Dictionary<string, Node> _upperGrid;
+        //private static Dictionary<string, Node> _pathGrid;
+        //private static Dictionary<string, Node> _upperGrid;
 
         /// <summary>
         /// Multiplier of the additional cost applied for the difference between two elevated cells' tiers
@@ -52,13 +52,8 @@ namespace Elevation
         {
             Mod.dLog("Pathfinding Initializing");
 
-            // Init both grids
 
-            // Letting a dictionary know its capacaity before adding any elements to it can increase efficiency. 
-            if (_pathGrid == null)
-                _pathGrid = new Dictionary<string, Node>(width * height);
-            if (_upperGrid == null)
-                _upperGrid = new Dictionary<string, Node>(width * height);
+       
 
 
             // Path grid is the base grid; terrain tiles, this will never change
@@ -82,7 +77,19 @@ namespace Elevation
 
             // used to keep track of where in the cluster we are.
             int currentClusterColumn = 0;
-
+            
+            ClusterGrid clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
+            
+            // Init all grids
+            //foreach(List<Cluster> gridClusterRow in clusterGrid){
+              //  foreach(Cluster
+            }
+            // Letting a dictionary know its capacaity before adding any elements to it can increase efficiency. 
+            if (_pathGrid == null)
+                _pathGrid = new Dictionary<string, Node>(width * height);
+            if (_upperGrid == null)
+                _upperGrid = new Dictionary<string, Node>(width * height);
+                
             // For loop handling setting up the cluster grid using World.inst.GetCellData(i, j) to 
             // iterate through the world grid and clusterRow and clusterColumn to place them in the 
             // correct cluster on the grid.
@@ -114,16 +121,16 @@ namespace Elevation
                     
                     string id = CellMetadata.GetPositionalID(cell);
 
-                    //if (!_pathGrid.ContainsKey(id))
-                        //_pathGrid.Add(id, pathGridNode);
-                    //else
-                        //_pathGrid[id] = pathGridNode;
+                    if (!_pathGrid.ContainsKey(id))
+                        _pathGrid.Add(id, pathGridNode);
+                    else
+                        _pathGrid[id] = pathGridNode;
                     //Mod.Log($"Duplicate key for path grid {id}");
-                    //if (!_upperGrid.ContainsKey(id))
-                        //_upperGrid.Add(id, upperGridNode);
-                    //else
-                        //_upperGrid[id] = upperGridNode;
-                    ////Mod.Log($"Duplicate key for upper grid {id}");
+                    if (!_upperGrid.ContainsKey(id))
+                        _upperGrid.Add(id, upperGridNode);
+                    else
+                        _upperGrid[id] = upperGridNode;
+                    //Mod.Log($"Duplicate key for upper grid {id}");
 
                     //clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].
 
