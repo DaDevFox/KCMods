@@ -145,15 +145,16 @@ namespace Elevation
             }
 
 
-            // checking ouside ring of clusters open paths to neighboring clusters
-            foreach(Cluster cluster in clusters){ 
-                for(int i = 0; i < cluster.length; i++){ 
-                    for(int j = 0; j < cluster.width && (i == 0 || i = cluster.length); j++){
+                // checking ouside ring of clusters open paths to neighboring clusters
+            foreach(List<Cluster> clusterRow in clusterGrid){
+                foreach(Cluster cluster in clusterRow){ 
+                    for(int i = 0; i < width / clusterGridClusterDimentions; i++){ 
+                        for(int j = 0; j < height / clusterGridClusterDimentions && (i == 0 || i = cluster.length); j++){
 
+                        }
                     }
                 }
             }
-            
 
             Mod.dLog("Connecting");
 
