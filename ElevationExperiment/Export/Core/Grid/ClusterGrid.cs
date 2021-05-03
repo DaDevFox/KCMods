@@ -23,11 +23,14 @@ namespace Elevation
             size = clusterDimentions * clusterDimentions;
 
             for(int i = 0; i < size; i++){
-
+                
+                List<Cluster> clusterRow = new List<Cluster>();
                 for(int j = 0; j < size; j++){
                     
-                    Clusters[i][j] = new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)); 
+                    clusterRow.add(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions))); 
                 }
+                
+                Clusters.add(clusterRow);
             }
         }
 
