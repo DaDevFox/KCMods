@@ -27,7 +27,7 @@ namespace Elevation
                 List<Cluster> clusterRow = new List<Cluster>();
                 for(int j = 0; j < size; j++){
                     
-                    clusterRow.add(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions))); 
+                    clusterRow.add(new Cluster(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
                 }
                 
                 Clusters.add(clusterRow);
