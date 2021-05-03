@@ -14,6 +14,23 @@ namespace Elevation
 
   public static class ClusterGrid{
     
+    private List<List<Cluster>> Clusters = new List<List<Cluster>>();
     
+    private int size;
+    
+    public ClusterGrid(int clusterDimentions){
+      
+      size = clusterDimentions;
+    }
+    
+    public static List<List<Cluster> GetClusters(){
+      
+      return this.Clusters;
+    }
+    
+    public static void SetClusters(List<List<Cluster> clusters){
+      
+      this.Clusters - clusters;
+    }
   }
 }
