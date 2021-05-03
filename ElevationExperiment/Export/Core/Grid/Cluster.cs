@@ -13,6 +13,21 @@ namespace Elevation
 
   public class Cluster{
   
+    public static Grid ClusterGrid;
+    
+    public static Cluster( Grid clusterGrid){
+      
+      this.ClusterGrid = clusterGrid;
+    }
+    
+    public static SetCluster(Grid clusterGrid){
+       
+      this.ClusterGrid = clusterGrid;
+    }
+    
+    public static Grid cluster(){
+      
+      return this.ClusterGrid;
+    }
   }
-  
 }
