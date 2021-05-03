@@ -13,19 +13,19 @@ namespace Elevation
 
   public class Cluster{
   
-    public static Grid ClusterGrid;
+    public static Dictionary<string, Node> ClusterGrid;
     
-    public static Cluster( Grid clusterGrid){
+    public static Cluster( Dictionary<string, Node> clusterGrid){
       
       this.ClusterGrid = clusterGrid;
     }
     
-    public static SetCluster(Grid clusterGrid){
+    public static SetCluster(Dictionary<string, Node> clusterGrid){
        
       this.ClusterGrid = clusterGrid;
     }
     
-    public static Grid cluster(){
+    public static Dictionary<string, Node> cluster(){
       
       return this.ClusterGrid;
     }
