@@ -51,11 +51,7 @@ namespace Elevation
         public override void Init(int width, int height)
         {
             Mod.dLog("Pathfinding Initializing");
-
-
-       
-
-
+            
             // Path grid is the base grid; terrain tiles, this will never change
             // Upper grid is a grid exclusively for structures units can travel on top of
             // such as castle blocks or gates, these y-coordinates will change dynamically
@@ -78,12 +74,9 @@ namespace Elevation
             // used to keep track of where in the cluster we are.
             int currentClusterColumn = 0;
             
+            // Init all grids
             ClusterGrid clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
             
-            // Init all grids
-            //foreach(List<Cluster> gridClusterRow in clusterGrid){
-              //  foreach(Cluster
-            }
             // Letting a dictionary know its capacaity before adding any elements to it can increase efficiency. 
             if (_pathGrid == null)
                 _pathGrid = new Dictionary<string, Node>(width * height);
