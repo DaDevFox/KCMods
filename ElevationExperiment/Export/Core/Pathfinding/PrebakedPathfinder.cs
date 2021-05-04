@@ -1,6 +1,8 @@
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Elevation
 {
@@ -91,21 +93,21 @@ namespace Elevation
                     if (cell == null)
                         continue;
 
-                    Node pathGridNode = new Node()
+                    Elevation.PrebakedPathfinder.Node pathGridNode = new Elevation.PrebakedPathfinder.Node()
                     {
                         cell = cell,
                         meta = Grid.Cells.Get(cell),
                         upperGrid = false
                     };
 
-                    Node upperGridNode = new Node()
+                    Elevation.PrebakedPathfinder.Node upperGridNode = new Elevation.PrebakedPathfinder.Node()
                     {
                         cell = cell,
                         meta = Grid.Cells.Get(cell),
                         upperGrid = true
                     };
                     
-                    string id = clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow;
+                    string id = clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow;
 
                     currentClusterRow++;
 
@@ -171,13 +173,13 @@ namespace Elevation
                         
                             if((i == 0 || i + 1 == width / ClusterGridClusterDimentions) || (j == 0 || j + 1 == width / ClusterGridClusterDimentions)){
                                 
-                                CellMeta mark = Grid.Cells.Get(cluster.ClustersGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
+                                CellMeta mark = Grid.Cells.Get(cluster.ClustersGrid[clusterGridColumn + V + clusterGridRow + V + currentClusterColumn + V + currentClusterRow].cell);
                                 
                                 CellMeta[] neighbors = mark.neighborsPlusFast;
                                 
-                                Node current_path = cluster.ClustersGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
+                                Node current_path = cluster.ClustersGrid[clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow];
                                 
-                                Node current_upper = cluster.ClustersUpperGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
+                                Node current_upper = cluster.ClustersUpperGrid[clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow];
                                 
                                 if(j == 0){
                                 
@@ -237,15 +239,19 @@ namespace Elevation
                 
             string id = CellMetadata.GetPositionalID(neighbor.cell);
             
-            string[] strings = id.Split(V);
+            string[] strings = id.Split(Convert.ToChar("_"));
          
-            int neighborGridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+            int neighborGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
 
-            int neighborGridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
-             
+            int neighborGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+            
+            int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+            int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
             Dictionary<string, Node> neighbor_upperGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersUpperGrid;
                
-            Node neighborNode_upper = neighbor_upperGrid[id + ":" + neighborGridColumn + "_" + neighborGridRow];
+            Node neighborNode_upper = neighbor_upperGrid[neighborGridColumn + V + neighborGridRow + ":" + currGridColumn + V + currGridRow];
              
             current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
 
@@ -257,7 +263,7 @@ namespace Elevation
                
                 Dictionary<string, Node> neighbor_pathGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersGrid;
 
-                Node neighborNode_path = _pathGrid[id + ":" + neighborGridColumn + "_" + neighborGridRow];
+                Node neighborNode_path = _pathGrid[id + ":" + neighborGridColumn + V + neighborGridRow];
 
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
@@ -280,10 +286,22 @@ namespace Elevation
         {
             if (cell == null)
                 return null;
+            
             string id = CellMetadata.GetPositionalID(cell);
+
+            string[] strings = id.Split(Convert.ToChar("_"));
+
+            int GridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+
+            int GridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+            int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+            int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
             return upperGrid ?
-                (_upperGrid.ContainsKey(id) ? _upperGrid[id] : null) :
-                (_pathGrid.ContainsKey(id) ? _pathGrid[id] : null);
+                (ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid.ContainsKey(GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow) ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : null) :
+                (ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid.ContainsKey(GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow) ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : null);
         }
 
         /// <summary>
@@ -298,9 +316,21 @@ namespace Elevation
             if (new Vector3(x, 0f, z) != World.inst.ClampToWorld(new Vector3(x, 0f, z)))
                 return null;
             string id = CellMetadata.GetPositionalID(x, z);
+
+            string[] strings = id.Split(Convert.ToChar("_"));
+
+            int GridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+
+            int GridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+            int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+            int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
             return upperGrid ?
-                (_upperGrid.ContainsKey(id) ? _upperGrid[id] : null) :
-                (_pathGrid.ContainsKey(id) ? _pathGrid[id] : null);
+                (ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid.ContainsKey(GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow) ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : null) :
+                (ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid.ContainsKey(GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow) ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : null);
+
         }
 
         public static Node GetClosestUnblocked(Node node, int team, Pathfinder.blocksPathTest blocks, bool upperGrid)
@@ -361,18 +391,15 @@ namespace Elevation
 
         private static void Clear()
         {
-            foreach(KeyValuePair<string, Node> pair in _pathGrid)
-            {
-                pair.Value.g = 0f;
-                pair.Value.h = 0f;
-                pair.Value.parent = null;
-            }
 
-            foreach(KeyValuePair<string, Node> pair in _upperGrid)
+            foreach (List<Cluster> clusters in ClusterGrid.Clusters)
             {
-                pair.Value.g = 0f;
-                pair.Value.h = 0f;
-                pair.Value.parent = null;
+                foreach(Cluster cluster in clusters)
+                {
+                    cluster.ClustersGrid.Clear();
+
+                    cluster.ClustersUpperGrid.Clear();
+                }
             }
         }
 
@@ -467,10 +494,22 @@ namespace Elevation
                 // Find nodes that are connected
                 Dictionary<Node, float> connected = current.connected;
 
+                string posId = CellMetadata.GetPositionalID(current.cell);
+
+                string[] strings = posId.Split(Convert.ToChar("_"));
+
+                int GridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+
+                int GridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+                int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+                int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
                 // Check for intergrid travel
                 if (CheckIntergridTravel(current) && allowIntergridTravel)
                     connected.Add(
-                        (current.upperGrid ? _pathGrid[current.meta.id] : _upperGrid[current.meta.id]),
+                        (current.upperGrid ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow]),
                         IntergridTraversalCost);
 
                 // Check for diagonal travel
@@ -616,7 +655,19 @@ namespace Elevation
                 float num9 = (num4 + num6 != 0) ? Mathf.Sqrt((float)num4 * (float)num4 + (float)num6 * (float)num6) : 1f;
                 for (; ; )
                 {
-                    Node node = a.upperGrid ? _upperGrid[a.id] : _pathGrid[a.id];
+                    string posId = CellMetadata.GetPositionalID(a.cell);
+
+                    string[] strings = posId.Split(Convert.ToChar("_"));
+
+                    int GridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+
+                    int GridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+                    int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+                    int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
+                    Node node = a.upperGrid ? ClusterGrid.Clusters[GridColumn][GridRow].ClustersUpperGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow] : ClusterGrid.Clusters[GridColumn][GridRow].ClustersGrid[GridColumn + V + GridRow + ":" + currGridColumn + V + currGridRow];
                     if (GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(node.cell, teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
                     {
                         break;
@@ -690,6 +741,11 @@ namespace Elevation
             }
             return false;
         }
+
+        //public override void Path(Vector3 startPos, bool upperGridStart, Vector3 endPos, bool upperGridEnd, ref List<Vector3> path, Pathfinder.blocksPathTest blocksPath, Pathfinder.blocksPathTest pull, Pathfinder.applyExtraCost extraCost, int team, bool doDiagonal, bool doTrimming, bool allowIntergridTravel)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
 

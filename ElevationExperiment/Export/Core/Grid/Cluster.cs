@@ -7,30 +7,30 @@ namespace Elevation
     public class Cluster : IEnumerable
     {
   
-    public Dictionary<string, Node> ClustersGrid;
+    public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersGrid;
     
-    public Dictionary<string, Node> ClustersUpperGrid;
+    public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersUpperGrid;
     
-    public Cluster( Dictionary<string, Node> clustersGrid){
+    public Cluster( Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersGrid){
 
         this.ClustersGrid = clustersGrid;
     }
     
-    public void SetCluster(Dictionary<string, Node> clusterGrid, Dictionary<string, Node> clustesrGrid){
+    public void SetCluster(Dictionary<string, Elevation.PrebakedPathfinder.Node> clusterGrid, Dictionary<string, Elevation.PrebakedPathfinder.Node> clustesrGrid){
 
             this.ClustersGrid = clustesrGrid;
     }
-    public void SetClustersUpper(Dictionary<string, Node> clustersUpperGrid){
+    public void SetClustersUpper(Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersUpperGrid){
 
             this.ClustersUpperGrid = clustersUpperGrid;
     }
     
-    public Dictionary<string, Node> GetCluster(){
+    public Dictionary<string, Elevation.PrebakedPathfinder.Node> GetCluster(){
       
       return this.ClustersGrid;
     }
     
-    public Dictionary<string, Node> GetClustersUpper(){
+    public Dictionary<string, Elevation.PrebakedPathfinder.Node> GetClustersUpper(){
       
       return this.ClustersUpperGrid;
     }

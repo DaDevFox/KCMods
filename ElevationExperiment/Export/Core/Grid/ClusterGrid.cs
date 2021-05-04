@@ -20,7 +20,7 @@ namespace Elevation
                 List<Cluster> clusterRow = new List<Cluster>();
                 for(int j = 0; j < size; j++){
                     
-                    clusterRow.Add(new Cluster(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
+                    clusterRow.Add(new Cluster(new Dictionary<string, Elevation.PrebakedPathfinder.Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
                 }
                 
                 Clusters.Add(clusterRow);
