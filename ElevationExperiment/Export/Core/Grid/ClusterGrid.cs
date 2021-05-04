@@ -15,10 +15,10 @@ namespace Elevation
 
             size = clusterDimentions * clusterDimentions;
 
-            for(int i = 0; i < size; i++){
+            for(int i = 0; i < clusterDimentions; i++){
                 
                 List<Cluster> clusterRow = new List<Cluster>();
-                for(int j = 0; j < size; j++){
+                for(int j = 0; j < clusterDimentions; j++){
                     
                     clusterRow.Add(new Cluster(new Dictionary<string, Elevation.PrebakedPathfinder.Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
                 }
@@ -39,7 +39,7 @@ namespace Elevation
 
         public IEnumerator GetEnumerator()
         {
-            throw new System.NotImplementedException();
+            return Clusters.GetEnumerator();
         }
     }
 }

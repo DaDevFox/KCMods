@@ -54,7 +54,6 @@ namespace Elevation
 
         public override void Init(int width, int height)
         {
-            Mod.dLog("Pathfinding Initializing");
             
             // Path grid is the base grid; terrain tiles, this will never change
             // Upper grid is a grid exclusively for structures units can travel on top of
@@ -88,11 +87,14 @@ namespace Elevation
                 // j is the world grids height.
                 for(int j = 0; j < height; j++){
 
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 1");
+
                     Cell cell = World.inst.GetCellData(i, j);
 
                     if (cell == null)
                         continue;
 
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 2");
                     Elevation.PrebakedPathfinder.Node pathGridNode = new Elevation.PrebakedPathfinder.Node()
                     {
                         cell = cell,
@@ -106,74 +108,100 @@ namespace Elevation
                         meta = Grid.Cells.Get(cell),
                         upperGrid = true
                     };
-                    
+
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 3");
                     string id = clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow;
 
-                    currentClusterRow++;
-
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 4");
                     if (!ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid.ContainsKey(id))
                         ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid.Add(id, pathGridNode);
                     else
                         ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid[id] = pathGridNode;
-                       
+
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 5");
                     if (!ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid.ContainsKey(id))
                         ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid.Add(id, upperGridNode);
                     else
                         ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid[id] = upperGridNode;
-                        
-                    // if checking if it is time to change cluster grid column.
-                    if((j + 1) % (height / ClusterGridClusterDimentions) == 0){
 
-                        clusterGridRow++;
+                    currentClusterRow++;
+
+                    if(currentClusterRow == ClusterGridClusterDimentions){
+
+                        currentClusterRow++;
+                        currentClusterRow = 0;
+                    }
+
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 6");
+                    if(j == height)
+                    {
+                        Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 8");
+
+                        clusterGridRow = 0;
 
                         currentClusterRow = 0;
                     }
+                    
+                    Mod.dLog(clusterGridColumn + " " + currentClusterColumn + " " + clusterGridRow + " " + currentClusterRow + " 9");
                 }
-
+                
                 currentClusterColumn++;
 
-                // if checking if it is time to change cluster grid rows.
-                if((i + 1) % (width / ClusterGridClusterDimentions)  == 0){
-
+                if(currentClusterColumn == ClusterGridClusterDimentions)
+                {
                     clusterGridColumn++;
-
+                    currentClusterColumn = 0;
                 }
-                else if(i == width){
+
+                Mod.dLog("Pathfinding Initializing");
+
+                if(i == width){
+
+                    Mod.dLog("Pathfinding Initializing2");
 
                     clusterGridColumn = 0;
+
+                    currentClusterColumn = 0;
                 }
-
             }
-
+            
+             Mod.dLog("Pathfinding Initializing3");
             // clusterGridRow is the row on the grid of clusters currently being accessed
             clusterGridRow = 0;
 
             // clusterGridColumn is the column on the grid of clusters currently being accessed
             clusterGridColumn = 0;
-            
-                // checking ouside ring of clusters open paths to neighboring clusters
-            foreach(List<Cluster> clusterColumn in ClusterGrid)
+
+                     Mod.dLog("Pathfinding Initializing4");
+            // checking ouside ring of clusters open paths to neighboring clusters
+            foreach (List<Cluster> clusterColumn in ClusterGrid)
             {
-            
-                foreach(Cluster cluster in clusterColumn){ 
-            
-                    foreach (Node node in cluster.ClustersGrid.Values) {
-                    
+                
+                foreach (Cluster cluster in clusterColumn)
+                {
+
+                    foreach (Elevation.PrebakedPathfinder.Node node in cluster.ClustersGrid.Values) {
+
                         node.ClearConnections();
                     }
                     
-                    foreach(Node node in cluster.ClustersUpperGrid.Values) {
-                    
+                    foreach(Elevation.PrebakedPathfinder.Node node in cluster.ClustersUpperGrid.Values) {
+
                         node.ClearConnections();
+
                     }
                     
-                    for(int i = 0; i < width / ClusterGridClusterDimentions; i++){ 
-                    
-                        for(int j = 0; j < height / ClusterGridClusterDimentions; j++){
-                        
-                            if((i == 0 || i + 1 == width / ClusterGridClusterDimentions) || (j == 0 || j + 1 == width / ClusterGridClusterDimentions)){
-                                
-                                CellMeta mark = Grid.Cells.Get(cluster.ClustersGrid[clusterGridColumn + V + clusterGridRow + V + currentClusterColumn + V + currentClusterRow].cell);
+                    for(int i = 0; i + 1 < width / ClusterGridClusterDimentions; i++){
+
+                        for (int j = 0; j + 1 < height / ClusterGridClusterDimentions; j++){
+
+                            Mod.dLog("Pathfinding Initializing55");
+
+                            if ((i == 0 || i + 1 == width / ClusterGridClusterDimentions) || (j == 0 || j + 1 == width / ClusterGridClusterDimentions)){
+
+                                Mod.dLog("Pathfinding Initializing6");
+
+                                CellMeta mark = Grid.Cells.Get(cluster.ClustersGrid[clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow].cell);
                                 
                                 CellMeta[] neighbors = mark.neighborsPlusFast;
                                 
@@ -182,49 +210,52 @@ namespace Elevation
                                 Node current_upper = cluster.ClustersUpperGrid[clusterGridColumn + V + clusterGridRow + ":" + currentClusterColumn + V + currentClusterRow];
                                 
                                 if(j == 0){
-                                
-                                    MakeConnections(neighbors[7], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+
+                                    Mod.dLog("Pathfinding Initializing7");
+
+                                    MakeConnections(neighbors[7], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[0], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[0], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[1], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[1], mark, current_path, current_upper);
                                 }
                                 
                                 if(j + 1 == height / ClusterGridClusterDimentions){
+
+                                    Mod.dLog("Pathfinding Initializing8");
+
+                                    MakeConnections(neighbors[1], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[1], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[2], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[2], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
-                                    
-                                    MakeConnections(neighbors[3], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[3], mark,current_path, current_upper);
                                 }
                                 
                                 if(i + 1 == width / ClusterGridClusterDimentions){
+
+                                    Mod.dLog("Pathfinding Initializing9");
+
+                                    MakeConnections(neighbors[3], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[3], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[4], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[4], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
-                                    
-                                    MakeConnections(neighbors[5], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[5], mark, current_path, current_upper);
                                 }
                                 
                                 if(i == 0){
+
+                                    Mod.dLog("Pathfinding Initializing10");
+
+                                    MakeConnections(neighbors[5], mark, current_path, current_upper);
                                     
-                                    MakeConnections(neighbors[5], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[6], mark, current_path,current_upper);
                                     
-                                    MakeConnections(neighbors[6], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
-                                    
-                                    MakeConnections(neighbors[7], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
+                                    MakeConnections(neighbors[7], mark, current_path, current_upper);
                                 }
                             }
                         }
                     }
-                    clusterGridRow++;
                 }
-                
-                clusterGridColumn++;
-                
-                clusterGridRow = 0;
             }
 
             Mod.dLog("Connecting");
@@ -232,7 +263,7 @@ namespace Elevation
             Mod.Log("Pathfinding Initialized");
         }
         
-        public static void MakeConnections(CellMeta neighbor, CellMeta mark, Dictionary<string, Node> _pathGrid, Node current_path, Dictionary<string, Node> _upperGrid, Node current_upper){
+        public static void MakeConnections(CellMeta neighbor, CellMeta mark, Node current_path, Node current_upper){
                                 
             if (neighbor == null)
                 return;
@@ -272,10 +303,10 @@ namespace Elevation
             int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
 
             if (difference <= ElevationClimbThreshold){
-               
+
                 Dictionary<string, Node> neighbor_pathGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersGrid;
 
-                Node neighborNode_path = _pathGrid[neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow];
+                Node neighborNode_path = neighbor_pathGrid[neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow];
 
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
@@ -283,7 +314,7 @@ namespace Elevation
 
                 ClusterGrid.Clusters[currGridColumn][currGridRow].Routes.Add(currGridColumn + V + currGridRow + ":" + neighborGridColumn + V + neighborGridRow, new GridRoute(currGridColumn, currGridRow, currGridColumn + V + currGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow, neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow));
 
-                ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].Routes.Add(neighborGridColumn + V + neighborGridRow + ":" + currGridColumn + V + currGridRow, new GridRoute(currGridColumn, currGridRow, neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow, currGridColumn + V + currGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow));
+                ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].Routes.Add(neighborGridColumn + V + neighborGridRow + ":" + currGridColumn + V + currGridRow, new GridRoute(neighborGridColumn, neighborGridRow, neighborGridColumn + V + neighborGridRow + ":" + currClusterColumn + V + currClusterRow, currGridColumn + V + currGridRow + ":" + currClusterColumn + V + currClusterRow));
             }
         }
 

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 namespace Elevation
 {
 
-    public class Cluster : IEnumerable
+    public class Cluster
     {
   
-        public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersGrid;
+        public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersGrid = new Dictionary<string, Elevation.PrebakedPathfinder.Node>();
     
-        public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersUpperGrid;
+        public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersUpperGrid = new Dictionary<string, Elevation.PrebakedPathfinder.Node>();
 
         public Dictionary<string, GridRoute> Routes;
 
@@ -35,11 +35,6 @@ namespace Elevation
         public Dictionary<string, Elevation.PrebakedPathfinder.Node> GetClustersUpper(){
       
             return this.ClustersUpperGrid;
-        }
-
-        public IEnumerator GetEnumerator()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }
