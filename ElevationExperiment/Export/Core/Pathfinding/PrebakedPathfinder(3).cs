@@ -106,7 +106,7 @@ namespace Elevation
                         upperGrid = true
                     };
                     
-                    string id = CellMetadata.GetPositionalID(cell);
+                    string id = clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow;
 
                     currentClusterRow++;
 
@@ -144,16 +144,44 @@ namespace Elevation
 
             }
 
+            // clusterGridRow is the row on the grid of clusters currently being accessed
+            clusterGridRow = 0;
 
+            // clusterGridColumn is the column on the grid of clusters currently being accessed
+            clusterGridColumn = 0;
+            
                 // checking ouside ring of clusters open paths to neighboring clusters
-            foreach(List<Cluster> clusterRow in clusterGrid){
-                foreach(Cluster cluster in clusterRow){ 
+            foreach(List<Cluster> clusterColumn in ClusterGrid){
+            
+                foreach(Cluster cluster in clusterColumn){ 
+            
+                    foreach (Node node in cluster.ClusterGrid.Values) {
+                    
+                        node.ClearConnections();
+                    }
+                    
+                    foreach(Node node in cluster.ClusterUpperGrid.Values) {
+                    
+                        node.ClearConnections();
+                    }
+                    
                     for(int i = 0; i < width / clusterGridClusterDimentions; i++){ 
-                        for(int j = 0; j < height / clusterGridClusterDimentions && (i == 0 || i = cluster.length); j++){
-
+                    
+                        for(int j = 0; j < height / clusterGridClusterDimentions; j++){
+                        
+                            if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions))){
+                                
+                            }
                         }
                     }
+                    clusterGridRow++;
+                    
+                    List<int> neighborsThatMatter = new List<int>() { 0, 1, 2, 7 };
                 }
+                
+                clusterGridColumn++;
+                
+                clusterGridRow = 0;
             }
 
             Mod.dLog("Connecting");
@@ -166,15 +194,6 @@ namespace Elevation
 
             // TODO: Optimize loop below
             // Try checking all connections at runtime?
-
-            foreach (Node node in _pathGrid.Values) {
-                node.ClearConnections();
-            }
-            foreach(Node node in _upperGrid.Values) {
-                node.ClearConnections();
-            }
-
-            List<int> neighborsThatMatter = new List<int>() { 0, 1, 2, 7 };
 
             // Mark connections
             float timeStart = Time.time;
