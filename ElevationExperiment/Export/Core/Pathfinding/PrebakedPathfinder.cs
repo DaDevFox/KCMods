@@ -300,6 +300,7 @@ namespace Elevation
         /// <returns></returns>
         public static Node GetAt(Cell cell, bool upperGrid = false)
         {
+
             if (cell == null)
                 return null;
             
@@ -329,8 +330,10 @@ namespace Elevation
         /// <returns></returns>
         public static Node GetAt(int x, int z, bool upperGrid = false)
         {
+
             if (new Vector3(x, 0f, z) != World.inst.ClampToWorld(new Vector3(x, 0f, z)))
                 return null;
+
             string id = CellMetadata.GetPositionalID(x, z);
 
             string[] strings = id.Split(Convert.ToChar("_"));
@@ -352,11 +355,15 @@ namespace Elevation
         public static Node GetClosestUnblocked(Node node, int team, Pathfinder.blocksPathTest blocks, bool upperGrid)
         {
             Node found = null;
+
             if (blocks(node.cell, team) || node.connected.Count == 0)
             {
+
                 Cell cell = World.inst.FindMatchingSurroundingCell(node.cell, false, 2, c =>
                 {
+
                     Node n = GetAt(c);
+
                     return !(blocks(c, team) && n.connected.Count != 0 && n.upperGrid == upperGrid);
                 });
 
@@ -369,36 +376,48 @@ namespace Elevation
 
         private static Node GetNextCandidate(List<Node> openSet)
         {
+
             if (openSet.Count > 0)
             {
+
                 float lowest = float.MaxValue;
+
                 Node candidate = null;
+
                 for (int i = 0; i < openSet.Count; i++)
                 {
+
                     Node n = openSet[i];
+
                     if (n.f < lowest)
                     {
+
                         lowest = n.f;
                         candidate = n;
                     }
                 }
+
                 return candidate;
             }
+
             return null;
         }
 
         private static float Dist(Vector3 start, Vector3 end)
         {
+
             return (start - end).sqrMagnitude;
         }
 
         private static float Dist(Node start, Node end)
         {
+
             return Dist(start.cell.Center.xz(), end.cell.Center.xz());
         }
 
         public static bool Connected(Cell a, Cell b)
         {
+
             Node nA = GetAt(a);
             Node nB = GetAt(b);
 
@@ -410,8 +429,10 @@ namespace Elevation
 
             foreach (List<Cluster> clusters in ClusterGrid.Clusters)
             {
+
                 foreach(Cluster cluster in clusters)
                 {
+
                     cluster.ClustersGrid.Clear();
 
                     cluster.ClustersUpperGrid.Clear();
@@ -448,28 +469,35 @@ namespace Elevation
             // Blocks water as well as other obstacles
             Pathfinder.blocksPathTest blocks = (c, teamId) =>
             {
+
                 return blocksPath(c, teamId) || BlocksPath(c, teamId);
             };
 
             // Init vars
             List<Node> openSet = new List<Node>();
+
             List<Node> closedSet = new List<Node>();
 
             Cell startCell = World.inst.GetCellDataClamped(World.inst.ClampToWorld(startPos));
+
             Cell endCell = World.inst.GetCellDataClamped(World.inst.ClampToWorld(endPos));
 
             Node start = GetAt(startCell, upperGridStart);
+
             Node end = GetAt(endCell, upperGridEnd);
 
             // Check for blocked start and/or end cell
             start = GetClosestUnblocked(start, team, blocks, upperGridStart);
+
             end = GetClosestUnblocked(end, team, blocks, upperGridEnd);
 
             List<string> visited = new List<string>();
 
             if (start == null || end == null)
             {
+
                 path.Add(startPos);
+
                 path.Add(endPos);
 
                 return;
@@ -477,7 +505,9 @@ namespace Elevation
 
             // Begin searching by adding start to open set
             start.g = 0;
+
             start.Heuristic(end);
+
             start.parent = null;
 
             openSet.Add(start);
@@ -486,24 +516,29 @@ namespace Elevation
 
             while (openSet.Count > 0)
             {
+
                 // Find element with lowest f cost
                 current = GetNextCandidate(openSet);
 
                 openSet.Remove(current);
-                closedSet.Add(current);
 
+                closedSet.Add(current);
 
                 // Check if reached destination
                 if (current == end)
                 {
+
                     try
                     {
+
                         path = RetracePath(current);
                     }
                     catch
                     {
+
                         Mod.dLog($"Path retrace looped on path {startPos}{(upperGridStart? "u" : "l")} to {endPos}{(upperGridEnd ? "u" : "l")}");
                     }
+
                     return;
                 }
 
@@ -536,6 +571,7 @@ namespace Elevation
                 // Add all connected to openset to be later evaluated
                 foreach(KeyValuePair<Node, float> connection in connected)
                 {
+
                     if (blocks(connection.Key.cell, team) || closedSet.Contains(connection.Key))
                         continue;
 
@@ -567,6 +603,7 @@ namespace Elevation
 
             if (doTrimming)
             {
+
                 StringPull(start, end, team, pull, extraCost);
             }
         }
