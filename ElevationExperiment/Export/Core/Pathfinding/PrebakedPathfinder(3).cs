@@ -188,28 +188,37 @@ namespace Elevation
                                 if(j == 0){
                                 
                                     MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[0], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                 }
                                 
                                 if(j + 1 == height / clusterGridClusterDimentions){
                                     
                                     MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[2], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                 }
                                 
                                 if(i + 1 == width / clusterGridClusterDimentions){
                                     
                                     MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[4], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                 }
                                 
                                 if(i == 0){
                                 
+                                    
                                     MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[6], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    
                                     MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                 }
                             }
@@ -232,6 +241,7 @@ namespace Elevation
                                 
             if (neighbor == null)
                 return;
+                
             string id = CellMetadata.GetPositionalID(neighbor.cell);
             
             string[] strings = id.Split("_");
@@ -254,8 +264,8 @@ namespace Elevation
 
             int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
 
-            if (difference <= ElevationClimbThreshold)
-            {
+            if (difference <= ElevationClimbThreshold){
+            
                 Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
 
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost
