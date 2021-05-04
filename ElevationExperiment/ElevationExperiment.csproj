@@ -35,10 +35,10 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="DOTween">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\DOTween.dll</HintPath>
@@ -89,8 +89,7 @@
   <ItemGroup>
     <Compile Include="Export\Core\Grid\Cluster.cs" />
     <Compile Include="Export\Core\Grid\ClusterGrid.cs" />
-    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%282%29.cs" />
-    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%283%29.cs" />
+    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder.cs" />
     <Compile Include="Export\External\API\API.cs" />
     <Compile Include="Export\Content\Assets\AssetBundleManager.cs" />
     <Compile Include="Export\Content\Buildings\Buildings.cs" />
@@ -117,7 +116,6 @@
     <Compile Include="Export\Core\Patches\Environmental\WolfPatch.cs" />
     <Compile Include="Export\Core\Patches\Game\WorldGridPatch.cs" />
     <Compile Include="Export\Core\Patches\Placement\DragSelectPatch.cs" />
-    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\RuntimePathfinder.cs" />
     <Compile Include="Export\Content\Settings\Settings.cs" />
