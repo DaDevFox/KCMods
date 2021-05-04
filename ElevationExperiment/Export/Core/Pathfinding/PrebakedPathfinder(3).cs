@@ -136,7 +136,7 @@ namespace Elevation
                     clusterGridColumn++;
 
                 }
-                else if(i == width && j != height){
+                else if(i == width){
 
                     clusterGridColumn = 0;
                 }
