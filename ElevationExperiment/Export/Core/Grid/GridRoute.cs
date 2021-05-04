@@ -17,6 +17,8 @@ namespace Elevation
 
         public int Z;
 
+        public 
+
         public GridRoute(int x, int z, string StartGridID, string EndGridID)
         {
             this.X = x;

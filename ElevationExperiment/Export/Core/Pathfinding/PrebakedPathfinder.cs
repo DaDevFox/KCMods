@@ -569,35 +569,34 @@ namespace Elevation
 
 
                 // Add all connected to openset to be later evaluated
-                foreach(KeyValuePair<Node, float> connection in connected)
+                foreach(KeyValuePair<string, GridRoute> route in ClusterGrid.Clusters[GridColumn][GridRow].Routes)
                 {
+                    CheckRoute(currGridColumn, currGridRow, ClusterGrid.Clusters[GridColumn][GridRow], GridColumn + V + GridRow + ":", route, team, closedSet, blocks);
 
-                    if (blocks(connection.Key.cell, team) || closedSet.Contains(connection.Key))
-                        continue;
+                    //string id = route.Key.id;
 
-                    string id = connection.Key.id;
+                    ////if (visited.Contains(id))
+                    ////    continue;
 
-                    //if (visited.Contains(id))
-                    //    continue;
+                    //float connectionCost = current.g +
+                    //    (CostPerNode + route.Value + extraCost(route.Key.cell, team));
 
-                    float connectionCost = current.g +
-                        (CostPerNode + connection.Value + extraCost(connection.Key.cell, team));
+                    //if (!openSet.Contains(route.Key))
+                    //    openSet.Add(route.Key);
 
-                    if (!openSet.Contains(connection.Key))
-                        openSet.Add(connection.Key);
+                    //if (connectionCost < route.Key.g || !route.Key.visited)
+                    //{
 
-                    if (connectionCost < connection.Key.g || !connection.Key.visited){
+                    //    route.Key.g = connectionCost;
 
-                        connection.Key.g = connectionCost;
+                    //    route.Key.Heuristic(end);
 
-                        connection.Key.Heuristic(end);
+                    //    route.Key.parent = current;
 
-                        connection.Key.parent = current;
+                    //    route.Key.visited = true;
+                    //}
 
-                        connection.Key.visited = true;
-                    }
-
-                    //visited.Add(id);
+                    ////visited.Add(id);
                 }
             }
 
@@ -605,6 +604,31 @@ namespace Elevation
             {
 
                 StringPull(start, end, team, pull, extraCost);
+            }
+        }
+
+        private static void CheckRoute(int currGridColumn, int currGridRow, Cluster cluster, string clusterIdPrefix, KeyValuePair<string, GridRoute> route, int team, List<Node> closedSet,  Pathfinder.blocksPathTest blocks)
+        {
+            for (int i = currGridColumn; i != route.Value.X; i -= ((i - route.Value.X) / -(i - route.Value.X)))
+            {
+
+                for (int j = currGridRow; j != route.Value.Z; j -= ((j - route.Value.Z) / -(j - route.Value.Z)))
+                {
+
+                    if (route.Key.Contains(i + V + j))
+                        continue;
+
+
+                    if (blocks(cluster.ClustersGrid[clusterIdPrefix + i + V + j].cell, team) || closedSet.Contains(cluster.ClustersGrid[clusterIdPrefix + i + V + j]))
+                    {
+
+                        CheckRoute(currGridColumn, currGridRow, cluster, clusterIdPrefix, route, team, closedSet, blocks);
+                        
+                    }
+
+                }
+
+
             }
         }
 
