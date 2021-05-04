@@ -177,7 +177,7 @@ namespace Elevation
                         
                             if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions))){
                                 
-                                CellMeta mark = Grid.Cells.Get(x, z);
+                                CellMeta mark = Grid.Cells.Get(cluster[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
                                 
                                 CellMeta[] neighbors = mark.neighborsPlusFast;
                                 
