@@ -11,21 +11,21 @@ namespace Elevation
     {
         public string StartGridID;
 
-        public string ClusterGridID;
-
         public string EndGridID;
 
         public int ClusterRouteStart;
 
         public int ClusterRouteEnd;
 
-        public GridRoute(int start, int end, string clusterID)
+        public GridRoute(int start, int end, string StartGridID, string EndGridID)
         {
             this.ClusterRouteStart = start;
 
             this.ClusterRouteEnd = end;
 
-            this.ClusterGridID = clusterID;
+            this.StartGridID = StartGridID;
+
+            this.EndGridID = EndGridID;
         }
 
         public IEnumerator GetEnumerator()
