@@ -165,18 +165,60 @@ namespace Elevation
                         node.ClearConnections();
                     }
                     
+                    int neighbourStartingIndex = 0;
+                    
+                    int connectionCount = 0;
+                    
+                    List<int> neighborsThatMatter = new List<int>() { 0, 1, 2, 7 };
+                    
                     for(int i = 0; i < width / clusterGridClusterDimentions; i++){ 
                     
                         for(int j = 0; j < height / clusterGridClusterDimentions; j++){
                         
                             if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions))){
                                 
+                                CellMeta mark = Grid.Cells.Get(x, z);
+                                
+                                CellMeta[] neighbors = mark.neighborsPlusFast;
+                                
+                                Node current_path = _pathGrid[CellMetadata.GetPositionalID(x, z)];
+                                
+                                Node current_upper = _upperGrid[CellMetadata.GetPositionalID(x, z)];
+                                
+                                foreach (int n in neighborsThatMatter)
+                                {
+
+                                    CellMeta neighbor = neighbors[n];
+                                    if (neighbor == null)
+                                        continue;
+
+                                    Node neighborNode_upper = _upperGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+                                    
+                                    current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
+                                    
+                                    neighborNode_upper.AddConnection(current_upper, BasePathfindingCost);
+                                    
+                                    int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
+
+                                    if (difference <= ElevationClimbThreshold)
+                                    {
+                                        Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+
+                                        current_path.AddConnection(neighborNode_path, BasePathfindingCost
+                                            + (difference * ElevationClimbCostMultiplier)
+                                            );
+
+                                        neighborNode_path.AddConnection(current_path, BasePathfindingCost
+                                            + (difference * ElevationClimbCostMultiplier)
+                                            );
+                                        connectionCount += 1;
+
+                                    }
+                                }
                             }
                         }
                     }
                     clusterGridRow++;
-                    
-                    List<int> neighborsThatMatter = new List<int>() { 0, 1, 2, 7 };
                 }
                 
                 clusterGridColumn++;
@@ -185,146 +227,6 @@ namespace Elevation
             }
 
             Mod.dLog("Connecting");
-
-            List<CellMeta> all = Grid.Cells.GetAll();
-
-            Mod.dLog($"To loop thorugh {all.Count}");
-
-            Stopwatch timer = Stopwatch.StartNew();
-
-            // TODO: Optimize loop below
-            // Try checking all connections at runtime?
-
-            // Mark connections
-            float timeStart = Time.time;
-            float timeOld = Time.time;
-            List<float> operationTimes = new List<float>() { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            int operationIndex = 0;
-            int neighbourStartingIndex = 0;
-            int connectionCount = 0;
-            for (int x = 0; x < width; x++)
-            {
-                for (int z = 0; z < height; z++)
-                {
-                    operationIndex = 0;
-                    timeOld = Time.time;
-
-                    CellMeta mark = Grid.Cells.Get(x, z);
-
-                    operationTimes[operationIndex] += Time.time - timeOld;
-                    operationIndex += 1;
-                    timeOld = Time.time;
-
-                    CellMeta[] neighbors = mark.neighborsPlusFast;
-
-                    operationTimes[operationIndex] += Time.time - timeOld;
-                    operationIndex += 1;
-                    timeOld = Time.time;
-
-                    Node current_path = _pathGrid[CellMetadata.GetPositionalID(x, z)];
-
-                    operationTimes[operationIndex] += Time.time - timeOld;
-                    operationIndex += 1;
-                    timeOld = Time.time;
-
-                    Node current_upper = _upperGrid[CellMetadata.GetPositionalID(x, z)];
-
-                    operationTimes[operationIndex] += Time.time - timeOld;
-                    operationIndex += 1;
-                    timeOld = Time.time;
-
-                    neighbourStartingIndex = operationIndex;
-
-                    foreach (int n in neighborsThatMatter)
-                    {
-                        operationIndex = neighbourStartingIndex;
-                        timeOld = Time.time;
-
-                        CellMeta neighbor = neighbors[n];
-                        if (neighbor == null)
-                            continue;
-
-                        operationTimes[operationIndex] += Time.time - timeOld;
-                        operationIndex += 1;
-                        timeOld = Time.time;
-
-                        // Upper grid should not be innately blocked under any circumstances; as circumstances can change and nodes that 
-                        // were once disconnected aren't anymore; height difference between upper grid will be checked when finding path
-
-                        Node neighborNode_upper = _upperGrid[CellMetadata.GetPositionalID(neighbor.cell)];
-
-                        operationTimes[operationIndex] += Time.time - timeOld;
-                        operationIndex += 1;
-                        timeOld = Time.time;
-
-                        current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
-
-                        operationTimes[operationIndex] += Time.time - timeOld;
-                        operationIndex += 1;
-                        timeOld = Time.time;
-
-                        neighborNode_upper.AddConnection(current_upper, BasePathfindingCost);
-
-                        operationTimes[operationIndex] += Time.time - timeOld;
-                        operationIndex += 1;
-                        timeOld = Time.time;
-
-                        int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
-
-                        operationTimes[operationIndex] += Time.time - timeOld;
-                        operationIndex += 1;
-                        timeOld = Time.time;
-
-                        if (difference <= ElevationClimbThreshold)
-                        {
-                            operationTimes[operationIndex] += Time.time - timeOld;
-                            operationIndex += 1;
-                            timeOld = Time.time;
-
-                            // The y-coordinates of the path grid on the other hand, will never change, and as such, there is no need
-                            // to check nodes' y-coordinates when finding path, so these can be permanently tracked in the node itself
-
-                            Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
-
-                            operationTimes[operationIndex] += Time.time - timeOld;
-                            operationIndex += 1;
-                            timeOld = Time.time;
-
-                            current_path.AddConnection(neighborNode_path, BasePathfindingCost
-                                + (difference * ElevationClimbCostMultiplier)
-                                );
-
-                            operationTimes[operationIndex] += Time.time - timeOld;
-                            operationIndex += 1;
-                            timeOld = Time.time;
-
-                            neighborNode_path.AddConnection(current_path, BasePathfindingCost
-                                + (difference * ElevationClimbCostMultiplier)
-                                );
-
-                            operationTimes[operationIndex] += Time.time - timeOld;
-                            operationIndex += 1;
-                            timeOld = Time.time;
-
-                            connectionCount += 1;
-                        }
-                    }
-                }
-            }
-            Mod.Log("CUSTOM VERSION");
-            Mod.Log("TOTAL CONNECTIONS: " + connectionCount.ToString());
-            Mod.Log("TOTAL TIME: " + (Time.time - timeStart).ToString());
-            int operationIndexB = 0;
-            foreach (float operationTime in operationTimes) {
-                Mod.Log(operationIndexB.ToString() + " - " + operationTime.ToString());
-                operationIndexB += 1;
-            }
-            Mod.Log("----------------------------------------------------------------------------------------------------");
-
-
-            timer.Stop();
-
-            Mod.dLog($"Connections parsed in {timer.Elapsed}");
 
             Mod.Log("Pathfinding Initialized");
         }
