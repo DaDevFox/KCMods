@@ -14,6 +14,7 @@ namespace Elevation
     {
         //private static Dictionary<string, Node> _pathGrid;
         //private static Dictionary<string, Node> _upperGrid;
+        private static ClusterGrid clusterGrid;
 
         /// <summary>
         /// Multiplier of the additional cost applied for the difference between two elevated cells' tiers
@@ -36,6 +37,10 @@ namespace Elevation
         /// Cost to travel between grids
         /// </summary>
         public static float IntergridTraversalCost { get; } = 0f;
+
+        // the dimensions, height and width, of the cluster grid
+        int clusterGridClusterDimentions = 10;
+        
         /// <summary>
         /// If this funciton returns true on a node, it can be used to travel from the path to the upper grid or vice versa
         /// </summary>
@@ -65,9 +70,6 @@ namespace Elevation
             // clusterGridColumn is the column on the grid of clusters currently being accessed
             int clusterGridColumn = 0;
 
-            // the dimensions, height and width, of the cluster grid
-            int clusterGridClusterDimentions = 10;
-
             // used to keep track of where in the cluster we are.
             int currentClusterRow = 0;
 
@@ -75,7 +77,7 @@ namespace Elevation
             int currentClusterColumn = 0;
             
             // Init all grids
-            ClusterGrid clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
+            clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
                 
             // For loop handling setting up the cluster grid using World.inst.GetCellData(i, j) to 
             // iterate through the world grid and clusterRow and clusterColumn to place them in the 
@@ -169,51 +171,46 @@ namespace Elevation
                     
                     int connectionCount = 0;
                     
-                    List<int> neighborsThatMatter = new List<int>() { 0, 1, 2, 7 };
-                    
                     for(int i = 0; i < width / clusterGridClusterDimentions; i++){ 
                     
                         for(int j = 0; j < height / clusterGridClusterDimentions; j++){
                         
                             if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions))){
                                 
-                                CellMeta mark = Grid.Cells.Get(cluster[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
+                                CellMeta mark = Grid.Cells.Get(cluster.ClusterGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
                                 
                                 CellMeta[] neighbors = mark.neighborsPlusFast;
                                 
-                                Node current_path = _pathGrid[CellMetadata.GetPositionalID(x, z)];
+                                Node current_path = cluster.ClusterGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
                                 
-                                Node current_upper = _upperGrid[CellMetadata.GetPositionalID(x, z)];
+                                Node current_upper = cluster.ClusterUpperGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
                                 
-                                foreach (int n in neighborsThatMatter)
-                                {
-
-                                    CellMeta neighbor = neighbors[n];
-                                    if (neighbor == null)
-                                        continue;
-
-                                    Node neighborNode_upper = _upperGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+                                if(j == 0){
+                                
+                                    MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[0], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                }
+                                
+                                if(j + 1 == height / clusterGridClusterDimentions){
                                     
-                                    current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
+                                    MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[2], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                }
+                                
+                                if(i + 1 == width / clusterGridClusterDimentions){
                                     
-                                    neighborNode_upper.AddConnection(current_upper, BasePathfindingCost);
-                                    
-                                    int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
-
-                                    if (difference <= ElevationClimbThreshold)
-                                    {
-                                        Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
-
-                                        current_path.AddConnection(neighborNode_path, BasePathfindingCost
-                                            + (difference * ElevationClimbCostMultiplier)
-                                            );
-
-                                        neighborNode_path.AddConnection(current_path, BasePathfindingCost
-                                            + (difference * ElevationClimbCostMultiplier)
-                                            );
-                                        connectionCount += 1;
-
-                                    }
+                                    MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[4], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                }
+                                
+                                if(i == 0){
+                                
+                                    MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[6], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                 }
                             }
                         }
@@ -229,6 +226,48 @@ namespace Elevation
             Mod.dLog("Connecting");
 
             Mod.Log("Pathfinding Initialized");
+        }
+        
+        public static void MakeConnections(CellMeta neighbor, CellMeta mark, Dictionary<string, Node> _pathGrid, Node current_path, Dictionary<string, Node> _upperGrid, Node current_upper){
+                                
+            if (neighbor == null)
+                return;
+            string id = CellMetadata.GetPositionalID(neighbor.cell);
+            
+            string[] strings = id.Split("_");
+            
+            Dictionary<string, Node> neighbor_upperGrid;
+            
+            try{
+         
+               neighbor_upperGrid = Dictionary<string, Node> neighbor_upperGrid = clusterGrid[Int32.Parse(strings[0]) / clusterGridClusterDimentions][Int32.Parse(strings[1]]).ClusterUpperGrid;
+            }
+            
+            if(neighbor_upperGrid == null)
+                return;
+             
+            Node neighborNode_upper = neighbor_upperGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+             
+            current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
+
+            neighborNode_upper.AddConnection(current_upper, BasePathfindingCost);
+
+            int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
+
+            if (difference <= ElevationClimbThreshold)
+            {
+                Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+
+                current_path.AddConnection(neighborNode_path, BasePathfindingCost
+                    + (difference * ElevationClimbCostMultiplier)
+                    );
+
+                neighborNode_path.AddConnection(current_path, BasePathfindingCost
+                    + (difference * ElevationClimbCostMultiplier)
+                    );
+                connectionCount += 1;
+
+            }
         }
 
         #endregion
