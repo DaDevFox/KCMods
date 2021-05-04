@@ -9,6 +9,8 @@ namespace Elevation
 {
     public class GridRoute : IEnumerable
     {
+        public string id;
+
         public string StartGridID;
 
         public string EndGridID;
@@ -17,7 +19,7 @@ namespace Elevation
 
         public int Z;
 
-        public 
+        public float Value;
 
         public GridRoute(int x, int z, string StartGridID, string EndGridID)
         {
@@ -28,6 +30,8 @@ namespace Elevation
             this.StartGridID = StartGridID;
 
             this.EndGridID = EndGridID;
+
+            this.id = this.StartGridID + ":" + this.X + "_" + this.Z;
         }
 
         public IEnumerator GetEnumerator()

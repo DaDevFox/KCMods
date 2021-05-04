@@ -571,32 +571,8 @@ namespace Elevation
                 // Add all connected to openset to be later evaluated
                 foreach(KeyValuePair<string, GridRoute> route in ClusterGrid.Clusters[GridColumn][GridRow].Routes)
                 {
-                    CheckRoute(currGridColumn, currGridRow, ClusterGrid.Clusters[GridColumn][GridRow], GridColumn + V + GridRow + ":", route, team, closedSet, blocks);
 
-                    //string id = route.Key.id;
-
-                    ////if (visited.Contains(id))
-                    ////    continue;
-
-                    //float connectionCost = current.g +
-                    //    (CostPerNode + route.Value + extraCost(route.Key.cell, team));
-
-                    //if (!openSet.Contains(route.Key))
-                    //    openSet.Add(route.Key);
-
-                    //if (connectionCost < route.Key.g || !route.Key.visited)
-                    //{
-
-                    //    route.Key.g = connectionCost;
-
-                    //    route.Key.Heuristic(end);
-
-                    //    route.Key.parent = current;
-
-                    //    route.Key.visited = true;
-                    //}
-
-                    ////visited.Add(id);
+                    CheckRoute(currGridColumn, currGridRow, ClusterGrid.Clusters[GridColumn][GridRow], GridColumn + V + GridRow + ":", route, team, closedSet, openSet, visited, blocks, extraCost, current, end);
                 }
             }
 
@@ -607,13 +583,15 @@ namespace Elevation
             }
         }
 
-        private static void CheckRoute(int currGridColumn, int currGridRow, Cluster cluster, string clusterIdPrefix, KeyValuePair<string, GridRoute> route, int team, List<Node> closedSet,  Pathfinder.blocksPathTest blocks)
+        private static void CheckRoute(int currGridColumn, int currGridRow, Cluster cluster, string clusterIdPrefix, KeyValuePair<string, GridRoute> route, int team, List<Node> closedSet, List<Node> openSet, List<string> visited, Pathfinder.blocksPathTest blocks, Pathfinder.applyExtraCost extraCost, Node current, Node end)
         {
             for (int i = currGridColumn; i != route.Value.X; i -= ((i - route.Value.X) / -(i - route.Value.X)))
             {
 
                 for (int j = currGridRow; j != route.Value.Z; j -= ((j - route.Value.Z) / -(j - route.Value.Z)))
                 {
+                    if (visited.Contains(clusterIdPrefix + i + V + j))
+                        continue;
 
                     if (route.Key.Contains(i + V + j))
                         continue;
@@ -622,9 +600,29 @@ namespace Elevation
                     if (blocks(cluster.ClustersGrid[clusterIdPrefix + i + V + j].cell, team) || closedSet.Contains(cluster.ClustersGrid[clusterIdPrefix + i + V + j]))
                     {
 
-                        CheckRoute(currGridColumn, currGridRow, cluster, clusterIdPrefix, route, team, closedSet, blocks);
+                        CheckRoute(currGridColumn, currGridRow, cluster, clusterIdPrefix, route, team, closedSet, openSet, visited, blocks, extraCost, current, end);
                         
                     }
+                    
+                    float connectionCost = current.g +
+                        (CostPerNode + route.Value.Value + extraCost(cluster.ClustersGrid[clusterIdPrefix + i + V + j].cell, team));
+
+                    if (!openSet.Contains(cluster.ClustersGrid[clusterIdPrefix + i + V + j]))
+                        openSet.Add(cluster.ClustersGrid[clusterIdPrefix + i + V + j]);
+
+                    if (connectionCost < cluster.ClustersGrid[clusterIdPrefix + i + V + j].g || !cluster.ClustersGrid[clusterIdPrefix + i + V + j].visited)
+                    {
+
+                        cluster.ClustersGrid[clusterIdPrefix + i + V + j].g = connectionCost;
+
+                        cluster.ClustersGrid[clusterIdPrefix + i + V + j].Heuristic(end);
+
+                        cluster.ClustersGrid[clusterIdPrefix + i + V + j].parent = current;
+
+                        cluster.ClustersGrid[clusterIdPrefix + i + V + j].visited = true;
+                    }
+
+                    visited.Add(clusterIdPrefix + i + V + j);
 
                 }
 
