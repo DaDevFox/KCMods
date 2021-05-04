@@ -1,22 +1,15 @@
-
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using System.Reflection;
-using Newtonsoft.Json;
 
 namespace Elevation
 {
 
-    public static class ClusterGrid{
+    public class ClusterGrid : IEnumerable
+    {
 
-        private List<List<Cluster>> Clusters = new List<List<Cluster>>();
+        public static List<List<Cluster>> Clusters = new List<List<Cluster>>();
 
-        private int size;
+        public static int size;
 
         public ClusterGrid(int clusterDimentions, int height, int width){
 
@@ -27,21 +20,27 @@ namespace Elevation
                 List<Cluster> clusterRow = new List<Cluster>();
                 for(int j = 0; j < size; j++){
                     
-                    clusterRow.add(new Cluster(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
+                    clusterRow.Add(new Cluster(new Dictionary<string, Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
                 }
                 
-                Clusters.add(clusterRow);
+                Clusters.Add(clusterRow);
             }
         }
 
-        public static List<List<Cluster> GetClusters(){
 
-            return this.Clusters;
+        public static List<List<Cluster>> GetClusters(){
+
+            return ClusterGrid.Clusters;
         }
 
-        public static void SetClusters(List<List<Cluster> clusters){
+        public static void SetClusters(List<List<Cluster>> clusters){
 
-            this.Clusters - clusters;
+            ClusterGrid.Clusters = clusters;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

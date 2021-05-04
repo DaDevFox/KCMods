@@ -87,7 +87,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Export\Core\Grid\Cluster.cs" />
+    <Compile Include="Export\Core\Grid\ClusterGrid.cs" />
     <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%282%29.cs" />
+    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%283%29.cs" />
     <Compile Include="Export\External\API\API.cs" />
     <Compile Include="Export\Content\Assets\AssetBundleManager.cs" />
     <Compile Include="Export\Content\Buildings\Buildings.cs" />

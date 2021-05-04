@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using UnityEngine;
-using Harmony;
 
 namespace Elevation
 {
 
     public class PrebakedPathfinder : ElevationPathfinder
     {
+        private const string V = "_";
+
         //private static Dictionary<string, Node> _pathGrid;
         //private static Dictionary<string, Node> _upperGrid;
         private static ClusterGrid clusterGrid;
@@ -39,7 +36,7 @@ namespace Elevation
         public static float IntergridTraversalCost { get; } = 0f;
 
         // the dimensions, height and width, of the cluster grid
-        int clusterGridClusterDimentions = 10;
+        public static int clusterGridClusterDimentions { get; } = 10;
         
         /// <summary>
         /// If this funciton returns true on a node, it can be used to travel from the path to the upper grid or vice versa
@@ -77,7 +74,7 @@ namespace Elevation
             int currentClusterColumn = 0;
             
             // Init all grids
-            clusterGrid = new ClusterGrid(clusterGridDimention, height, width);
+            clusterGrid = new ClusterGrid(clusterGridClusterDimentions, height, width);
                 
             // For loop handling setting up the cluster grid using World.inst.GetCellData(i, j) to 
             // iterate through the world grid and clusterRow and clusterColumn to place them in the 
@@ -112,15 +109,15 @@ namespace Elevation
 
                     currentClusterRow++;
 
-                    if (!clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid.ContainsKey(id))
-                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid.Add(id, pathGridNode);
+                    if (!ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid.ContainsKey(id))
+                        ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid.Add(id, pathGridNode);
                     else
-                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterGrid[id] = pathGridNode;
+                        ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersGrid[id] = pathGridNode;
                        
-                    if (!clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid.ContainsKey(id))
-                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid.Add(id, upperGridNode);
+                    if (!ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid.ContainsKey(id))
+                        ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid.Add(id, upperGridNode);
                     else
-                        clusterGrid.ClusterGrid[clusterGridColumn][clusterGridRow].ClusterUpperGrid[id] = upperGridNode;
+                        ClusterGrid.Clusters[clusterGridColumn][clusterGridRow].ClustersUpperGrid[id] = upperGridNode;
                         
                     // if checking if it is time to change cluster grid column.
                     if((j + 1) % (height / clusterGridClusterDimentions) == 0){
@@ -139,7 +136,7 @@ namespace Elevation
                     clusterGridColumn++;
 
                 }
-                elseif(i == width && j != height){
+                else if(i == width && j != height){
 
                     clusterGridColumn = 0;
                 }
@@ -153,72 +150,69 @@ namespace Elevation
             clusterGridColumn = 0;
             
                 // checking ouside ring of clusters open paths to neighboring clusters
-            foreach(List<Cluster> clusterColumn in ClusterGrid){
+            foreach(List<Cluster> clusterColumn in clusterGrid)
+            {
             
                 foreach(Cluster cluster in clusterColumn){ 
             
-                    foreach (Node node in cluster.ClusterGrid.Values) {
+                    foreach (Node node in cluster.ClustersGrid.Values) {
                     
                         node.ClearConnections();
                     }
                     
-                    foreach(Node node in cluster.ClusterUpperGrid.Values) {
+                    foreach(Node node in cluster.ClustersUpperGrid.Values) {
                     
                         node.ClearConnections();
                     }
-                    
-                    int neighbourStartingIndex = 0;
-                    
-                    int connectionCount = 0;
                     
                     for(int i = 0; i < width / clusterGridClusterDimentions; i++){ 
                     
                         for(int j = 0; j < height / clusterGridClusterDimentions; j++){
                         
-                            if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions))){
+                            if((i == 0 || i + 1 == width / clusterGridClusterDimentions) || (j == 0 || j + 1 == width / clusterGridClusterDimentions)){
                                 
-                                CellMeta mark = Grid.Cells.Get(cluster.ClusterGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
+                                CellMeta mark = Grid.Cells.Get(cluster.ClustersGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow].cell);
                                 
                                 CellMeta[] neighbors = mark.neighborsPlusFast;
                                 
-                                Node current_path = cluster.ClusterGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
+                                Node current_path = cluster.ClustersGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
                                 
-                                Node current_upper = cluster.ClusterUpperGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
+                                Node current_upper = cluster.ClustersUpperGrid[clusterGridColumn + "_" + clusterGridRow + ":" + currentClusterColumn + "_" + currentClusterRow];
                                 
                                 if(j == 0){
                                 
-                                    MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[7], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[0], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[0], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[1], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                 }
                                 
                                 if(j + 1 == height / clusterGridClusterDimentions){
                                     
-                                    MakeConnections(neighbors[1], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[1], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[2], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[2], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[3], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                 }
                                 
                                 if(i + 1 == width / clusterGridClusterDimentions){
                                     
-                                    MakeConnections(neighbors[3], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[3], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[4], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[4], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[5], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                 }
                                 
                                 if(i == 0){
                                     
-                                    MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[5], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[6], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[6], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                     
-                                    MakeConnections(neighbors[7], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
+                                    MakeConnections(neighbors[7], mark, cluster.ClustersGrid, current_path, cluster.ClustersUpperGrid, current_upper);
                                 }
                             }
                         }
@@ -243,25 +237,15 @@ namespace Elevation
                 
             string id = CellMetadata.GetPositionalID(neighbor.cell);
             
-            string[] strings = id.Split("_");
-            
-            int neighborGridColumn
-            
-            int neighborGridRow
-            
-            try{
+            string[] strings = id.Split(V);
          
-                neighborGridColumn = Int32.Parse(strings[0]) / clusterGridClusterDimentions;
+            int neighborGridColumn = Int32.Parse(strings[0]) / clusterGridClusterDimentions;
 
-                neighborGridRow = Int32.Parse(strings[1]) / clusterGridClusterDimentions;
-            }
-            
-            if(neighborGridRow == null || neighborGridColumn == null)
-                return;
+            int neighborGridRow = Int32.Parse(strings[1]) / clusterGridClusterDimentions;
              
-            Dictionary<string, Node> neighbor_upperGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterUpperGrid;
+            Dictionary<string, Node> neighbor_upperGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersUpperGrid;
                
-            Node neighborNode_upper = neighbor_upperGrid[id + ":" neighborGridColumn + "_" + neighborGridRow];
+            Node neighborNode_upper = neighbor_upperGrid[id + ":" + neighborGridColumn + "_" + neighborGridRow];
              
             current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
 
@@ -271,9 +255,9 @@ namespace Elevation
 
             if (difference <= ElevationClimbThreshold){
                
-                Dictionary<string, Node> neighbor_pathGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterGrid;
+                Dictionary<string, Node> neighbor_pathGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersGrid;
 
-                Node neighborNode_path = _pathGrid[currId + ":" neighborGridColumn + "_" + neighborGridRow];
+                Node neighborNode_path = _pathGrid[id + ":" + neighborGridColumn + "_" + neighborGridRow];
 
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 

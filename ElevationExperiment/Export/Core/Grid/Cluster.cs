@@ -1,44 +1,43 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using System.Reflection;
-using Newtonsoft.Json;
 
 namespace Elevation
 {
 
-  public class Cluster{
+    public class Cluster : IEnumerable
+    {
   
-    public static Dictionary<string, Node> ClustersGrid;
+    public Dictionary<string, Node> ClustersGrid;
     
-    public static Dictionary<string, Node> ClustersUpperGrid;
+    public Dictionary<string, Node> ClustersUpperGrid;
     
-    public static Cluster( Dictionary<string, Node> clustersGrid){
-      
-      this.ClustersGrid = clustersGrid;
+    public Cluster( Dictionary<string, Node> clustersGrid){
+
+        this.ClustersGrid = clustersGrid;
     }
     
-    public static SetCluster(Dictionary<string, Node> clusterGrid, Dictionary<string, Node> clustesrGrid){
-       
-      this.ClustersGrid = clustesrGrid;
+    public void SetCluster(Dictionary<string, Node> clusterGrid, Dictionary<string, Node> clustesrGrid){
+
+            this.ClustersGrid = clustesrGrid;
     }
-    public static SetClustersUpper(Dictionary<string, Node> clustersUpperGrid){
-       
-      this.ClustersUpperGrid = clustersUpperGrid;
+    public void SetClustersUpper(Dictionary<string, Node> clustersUpperGrid){
+
+            this.ClustersUpperGrid = clustersUpperGrid;
     }
     
-    public static Dictionary<string, Node> getCluster(){
+    public Dictionary<string, Node> GetCluster(){
       
       return this.ClustersGrid;
     }
     
-    public static Dictionary<string, Node> getClustersUpper(){
+    public Dictionary<string, Node> GetClustersUpper(){
       
       return this.ClustersUpperGrid;
     }
-  }
+
+        public IEnumerator GetEnumerator()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }
