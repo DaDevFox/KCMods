@@ -213,7 +213,6 @@ namespace Elevation
                                 }
                                 
                                 if(i == 0){
-                                
                                     
                                     MakeConnections(neighbors[5], mark, cluster.ClusterGrid, current_path, cluster.ClusterUpperGrid, current_upper);
                                     
@@ -246,17 +245,21 @@ namespace Elevation
             
             string[] strings = id.Split("_");
             
+            int neighborGridColumn = Int32.Parse(strings[0]) / clusterGridClusterDimentions;
+            
+            int neighborGridRow = Int32.Parse(strings[1]) / clusterGridClusterDimentions;
+            
             Dictionary<string, Node> neighbor_upperGrid;
             
             try{
          
-               neighbor_upperGrid = Dictionary<string, Node> neighbor_upperGrid = clusterGrid[Int32.Parse(strings[0]) / clusterGridClusterDimentions][Int32.Parse(strings[1]]).ClusterUpperGrid;
+               neighbor_upperGrid = Dictionary<string, Node> neighbor_upperGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterUpperGrid;
             }
             
             if(neighbor_upperGrid == null)
                 return;
              
-            Node neighborNode_upper = neighbor_upperGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+            Node neighborNode_upper = neighbor_upperGrid[id + ":" neighborGridColumn + "_" + neighborGridRow];
              
             current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
 
