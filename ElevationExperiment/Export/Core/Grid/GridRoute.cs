@@ -13,15 +13,15 @@ namespace Elevation
 
         public string EndGridID;
 
-        public int ClusterRouteStart;
+        public int X;
 
-        public int ClusterRouteEnd;
+        public int Z;
 
-        public GridRoute(int start, int end, string StartGridID, string EndGridID)
+        public GridRoute(int x, int z, string StartGridID, string EndGridID)
         {
-            this.ClusterRouteStart = start;
+            this.X = x;
 
-            this.ClusterRouteEnd = end;
+            this.Z = z;
 
             this.StartGridID = StartGridID;
 

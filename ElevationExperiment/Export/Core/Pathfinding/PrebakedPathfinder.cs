@@ -236,22 +236,34 @@ namespace Elevation
                                 
             if (neighbor == null)
                 return;
-                
+
             string id = CellMetadata.GetPositionalID(neighbor.cell);
-            
+
             string[] strings = id.Split(Convert.ToChar("_"));
-         
-            int neighborGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
 
-            int neighborGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
-            
-            int currGridColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+            int neighborGridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
 
-            int currGridRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+            int neighborGridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+            int currNeighborClusterColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+            int currNeighborClusterRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
+
+            string currId = CellMetadata.GetPositionalID(neighbor.cell);
+
+            string[] currStrings = id.Split(Convert.ToChar("_"));
+
+            int currGridColumn = Int32.Parse(strings[0]) / ClusterGridClusterDimentions;
+
+            int currGridRow = Int32.Parse(strings[1]) / ClusterGridClusterDimentions;
+
+            int currClusterColumn = Int32.Parse(strings[0]) % ClusterGridClusterDimentions;
+
+            int currClusterRow = Int32.Parse(strings[1]) % ClusterGridClusterDimentions;
 
             Dictionary<string, Node> neighbor_upperGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersUpperGrid;
                
-            Node neighborNode_upper = neighbor_upperGrid[neighborGridColumn + V + neighborGridRow + ":" + currGridColumn + V + currGridRow];
+            Node neighborNode_upper = neighbor_upperGrid[neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow];
              
             current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
 
@@ -263,13 +275,15 @@ namespace Elevation
                
                 Dictionary<string, Node> neighbor_pathGrid = ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].ClustersGrid;
 
-                Node neighborNode_path = _pathGrid[id + ":" + neighborGridColumn + V + neighborGridRow];
+                Node neighborNode_path = _pathGrid[neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow];
 
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
                 neighborNode_path.AddConnection(current_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
-                ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].Routes.Add();
+                ClusterGrid.Clusters[currGridColumn][currGridRow].Routes.Add(currGridColumn + V + currGridRow + ":" + neighborGridColumn + V + neighborGridRow, new GridRoute(currGridColumn, currGridRow, currGridColumn + V + currGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow, neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow));
+
+                ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].Routes.Add(neighborGridColumn + V + neighborGridRow + ":" + currGridColumn + V + currGridRow, new GridRoute(currGridColumn, currGridRow, neighborGridColumn + V + neighborGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow, currGridColumn + V + currGridRow + ":" + currNeighborClusterColumn + V + currNeighborClusterRow));
             }
         }
 
