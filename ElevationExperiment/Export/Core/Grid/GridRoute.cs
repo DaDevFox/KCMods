@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Elevation
 {
-    class GridRoute
+    public class GridRoute : IEnumerable
     {
         public string StartGridID;
 
@@ -25,6 +26,11 @@ namespace Elevation
             this.ClusterRouteEnd = end;
 
             this.ClusterGridID = clusterID;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
 }

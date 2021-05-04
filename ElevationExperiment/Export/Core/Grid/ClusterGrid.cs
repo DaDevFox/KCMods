@@ -7,7 +7,7 @@ namespace Elevation
     public class ClusterGrid : IEnumerable
     {
 
-        public static List<List<Cluster>> Clusters = new List<List<Cluster>>();
+        public List<List<Cluster>> Clusters = new List<List<Cluster>>();
 
         public static int size;
 
@@ -27,15 +27,14 @@ namespace Elevation
             }
         }
 
+        public List<List<Cluster>> GetClusters(){
 
-        public static List<List<Cluster>> GetClusters(){
-
-            return ClusterGrid.Clusters;
+            return this.Clusters;
         }
 
-        public static void SetClusters(List<List<Cluster>> clusters){
+        public void SetClusters(List<List<Cluster>> clusters){
 
-            ClusterGrid.Clusters = clusters;
+            this.Clusters = clusters;
         }
 
         public IEnumerator GetEnumerator()

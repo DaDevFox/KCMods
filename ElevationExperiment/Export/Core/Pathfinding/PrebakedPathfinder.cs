@@ -268,6 +268,8 @@ namespace Elevation
                 current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
                 neighborNode_path.AddConnection(current_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
+
+                ClusterGrid.Clusters[neighborGridColumn][neighborGridRow].Routes.Add();
             }
         }
 
@@ -534,11 +536,14 @@ namespace Elevation
                     if (!openSet.Contains(connection.Key))
                         openSet.Add(connection.Key);
 
-                    if (connectionCost < connection.Key.g || !connection.Key.visited)
-                    {
+                    if (connectionCost < connection.Key.g || !connection.Key.visited){
+
                         connection.Key.g = connectionCost;
+
                         connection.Key.Heuristic(end);
+
                         connection.Key.parent = current;
+
                         connection.Key.visited = true;
                     }
 

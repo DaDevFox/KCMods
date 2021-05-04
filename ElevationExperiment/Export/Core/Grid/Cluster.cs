@@ -11,9 +11,7 @@ namespace Elevation
     
         public Dictionary<string, Elevation.PrebakedPathfinder.Node> ClustersUpperGrid;
 
-        private static Dictionary<string, GridRoute> routes;
-
-        internal static Dictionary<string, GridRoute> Routes { get => routes; set => routes = value; }
+        public Dictionary<string, GridRoute> Routes;
 
         public Cluster( Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersGrid){
 
