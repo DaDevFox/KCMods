@@ -245,20 +245,22 @@ namespace Elevation
             
             string[] strings = id.Split("_");
             
-            int neighborGridColumn = Int32.Parse(strings[0]) / clusterGridClusterDimentions;
+            int neighborGridColumn
             
-            int neighborGridRow = Int32.Parse(strings[1]) / clusterGridClusterDimentions;
-            
-            Dictionary<string, Node> neighbor_upperGrid;
+            int neighborGridRow
             
             try{
          
-               neighbor_upperGrid = Dictionary<string, Node> neighbor_upperGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterUpperGrid;
+                neighborGridColumn = Int32.Parse(strings[0]) / clusterGridClusterDimentions;
+
+                neighborGridRow = Int32.Parse(strings[1]) / clusterGridClusterDimentions;
             }
             
-            if(neighbor_upperGrid == null)
+            if(neighborGridRow == null || neighborGridColumn == null)
                 return;
              
+            Dictionary<string, Node> neighbor_upperGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterUpperGrid;
+               
             Node neighborNode_upper = neighbor_upperGrid[id + ":" neighborGridColumn + "_" + neighborGridRow];
              
             current_upper.AddConnection(neighborNode_upper, BasePathfindingCost);
@@ -268,18 +270,14 @@ namespace Elevation
             int difference = Math.Abs(mark.elevationTier - neighbor.elevationTier);
 
             if (difference <= ElevationClimbThreshold){
-            
-                Node neighborNode_path = _pathGrid[CellMetadata.GetPositionalID(neighbor.cell)];
+               
+                Dictionary<string, Node> neighbor_pathGrid = clusterGrid[neighborGridColumn][neighborGridRow].ClusterGrid;
 
-                current_path.AddConnection(neighborNode_path, BasePathfindingCost
-                    + (difference * ElevationClimbCostMultiplier)
-                    );
+                Node neighborNode_path = _pathGrid[currId + ":" neighborGridColumn + "_" + neighborGridRow];
 
-                neighborNode_path.AddConnection(current_path, BasePathfindingCost
-                    + (difference * ElevationClimbCostMultiplier)
-                    );
-                connectionCount += 1;
+                current_path.AddConnection(neighborNode_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
 
+                neighborNode_path.AddConnection(current_path, BasePathfindingCost + (difference * ElevationClimbCostMultiplier));
             }
         }
 
