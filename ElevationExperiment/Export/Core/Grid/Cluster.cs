@@ -13,9 +13,11 @@ namespace Elevation
 
         public Dictionary<string, GridRoute> Routes;
 
-        public Cluster( Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersGrid){
+        public Cluster( Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersGrid, Dictionary<string, Elevation.PrebakedPathfinder.Node> clustersUpperGrid)
+        {
 
             this.ClustersGrid = clustersGrid;
+            this.ClustersUpperGrid = clustersUpperGrid;
         }
     
         public void SetCluster(Dictionary<string, Elevation.PrebakedPathfinder.Node> clusterGrid, Dictionary<string, Elevation.PrebakedPathfinder.Node> clustesrGrid){

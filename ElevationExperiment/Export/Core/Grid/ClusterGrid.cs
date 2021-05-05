@@ -7,20 +7,22 @@ namespace Elevation
     public class ClusterGrid : IEnumerable
     {
 
-        public List<List<Cluster>> Clusters = new List<List<Cluster>>();
+        public List<List<Cluster>> Clusters;
 
         public static int size;
 
         public ClusterGrid(int clusterDimentions, int height, int width){
 
-            size = clusterDimentions * clusterDimentions;
+            Clusters = new List<List<Cluster>>(width / clusterDimentions);
 
-            for(int i = 0; i < clusterDimentions; i++){
+            size = (height / clusterDimentions) * (width / clusterDimentions);
+
+            for(int i = 0; i < height / clusterDimentions; i++){
                 
-                List<Cluster> clusterRow = new List<Cluster>();
-                for(int j = 0; j < clusterDimentions; j++){
+                List<Cluster> clusterRow = new List<Cluster>(height / clusterDimentions);
+                for(int j = 0; j < width / clusterDimentions; j++){
                     
-                    clusterRow.Add(new Cluster(new Dictionary<string, Elevation.PrebakedPathfinder.Node>((width / clusterDimentions) * (height / clusterDimentions)))); 
+                    clusterRow.Add(new Cluster(new Dictionary<string, Elevation.PrebakedPathfinder.Node>(clusterDimentions * clusterDimentions), new Dictionary<string, Elevation.PrebakedPathfinder.Node>(clusterDimentions * clusterDimentions))); 
                 }
                 
                 Clusters.Add(clusterRow);

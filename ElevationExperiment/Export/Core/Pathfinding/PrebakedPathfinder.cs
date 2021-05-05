@@ -128,7 +128,7 @@ namespace Elevation
 
                     if(currentClusterRow == ClusterGridClusterDimentions){
 
-                        currentClusterRow++;
+                        clusterGridRow++;
                         currentClusterRow = 0;
                     }
 
