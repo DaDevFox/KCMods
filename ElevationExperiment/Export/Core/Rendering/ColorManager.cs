@@ -23,7 +23,7 @@ namespace Elevation
         };
 
         public static Texture2D elevationMap;
-        public static Material terrainMat;
+        public static Material terrainMat { get; set; }
         public static float tilingConstant;
 
         public static Color GetColor(int elevationTier)
@@ -72,6 +72,8 @@ namespace Elevation
             Mod.dLog("Terrain Map Baked");
 
             elevationMap = tex;
+
+            World.inst.SaveTexture(Mod.helper.modPath + "/terrainmap.png", elevationMap);
         }
 
 

@@ -79,7 +79,6 @@ namespace InsaneDifficultyMod.Events
             base.Run();
 
             Player.inst.AddHappinessMod(oppressionHappinessModId, 1000, happiness, "Oppression: " + GetDescription(happiness), Util.GetPlayerStartLandmass(), false, Settings.MaxOppressionHappiness, -Settings.MinOppressionHappiness);
-
         }
 
         private string GetDescription(int amount)

@@ -71,8 +71,12 @@ namespace Elevation
 			direction = Direction.North;
 			return false;
 		}
+
 		public static Cell GetCardinal(Cell from, Direction direction)
 		{
+			if (from == null)
+				return null;
+
 			Dictionary<Direction, Vector3> dirs = new Dictionary<Direction, Vector3>()
 				{
 					{ Direction.East,  new Vector3(1f, 0f, 0f) },
@@ -103,12 +107,12 @@ namespace Elevation
 
 		public static bool BlockedCompletely(Cell cell)
 		{
-			bool blocked = false;
+			bool blocked = cell == null;
 			if (cell != null)
 			{
 				if (WorldRegions.Marked)
 				{
-					if (WorldRegions.Unreachable.Contains(cell))
+					if (WorldRegions.GetTileRegion(cell) == -1)
 						blocked = true;
 				}
 
@@ -120,6 +124,8 @@ namespace Elevation
 
 		public static bool BlocksForBuilding(Cell c)
 		{
+			if (c == null) return false;
+
 			return c.Type == ResourceType.IronDeposit || 
 				c.Type == ResourceType.Stone || 
 				c.Type == ResourceType.UnusableStone || 
@@ -127,7 +133,18 @@ namespace Elevation
 				c.Type == ResourceType.WitchHut;
 		}
 
+		public static bool Connected(Cell from, Cell to)
+        {
+			if (from == null || to == null)
+				return false;
 
+			CellMeta fromMeta = Grid.Cells.Get(from);
+			CellMeta toMeta = Grid.Cells.Get(to);
+			if (fromMeta && toMeta)
+				if (Math.Abs(fromMeta.elevationTier - toMeta.elevationTier) <= 1)
+					return true;
+			return false;
+        }
 
 	}
 }

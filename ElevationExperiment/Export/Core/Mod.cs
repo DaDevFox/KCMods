@@ -29,9 +29,16 @@ namespace Elevation
 
         #region Localization
 
-        public static string localizationData { get; } = "en, de, fr, es" +
-            "generating_title,       Generating..." +
-            "generating_description, This may take a while";
+        public static string localizationData { get; } = "en,de,fr,es\n" +
+            "generating_title,Generating...,,,\n" +
+            "generating_description,This may take a while,,,\n" +
+            "world_init_title, Initializing world...,,,\n" +
+            "world_init_description,This may take a while,,,\n" +
+            "pruning_title, Processing Map...,,,\n" +
+            "pruning_preprocessing,Preparing data,,,\n" +
+            "pruning_floodfill,Indexing data,,,\n" +
+            "pruning_reformat,Finalizing,,,";
+
 
         #endregion
 

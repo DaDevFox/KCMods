@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageProjectUrl>https://github.com/rvhuang/linq-to-astar</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rvhuang/linq-to-astar.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Robert Vandenberg Huang</Authors>
+    <Product>Linq To A*</Product>
+    <PackageLicenseUrl>https://github.com/rvhuang/linq-to-astar/blob/master/LICENSE</PackageLicenseUrl>
+    <Version>1.2.1</Version>
+    <PackageId>linq-to-astar</PackageId>
+    <PackageTags>linq;astar;heuristic</PackageTags>
+    <Copyright>© 2019 Robert Vandenberg Huang</Copyright>
+    <Description>A* algorithm written in C#, used with LINQ expressions.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/rvhuang/linq-to-astar/master/favicon.ico</PackageIconUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <SignAssembly>false</SignAssembly>
+    <PackageReleaseNotes>1. Fix missing event modifier on AlgorithmProgress.ProgressChanged.
+2. Fix missing event modifier on AlgorithmObserverFactory(T).Created.
+3. Update documentation comments.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\Heuristic.Linq.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Heuristic.Linq.xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>

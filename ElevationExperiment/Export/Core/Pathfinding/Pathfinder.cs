@@ -12,7 +12,7 @@ namespace Elevation
 {
     public abstract class ElevationPathfinder
     {
-        public static ElevationPathfinder current { get; set; } = new PrebakedPathfinder();
+        public static ElevationPathfinder current { get; set; } = new ExternalPathfinder();
 
         public abstract void Init(int width, int height);
 

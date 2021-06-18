@@ -18,22 +18,31 @@ namespace InsaneDifficultyMod
         public static GameObject riotDemandsUIObj;
         public static RiotDemandsUI riotDemandsUI;
 
+        public static GameObject riotUIObj;
+        public static RiotUI riotUI;
+
 
         #endregion
 
         public static void Setup() 
         {
-            //ModSettingsUI
-            GameObject modSettingsPrefab = AssetBundleManager.GetAsset("ModSettings.prefab") as GameObject;
-            modSettingsUIObj = GameObject.Instantiate(modSettingsPrefab);
-            modSettingsUIObj.transform.SetParent(GameState.inst.mainMenuMode.mainMenuUI.transform, false);
-            modSettingsUI = modSettingsUIObj.AddComponent<ModSettingsUI>();
+            GameObject riotUIPrefab = Mod.assets.GetByName<GameObject>("RiotViewer");
+            riotUIObj = GameObject.Instantiate(riotUIPrefab);
+            riotUIObj.transform.SetParent(GameState.inst.playingMode.GameUIParent.transform, false);
+            riotUI = riotUIObj.AddComponent<RiotUI>();
 
-            //RiotDemandsUI
-            GameObject riotDemandsPrefab = AssetBundleManager.GetAsset("RiotDemandUI.prefab") as GameObject;
-            riotDemandsUIObj = GameObject.Instantiate(riotDemandsPrefab);
-            riotDemandsUIObj.transform.SetParent(GameState.inst.transform.Find("KeyboardMouseUICanvas"));
-            riotDemandsUI = riotDemandsUIObj.AddComponent<RiotDemandsUI>();
+
+            ////ModSettingsUI
+            //GameObject modSettingsPrefab = Mod.legacyAssets.GetByName<GameObject>("ModSettings");
+            //modSettingsUIObj = GameObject.Instantiate(modSettingsPrefab);
+            //modSettingsUIObj.transform.SetParent(GameState.inst.mainMenuMode.mainMenuUI.transform, false);
+            //modSettingsUI = modSettingsUIObj.AddComponent<ModSettingsUI>();
+
+            ////RiotDemandsUI
+            //GameObject riotDemandsPrefab = Mod.legacyAssets.GetByName<GameObject>("RiotDemandUI");
+            //riotDemandsUIObj = GameObject.Instantiate(riotDemandsPrefab);
+            //riotDemandsUIObj.transform.SetParent(GameState.inst.transform.Find("KeyboardMouseUICanvas"));
+            //riotDemandsUI = riotDemandsUIObj.AddComponent<RiotDemandsUI>();
 
         }
 

@@ -14,14 +14,58 @@ public static class ArrayExtensions
         return list.ToArray();
     }
 
-    public static T[] AddRange<T>(this T[] array, IEnumerable<T> elements)
+    public static T[] AddRange<T>(this T[] array, IEnumerable<T> collection)
     {
-        List<T> list = array.ToList();
-        list.AddRange(elements);
-        return list.ToArray();
+        int count = collection.Count();
+        T[] result = new T[array.Length + count];
+        array.CopyTo(result, 0);
+        for (int i = array.Length; i < result.Length; i++)
+        {
+            result[i] = collection.ElementAt(i - array.Length);
+        }
+
+        return result;
+
+        // List<T> list = array.ToList();
+        // list.AddRange(collection);
+        // return list.ToArray();
+    }
+
+    public static T[] AddRange<T>(this T[] array, T[] other)
+    {
+        T[] result = new T[array.Length + other.Length];
+        array.CopyTo(result, 0);
+        for (int i = array.Length; i < result.Length; i++)
+        {
+            result[i] = other[i - array.Length];
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Sets the last [<c>other.Length</c>] elements of the array <c>array</C> to other's elements. The completed array will always be of length <c>length</c>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="array"></param>
+    /// <param name="other"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    public static T[] SetLast<T>(this T[] array, T[] other, int length)
+    {
+        T[] result = new T[length];
+        for (int i = 0; i < result.Length; i++)
+            if (i < array.Length)
+                result[i] = array[i];
+
+        for (int i = result.Length - 1; i >= result.Length - other.Length; i--)
+        {
+            result[i] = other[result.Length - 1 - i];
+        }
+
+        return result;
     }
 }
-
 
 public static class RendererUtil
 {
@@ -44,10 +88,10 @@ public static class RendererUtil
         {
             vertices = new Vector3[]
             {
-                new Vector3(x, y, z) + new Vector3(0, 0, 0),
-                new Vector3(x, y, z) + new Vector3(width, 0, 0),
-                new Vector3(x, y, z) + new Vector3(0, height, 0),
-                new Vector3(x, y, z) + new Vector3(width, height, 0)
+                    new Vector3(x, y, z) + new Vector3(0, 0, 0),
+                    new Vector3(x, y, z) + new Vector3(width, 0, 0),
+                    new Vector3(x, y, z) + new Vector3(0, height, 0),
+                    new Vector3(x, y, z) + new Vector3(width, height, 0)
             },
             triangles = new int[]
             {
@@ -58,21 +102,104 @@ public static class RendererUtil
             },
             normals = new Vector3[]
             {
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward
             },
             uvs = new Vector2[]
             {
-                new Vector2(0, 0),
-                new Vector2(1, 0),
-                new Vector2(0, 1),
-                new Vector2(1, 1)
+                    new Vector2(0, 0),
+                    new Vector2(1, 0),
+                    new Vector2(0, 1),
+                    new Vector2(1, 1)
             }
         };
     }
 
+    /// <summary>
+    /// Simple depth 1 subdivision of a traditional quad; hardcoded for speed
+    /// </summary>
+    /// <param name="dimensions"></param>
+    /// <param name="position"></param>
+    /// <param name="masterSize"></param>
+    /// <returns></returns>
+    public static Quad NinePointQuad(Vector2 dimensions, Vector3 position, int masterSize = 0)
+    {
+        float width = dimensions.x;
+        float height = dimensions.y;
+        float x = position.x;
+        float y = position.y;
+        float z = position.z;
+
+        return new Quad()
+        {
+            vertices = new Vector3[]
+            {
+                    new Vector3(x, y, z) + new Vector3(0, 0, 0),
+                    new Vector3(x, y, z) + new Vector3(width/2, 0, 0),
+                    new Vector3(x, y, z) + new Vector3(0, height/2, 0),
+                    new Vector3(x, y, z) + new Vector3(width/2, height/2, 0),
+                    new Vector3(x, y, z) + new Vector3(width, 0, 0),
+                    new Vector3(x, y, z) + new Vector3(width, height/2, 0),
+                    new Vector3(x, y, z) + new Vector3(width, height, 0),
+                    new Vector3(x, y, z) + new Vector3(width/2, height, 0),
+                    new Vector3(x, y, z) + new Vector3(0, height, 0),
+            },
+            triangles = new int[]
+            {
+                    // 0, 0 left triangle
+                    masterSize + 0, masterSize + 2, masterSize + 1,
+                    // 0, 0 right triangle
+                    masterSize + 2, masterSize + 3, masterSize + 1,
+
+                    // 0.5, 0.5 left
+                    masterSize + 1, masterSize + 3, masterSize + 4,
+                    // 0.5, 0.5 right
+                    masterSize + 3, masterSize + 5, masterSize + 4,
+                    
+                    // 1, 0.5 left
+                    masterSize + 2, masterSize + 8, masterSize + 3,
+                    // 1, 0.5 right
+                    masterSize + 8, masterSize + 7, masterSize + 3,
+                    
+                    // 0.5, 1 left
+                    masterSize + 3, masterSize + 7, masterSize + 5,
+                    // 0.5, 1 right
+                    masterSize + 7, masterSize + 6, masterSize + 5,
+            },
+            normals = new Vector3[]
+            {
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward,
+                    -Vector3.forward
+            },
+            uvs = new Vector2[]
+            {
+                    new Vector2(0f, 0f),
+                    new Vector2(0.5f, 0f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(1f, 0f),
+                    new Vector2(1f, 0.5f),
+                    new Vector2(1f, 1f),
+                    new Vector2(0.5f, 1f),
+                    new Vector2(0f, 1f)
+            }
+        };
+    }
+
+    /// <summary>
+    /// Applies a quad to a mesh
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="quad"></param>
     public static void Apply(this Mesh mesh, Quad quad)
     {
         mesh.vertices = quad.vertices;
@@ -81,12 +208,18 @@ public static class RendererUtil
         mesh.uv = quad.uvs;
     }
 
+    /// <summary>
+    /// Adds a quad to a mesh vertices, tris, normals, and uvs
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="quad"></param>
     public static void Add(this Mesh mesh, Quad quad)
     {
         mesh.vertices = mesh.vertices.AddRange(quad.vertices);
         mesh.triangles = mesh.triangles.AddRange(quad.triangles);
-        mesh.normals = mesh.normals.AddRange(quad.normals);
-        mesh.uv = mesh.uv.AddRange(quad.uvs);
+
+        mesh.normals = mesh.normals.SetLast(quad.normals, mesh.vertices.Length);
+        mesh.uv = mesh.uv.SetLast(quad.uvs, mesh.vertices.Length);
     }
 
     /// <summary>
@@ -106,9 +239,11 @@ public static class RendererUtil
 
         return quad;
     }
-
 }
 
+/// <summary>
+/// Generic mesh struct for a grouping of points, triangles, normals, and uvs
+/// </summary>
 public struct Quad
 {
     public Vector3[] vertices;
@@ -116,4 +251,3 @@ public struct Quad
     public Vector3[] normals;
     public Vector2[] uvs;
 }
-

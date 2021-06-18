@@ -16,8 +16,11 @@ namespace InsaneDifficultyMod
         private GameObject modSettingsPrefab;
 
         public static Mod mod;
+        public static AssetDB assets { get; private set; }
+        public static AssetDB legacyAssets { get; private set; }
 
-        public static string modID = "insanedifficultymod";
+        public static string modID = "fox_insanedifficulty";
+        public static string legacyModID = "insanedifficultymod";
 
         public static KCModHelper helper;
 
@@ -29,7 +32,8 @@ namespace InsaneDifficultyMod
             var harmony = HarmonyInstance.Create("harmony");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            AssetBundleManager.UnpackAssetBundle();
+            assets = AssetBundleManager.Unpack(helper.modPath + "/assetbundle/", modID);
+            //legacyAssets = AssetBundleManager.Unpack(helper.modPath + "/legacy_assetbundle/", legacyModID);
             if (Settings.debug)
                 Application.logMessageReceived += onLogMessageReceived;
         }
@@ -89,13 +93,29 @@ namespace InsaneDifficultyMod
                 }
                 if (Input.GetKeyDown(KeyCode.R))
                 {
-                    Events.EventManager.TriggerEvent(typeof(Events.RiotEvent));
-                }
-                if (Input.GetKeyDown(KeyCode.E))
+                    Events.RiotSystem.Iterate();
+                }else if (Input.GetKeyDown(KeyCode.V))
                 {
-                    Events.EventManager.TriggerEvent(typeof(Events.DroughtEvent));
+                    Events.RiotSystem.EndAll();
                 }
+                if (Input.GetKeyDown(KeyCode.G))
+                {
+                    if (GameUI.inst.personUI.villager != null)
+                    {
+                        Villager villager = GameUI.inst.personUI.villager;
+                        float activeSpeed = (float)typeof(Villager).GetField("activeSpeed", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(GameUI.inst.personUI.villager);
+                        bool ignoreDeferred = (bool)typeof(Villager).GetField("ignoreDeferred", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(GameUI.inst.personUI.villager);
+                        DebugExt.Log($"Villager: paralyzed={GameUI.inst.personUI.villager.paralyzed}\ntravelPath={GameUI.inst.personUI.villager.travelPath.Count}\nactiveSpeed={activeSpeed}\nignoreDeferred={ignoreDeferred}");
+                        //GameUI.inst.personUI.villager.MoveToDeferred(World.inst.cellsToLandmass[GameUI.inst.personUI.villager.landMass].RandomElement().Center);
+                    }
+                }
+                //if (Input.GetKeyDown(KeyCode.E))
+                //{
+                //    Events.EventManager.TriggerEvent(typeof(Events.DroughtEvent));
+                //}
             }
+
+            Events.RiotSystem.Update();
 
             #endregion
         

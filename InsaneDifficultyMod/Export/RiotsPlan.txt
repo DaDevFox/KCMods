@@ -1,0 +1,7 @@
+﻿The basic idea was under a certain home happiness, peasants' dissatisfaction grow and after crossing a threshold [maybe a new stat called fear] organize a riot if one doesn't exist already, if it does they join it. 
+Each riot assembly finds a 'rally point' to gather at (prefers community buildings like town squares, markets, taverns, etc. ) and the building is no longer under player control as well as the peasants involved in the riot (they get removed from the population count and job system)
+After rallying enough to gain a significant following, they raise a demand, if you can meet it they split up and ignore the happiness crisis for 5-10 year, if not they march to the keep and if a decent amount of them make it, you're overthrown. 
+
+Rioting peasants can be attacked by military units, but happiness suffers a debuff whenever that happens. If you successfully quell a riot, another one won't happen for a while and it'd give you a chance to recover and restabilize your kingdom [if introducing the fear stat is neccessary, this would raise the 'fear', but it'd be tied to your military power: if people are unhappy but too afraid to express it and you lose your military suddenly, like in a viking raid, the fear would dip but happiness would stay the same, causing people to take advantage of your weakness and riot]
+
+This mechanic would add a better purpose to having a large military and offer an alternate way to rule, investing in oppression rather than appeasement of the people

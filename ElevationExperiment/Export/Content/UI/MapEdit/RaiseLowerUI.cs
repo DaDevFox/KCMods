@@ -38,7 +38,7 @@ namespace Elevation
 
         #region UI
 
-        private static float animationTime = 0.3f;
+        public static float animationTime { get; } = 0.3f;
 
         internal void AnimateButtonActive(GameObject button)
         {

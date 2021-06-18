@@ -7,6 +7,8 @@ using UnityEngine;
 using TMPro;
 using Fox.Localization;
 using Fox.UI;
+using UnityEngine.UI;
+using DG.Tweening;
 
 namespace Elevation
 {
@@ -14,9 +16,28 @@ namespace Elevation
     {
         private TextMeshProUGUI _title;
         private TextMeshProUGUI _description;
+        private Image _progress;
 
-        public static string titleTerm { get; } = "generating_title";
-        public static string descriptionTerm { get; } = "generating_description";
+        public static string titleTermDefault { get; } = "generating_title";
+        public static string descriptionTermDefault { get; } = "generating_description";
+
+        public static float smoothing { get; } = 3f;
+
+        public static float progressClamp = 0.0001f;
+
+
+        /// <summary>
+        /// Localization term for the title, set to null or empty string to use default
+        /// </summary>
+        public string title = "";
+
+        /// <summary>
+        /// Localization term for the description, set to null or empty string to use default
+        /// </summary>
+        public string description = "";
+
+        public float desiredProgress;
+        public float progress { get; private set; }
 
 
         void Awake()
@@ -25,6 +46,18 @@ namespace Elevation
 
             _title = transform.Find("window/Title").GetComponent<TextMeshProUGUI>();
             _description = transform.Find("window/Description").GetComponent<TextMeshProUGUI>();
+            _progress = transform.Find("window/Image").GetComponent<Image>();
+
+            UpdateText();
+        }
+
+        void Update()
+        {
+            //Mod.dLog(desiredProgress);
+            if (Math.Abs(_progress.fillAmount - desiredProgress) > progressClamp)
+                _progress.fillAmount = Mathf.Lerp(_progress.fillAmount, desiredProgress, Time.deltaTime * smoothing);
+            else
+                _progress.fillAmount = desiredProgress;
         }
 
         /// <summary>
@@ -33,7 +66,7 @@ namespace Elevation
         public void Activate()
         {
             gameObject.SetActive(true);
-            Localize();
+            UpdateText();
             // Normally UI is rendered at the end of a frame, however in this case, we want the ui rendered immediately, this method will force render the loading dialog and any other ui. 
             Canvas.ForceUpdateCanvases();
         }
@@ -49,10 +82,13 @@ namespace Elevation
         /// <summary>
         /// Updates the text on the loading screen to match the game language
         /// </summary>
-        public void Localize()
+        public void UpdateText()
         {
-            _title.text = Localization.Get(titleTerm);
-            _description.text = Localization.Get(descriptionTerm);
+            _title.alignment = TextAlignmentOptions.Center;
+            _description.alignment = TextAlignmentOptions.Center;
+
+            _title.text = !string.IsNullOrEmpty(title) ? Localization.Get(title) : Localization.Get(titleTermDefault);
+            _description.text = !string.IsNullOrEmpty(description) ? Localization.Get(description) : Localization.Get(descriptionTermDefault);
         }
     }
 }

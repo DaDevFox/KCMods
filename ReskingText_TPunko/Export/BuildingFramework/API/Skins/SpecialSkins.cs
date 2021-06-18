@@ -28,4 +28,26 @@ namespace ReskinEngine.API
 
         }
     }
+
+    [Category("maritime")]
+    public class FishinShipSkin : Skin
+    {
+        public override string Name => "Fishin Ship";
+        internal override string TypeIdentifier => "fishingship";
+
+
+        [Model(ModelAttribute.Type.Modular, description = "Modular model all fishing ships will use")]
+        public GameObject baseModel;
+
+        [Material("Material the ship model will use")]
+        public Material material;
+
+        protected override void PackageInternal(Transform dropoff, GameObject _base)
+        {
+            base.PackageInternal(dropoff, _base);
+
+            AppendModel(_base, baseModel, "baseModel");
+            AppendMaterial(_base, material, "material");
+        }
+    }
 }

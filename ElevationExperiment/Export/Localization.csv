@@ -1,0 +1,9 @@
+term,en,de,fr,es
+generating_title,Generating…,,,
+generating_description,This may take a while,,,
+world_init_title,Initializing world…,,,
+world_init_description,This may take a while,,,
+pruning_title,Processing Map…,,,
+pruning_preprocessing,Preparing data,,,
+pruning_floodfill,Sorting data,,,
+pruning_reformat,Finalizing,,,

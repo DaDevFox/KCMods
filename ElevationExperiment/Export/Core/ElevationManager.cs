@@ -141,7 +141,7 @@ namespace Elevation
         }
 
         /// <summary>
-        /// Updates only the mesh of an elevation block on a tile
+        /// Updates only the visuals of an elevation block on a tile
         /// </summary>
         /// <param name="cell"></param>
         /// <param name="forced">wether or not to update, even when the elevation of the tile has not changed since the last update</param>
@@ -156,7 +156,7 @@ namespace Elevation
         }
 
         /// <summary>
-        /// Updates only the mesh of all elevation blocks in the world
+        /// Updates only the visuals of all elevation blocks in the world
         /// </summary>
         /// <param name="forced"></param>
         public static void UpdateCellMetas(bool forced = false)

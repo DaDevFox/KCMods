@@ -18,7 +18,11 @@ namespace Fox.Rendering
 
         public bool HasSystem(string id) => _systems.ContainsKey(id);
 
-        public void Update() => _systems.ForEach((pair) => pair.Value.Update());
+        public void Update()
+        {
+            foreach (KeyValuePair<string, InstanceMeshSystem> pair in _systems)
+                pair.Value.Update();
+        }
 
         public void Clear() => _systems.Clear();
 
@@ -303,6 +307,7 @@ namespace Fox.Rendering
             return Get(matrix, idx, out result);
         }
 
+        //NOTE: Potential inefficiency; not shifting down when removing and therefore requiring a loop to search for the next free id (see also GetFreeId)
         public void RemoveAt(int matrix, int idx)
         {
             if(!Valid(matrix, idx))

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Harmony;
 using UnityEngine;
 using System.Reflection;
@@ -982,6 +983,9 @@ namespace Elevation.Patches
 	[HarmonyPatch(typeof(Pathfinder), "FindPath")]
 	public class PathfindingFindPathRedirect
 	{
+		public static long msThreshold { get; private set; } = 30;
+
+		private static Stopwatch timer = new Stopwatch();
 
 		static bool Prefix(
 		Vector3 startPos,
@@ -1001,32 +1005,68 @@ namespace Elevation.Patches
 		bool doTrimming,
 		bool allowUpperGrid)
 		{
-			ElevationPathfinder.current.Path(
-				startPos,
-				startUseUpperGrid,
-				endPos,
-				endUseUpperGrid,
+			if (Settings.debug)
+				timer.Start();
 
-				ref path,
+			if (ElevationPathfinder.current != null)
+			{
+				try
+				{
+					ElevationPathfinder.current.Path(
+						startPos,
+						startUseUpperGrid,
+						endPos,
+						endUseUpperGrid,
 
-				bt,
-				pullBlock,
-				ec,
+						ref path,
 
-				teamId,
+						bt,
+						pullBlock,
+						ec,
 
-				doDiagonal,
-				doTrimming,
-				allowUpperGrid);
+						teamId,
 
-			if (path.Count == 1 && startPos != endPos)
-				Mod.dLog($"Failed to path from {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}");
+						doDiagonal,
+						doTrimming,
+						allowUpperGrid);
 
-			//for (int i = 0; i < path.Count; i++)
-			//	DebugExt.Log(path[i], true, KingdomLog.LogStatus.Neutral, path[i]);
+				}
+				catch(Exception ex)
+                {
+					DebugExt.HandleException(ex);
+                }
+
+				if (path.Count == 1 && startPos != endPos)
+					Mod.dLog($"Failed to path from {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}");
+
+				if (Settings.debug)
+				{
+					timer.Stop();
+					if (timer.ElapsedMilliseconds > msThreshold)
+						Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
+				}
 
 
-			return false;
+				return false;
+			}
+			else
+				return true;
+		}
+
+		static void Postfix(
+			Vector3 startPos,
+			bool startUseUpperGrid,
+			Vector3 endPos,
+			bool endUseUpperGrid,
+
+			ref List<Vector3> path)
+        {
+			if (Settings.debug && ElevationPathfinder.current == null)
+			{
+				timer.Stop();
+				if (timer.ElapsedMilliseconds > msThreshold)
+					Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
+			}
 		}
 	}
 
@@ -1039,22 +1079,27 @@ namespace Elevation.Patches
 			Pathfinder.blocksPathTest bt, Pathfinder.applyExtraCost ec,
 			int teamId)
 		{
-			ElevationPathfinder.current.Path(
-				startPos, false,
-				endPos, false,
+			if (ElevationPathfinder.current != null)
+			{
+				ElevationPathfinder.current.Path(
+					startPos, false,
+					endPos, false,
 
-				ref path,
+					ref path,
 
-				bt,
-				bt,
-				ec,
+					bt,
+					bt,
+					ec,
 
-				teamId,
+					teamId,
 
-				false, false, false);
+					false, false, false);
 
 
-			return false;
+				return false;
+			}
+			else
+				return true;
 		}
 	}
 

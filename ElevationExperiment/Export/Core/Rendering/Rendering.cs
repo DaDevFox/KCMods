@@ -159,7 +159,7 @@ namespace Elevation
         }
 
         /// <summary>
-        /// Configures the mesh grid after elevation data has been  generated
+        /// Configures the mesh grid after elevation data has been generated
         /// </summary>
         public void InitMeshes()
         {

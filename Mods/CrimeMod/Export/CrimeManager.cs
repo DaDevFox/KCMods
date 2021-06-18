@@ -37,7 +37,7 @@ namespace CrimeMod
 
         public static List<Criminal> CriminalTypes { get; set; } = new List<Criminal>() 
         {
-            new Thief(),
+            new Robber(),
         };
 
         #endregion

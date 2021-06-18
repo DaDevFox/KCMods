@@ -23,6 +23,8 @@ namespace Elevation
     {
         protected static Dictionary<object, M> lookup;
 
+        public int Count => lookup.Count;
+
         public Metadata()
         {
             lookup = new Dictionary<object, M>();

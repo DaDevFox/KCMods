@@ -56,7 +56,7 @@ namespace InsaneDifficultyMod
 
         private void SetupRallyMarker() 
         {
-            GameObject markerPrefab = AssetBundleManager.GetAsset("RiotRallyMarker.prefab") as GameObject;
+            GameObject markerPrefab = Mod.legacyAssets.GetByName<GameObject>("RiotRallyMarker.prefab");
             rallyMarkerGO = GameObject.Instantiate(markerPrefab, new Vector3(rallyPos.x,rallyPos.y,rallyPos.z), Quaternion.identity);
             rallyMarker = rallyMarkerGO.AddComponent<RiotRallyMarker>();
             rallyMarker.riot = this;
@@ -73,7 +73,7 @@ namespace InsaneDifficultyMod
                 ((RioterJob)rioter.job).SetRallyPoint(cell);
             }
 
-            SetupRallyMarker();
+            //SetupRallyMarker();
         }
 
         public Cell GetRallyPoint()

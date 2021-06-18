@@ -45,10 +45,10 @@ namespace Elevation
                 GameState.inst.mainMenuMode.mapEditUI.transform);
             raiseLowerUI = raiseLowerUIObj.AddComponent<RaiseLowerUI>();
 
-            GameObject loadingDIalogObj = GameObject.Instantiate(
+            GameObject loadingDialogObj = GameObject.Instantiate(
                 loadingDialogPrefab,
-                GameState.inst.mainMenuMode.mainMenuUI.transform.GetChild(0));
-            loadingDialog = loadingDIalogObj.AddComponent<LoadingDialog>();
+                GameState.inst.playingMode.GameUIParent.transform.GetChild(0));
+            loadingDialog = loadingDialogObj.AddComponent<LoadingDialog>();
 
             Mod.dLog(GameState.inst.mainMenuMode.mainMenuUI.transform.GetChild(0).name);
 

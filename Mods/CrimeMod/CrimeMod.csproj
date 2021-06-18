@@ -77,7 +77,7 @@
   <ItemGroup>
     <Compile Include="Export\CrimeManager.cs" />
     <Compile Include="Export\Criminal.cs" />
-    <Compile Include="Export\CriminalTypes\Thief.cs" />
+    <Compile Include="Export\CriminalTypes\Robber.cs" />
     <Compile Include="Export\Mod.cs" />
     <Compile Include="Export\Settings.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />

@@ -80,7 +80,7 @@ namespace Elevation
 
                     // Pathfinding
                     if (Input.GetKeyDown(Settings.keycode_pruneCells))
-                        WorldRegions.DoRegionSearch();
+                        WorldRegions.Search();
                     if (Input.GetKeyDown(Settings.keycode_directionReference))
                     {
                         DebugExt.dLog("-Z");
@@ -130,23 +130,34 @@ namespace Elevation
             private static string GetConnectedForCell(Cell cell)
             {
                 CellMeta meta = Grid.Cells.Get(cell);
-                PrebakedPathfinder.Node node = PrebakedPathfinder.GetAt(meta.cell);
-
-                if (meta == null || node == null)
-                    return "";
-
-
-                string text = node.ToString() + Environment.NewLine;
-
-                text += "Connected: " + node.connected.Count.ToString();
-
-                foreach (KeyValuePair<PrebakedPathfinder.Node, float> pair in node.connected)
+                string text = "";
+                if (ElevationPathfinder.current is PrebakedPathfinder)
                 {
-                    text += Environment.NewLine;
-                    text += $"{pair.Key} with weight {pair.Value}";
-                }
-                text += Environment.NewLine;
+                    PrebakedPathfinder.Node node = PrebakedPathfinder.GetAt(meta.cell);
 
+                    if (meta == null || node == null)
+                        return "";
+
+
+                    text = node.ToString() + Environment.NewLine;
+
+                    text += "Connected: " + node.connected.Count.ToString();
+
+                    foreach (KeyValuePair<PrebakedPathfinder.Node, float> pair in node.connected)
+                    {
+                        text += Environment.NewLine;
+                        text += $"{pair.Key} with weight {pair.Value}";
+                    }
+                    text += Environment.NewLine;
+
+
+                    return text;
+                }
+
+                text = "Connected: \n";
+                foreach (CellMeta neighbor in meta.neighborsPlusFast)
+                    if (neighbor != null)
+                        text += $"neighbor: {neighbor.ToString()}{Environment.NewLine}";
                 return text;
             }
 

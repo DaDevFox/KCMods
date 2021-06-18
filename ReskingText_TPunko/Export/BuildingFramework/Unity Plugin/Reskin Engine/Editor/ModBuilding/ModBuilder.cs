@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define UNITY_EDITOR
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,7 @@ using UnityEditor;
 using System.IO;
 using System.Reflection;
 using ReskinEngine.Editor.Utils;
+
 
 #if UNITY_EDITOR
 
@@ -45,14 +48,14 @@ namespace ReskinEngine.Editor
 
     public class ModBuilder
     {
-        #region Constants
+#region Constants
 
         public static string APIFolderLocation { get; } = "Reskin Engine/API";
 
-        #endregion
+#endregion
 
 
-        #region Class Frame
+#region Class Frame
 
         private static string Usings()
         {
@@ -76,9 +79,9 @@ namespace ReskinEngine.Editor
         private static string ClosingBrace() => "}";
 
 
-        #endregion
+#endregion
 
-        #region Class Body
+#region Class Body
 
         public static string ClassVars() => "\t\tpublic static KCModHelper helper;\n";
 
@@ -90,13 +93,13 @@ namespace ReskinEngine.Editor
 
         public static string CloseMainMethod() => "\n\t\t\t}catch(Exception ex){\n\t\t\t\thelper.Log(ex.ToString());\n\t\t\t}\n\t\t}";
 
-        #region Collections
+#region Collections
 
         public static string WriteCollection(Mod mod, Collection collection) {
             string assetBundleName = Util.AssetBundleName($"{mod.name}_{collection.name}");
             string bundleVarName = $"{collection.name}_bundle";
 
-            string text = $"\t\t\t//{collection.name}\n\t\t\tAssetBundle {bundleVarName} = KCModHelper.LoadAssetBundle(helper.modPath + \"/assetbundle/\", \"{assetBundleName}\");";
+            string text = $"\t\t\t#region {collection.name}\n\t\t\tAssetBundle {bundleVarName} = KCModHelper.LoadAssetBundle(helper.modPath + \"/assetbundle/\", \"{assetBundleName}\");";
 
             text += "\n\n\n";
 
@@ -110,7 +113,7 @@ namespace ReskinEngine.Editor
                     if (field.GetValue(skin) as UnityEngine.Object != null)
                     {
                         UnityEngine.Object value = field.GetValue(skin) as UnityEngine.Object;
-                        text += $"\t\t\t// {skin.name} \n\t\t\t{fieldType} {skin.typeId}_{skin.name}_{field.Name} = {bundleVarName}.LoadAsset<{fieldType}>(\"{AssetDatabase.GetAssetPath(value)}\");";
+                        text += $"\t\t\t// {skin.name} \n\t\t\t{fieldType} {skin.typeId}_{skin.name}_{field.Name} = {bundleVarName}.LoadAsset<{fieldType}>(\"{AssetDatabase.GetAssetPath(value)}\");\n";
                     }
                 }
 
@@ -136,7 +139,7 @@ namespace ReskinEngine.Editor
                 {
                     BuildingSkin bSkin = skin as BuildingSkin;
 
-                    #region Person Positions
+#region Person Positions
 
                     //text += ";LAKDJF;ALKFJ;ASLKFJ;ALFKJAS;LKFJAD";
 
@@ -160,9 +163,9 @@ namespace ReskinEngine.Editor
 
                     text += $"\n\t\t\t{skinName}.personPositions = {personPositions};";
 
-                    #endregion
+#endregion
 
-                    #region Path Lists
+#region Path Lists
 
                     // Outline Meshes
                     string outlineMeshes = "";
@@ -206,14 +209,16 @@ namespace ReskinEngine.Editor
 
                     text += $"\n\t\t\t{skinName}.outlineSkinnedMeshes = {outlineSkinnedMeshes};";
 
-                    #endregion
+#endregion
 
                 }
 
                 // register skin
-                text += $"\n\t\t\tprofile.Add({skinName});\n\n";
+                text += $"\n\t\t\tprofile.Add({skinName});\n";
 
             }
+
+            text += "\t\t\t#endregion\n";
 
 
             return text;
@@ -223,9 +228,9 @@ namespace ReskinEngine.Editor
 
 
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
         [MenuItem("Test/Build Mods from selected")]
         public static void TestBuild()
@@ -252,9 +257,9 @@ namespace ReskinEngine.Editor
             CreateModFile(mod, outputPath);
         }
 
-        #region Files
+#region Files
 
-        #region Dependencies
+#region Dependencies
 
         private static void CreateAssetBundle(Mod mod, string outputPath)
         {
@@ -319,15 +324,15 @@ namespace ReskinEngine.Editor
             }
         }
 
-        #endregion
+#endregion
     
-        #region Main File
+#region Main File
 
         private static void CreateModFile(Mod mod, string outputPath)
         {
             StreamWriter script = File.CreateText(Path.Combine(outputPath, "Mod") + ".cs");
 
-            #region Heading
+#region Heading
 
             script.WriteLine(Usings());
 
@@ -335,9 +340,9 @@ namespace ReskinEngine.Editor
             script.WriteLine(Namespace(mod));
             script.WriteLine(Class());
 
-            #endregion
+#endregion
 
-            #region Body
+#region Body
 
             script.WriteLine(ClassVars());
             script.WriteLine(OpenMainMethod());
@@ -350,21 +355,21 @@ namespace ReskinEngine.Editor
             script.WriteLine(MainMethodConclude());
             script.WriteLine(CloseMainMethod());
 
-            #endregion
+#endregion
 
-            #region Close Heading
+#region Close Heading
 
             script.WriteLine(CloseClass());
             script.WriteLine(CloseNamespace());
 
-            #endregion
+#endregion
 
             script.Close();
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
     }
 
