@@ -339,6 +339,7 @@ namespace Elevation
 
         #endregion
 
+        // TODO: Use GUIUtility.systemCopyBuffer for copy-pasting text from clipboard
         internal static string Clipboard
         {//https://flystone.tistory.com/138
             get

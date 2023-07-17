@@ -48,6 +48,12 @@ namespace ReskinEngine.API
 
     #region Skins
 
+    public class SpecialCategory : Category
+    {
+        public override string id => "special";
+        public override int position => -1;
+    }
+
     public class EnvironmentCategory : Category
     {
         public override string id => "environment";
@@ -142,6 +148,23 @@ namespace ReskinEngine.API
     public class NotSupportedAttribute : Attribute
     {
 
+    }
+
+    /// <summary>
+    /// Signifies the version a skin is registered in, if not specified will assume compatability in both versions (STABLE and ALPHA)
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    public class VersionAttribute : Attribute
+    {
+        public enum GameVersion
+        {
+            STABLE,
+            ALPHA
+        }
+
+        public GameVersion version;
+
+        public VersionAttribute(GameVersion version) => this.version = version;
     }
 
     public abstract class SkinField : Attribute
@@ -277,8 +300,8 @@ namespace ReskinEngine.API
     {
         public ReskinProfile ReskinProfile { get; internal set; }
         public int Identifier { get; internal set; }
-        internal virtual string TypeIdentifier { get; }
-        public abstract string Name { get; }
+        internal abstract string TypeIdentifier { get; }
+        public virtual string Name { get; }
 
         /// <summary>
         /// Adds GameObject children to the target with specifications per skin as a method of communication between the client API and the Engine
@@ -368,11 +391,34 @@ namespace ReskinEngine.API
             pathObj.transform.SetParent(_base.transform);
         }
 
+        protected void AppendPosition(GameObject _base, Vector3 position, string name)
+        {
+            GameObject positionObj = new GameObject(name);
+            positionObj.transform.SetParent(_base.transform);
+
+            positionObj.transform.localPosition = position;
+        }
+
+        protected void AppendTransform(GameObject _base, string name, Vector3 position, Quaternion rotation)
+        {
+            AppendTransform(_base, name, position, rotation, Vector3.one);
+        }
+
+        protected void AppendTransform(GameObject _base, string name, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            Transform transform = new GameObject(name).transform;
+            transform.SetParent(_base.transform);
+
+            transform.localPosition = position;
+            transform.localRotation = rotation;
+            transform.localScale = scale;
+        }
+
         protected void AppendStringArray(GameObject _base, string name, params string[] array)
         {
             string list = "";
             for (int i = 0; i < array.Length; i++)
-                list += i != array.Length - 1 ? ", " : "";
+                list += i != array.Length - 1 ? array[i] + ", " : array[i];
 
             GameObject pathObj = new GameObject($"{name}:{list}");
             pathObj.transform.SetParent(_base.transform);
@@ -411,6 +457,10 @@ namespace ReskinEngine.API
         /// Paths to the colliders used for building selection
         /// </summary>
         public string[] colliders;
+        /// <summary>
+        /// Renderers that use the building shader; all renderers tagged as such will become involved with game effects targeted at buildings like the happiness overlay, snow, and damage however they will also have their material set to the unimaterial specified in the alpha version of the game (see colorsets and alpha compatability)
+        /// </summary>
+        public string[] renderersWithBuildingShader;
 
         protected override void PackageInternal(Transform dropoff, GameObject _base)
         {
@@ -437,12 +487,13 @@ namespace ReskinEngine.API
                 AppendStringArray(_base, "outlineSkinnedMeshes", outlineSkinnedMeshes);
             if (colliders != null && colliders.Length > 0)
                 AppendStringArray(_base, "colliders", colliders);
+            if (renderersWithBuildingShader != null && renderersWithBuildingShader.Length > 0)
+                AppendStringArray(_base, "renderersWithBuildingShader", renderersWithBuildingShader);
         }
     }
 
     //Generic
     /// <summary>
-    /// Don't use as a skin
     /// <para>Type of skin that can be used for most buildings in the game</para>
     /// </summary>
     [Hidden]
