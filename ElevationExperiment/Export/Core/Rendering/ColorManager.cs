@@ -81,7 +81,9 @@ namespace Elevation
         public static void SetTerrainMat()
         {
             tilingConstant = 1f / (ElevationManager.maxElevation - ElevationManager.minElevation);
-            terrainMat = new Material(TreeSystem.inst.material);
+            terrainMat =
+                //World.inst.uniMaterial[0];
+                new Material(Shader.Find("Standard"));
             terrainMat.enableInstancing = true;
 
             terrainMat.SetFloat("_Glossiness", 0f);
@@ -91,6 +93,7 @@ namespace Elevation
 
             terrainMat.mainTexture = elevationMap;
 
+            terrainMat.color = Color.white;
 
             Mod.dLog("Terrain Material Setup");
 

@@ -8,7 +8,6 @@ using TMPro;
 using Fox.Localization;
 using Fox.UI;
 using UnityEngine.UI;
-using DG.Tweening;
 
 namespace Elevation
 {
@@ -67,8 +66,9 @@ namespace Elevation
         {
             gameObject.SetActive(true);
             UpdateText();
+            // TODO: Find out how Canvas went away in new game verison ?????
             // Normally UI is rendered at the end of a frame, however in this case, we want the ui rendered immediately, this method will force render the loading dialog and any other ui. 
-            Canvas.ForceUpdateCanvases();
+            //Canvas.ForceUpdateCanvases();
         }
 
         /// <summary>

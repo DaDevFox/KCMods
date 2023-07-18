@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Harmony;
 using Fox.Profiling;
+using System.Reflection;
 
 namespace Elevation
 {
@@ -68,12 +69,12 @@ namespace Elevation
                         {
                             text += "Mesh Data -";
                             text += Environment.NewLine;
-                            text += $"Mesh system: {meta.mesh.system}; loc:{meta.mesh.matrix}_{meta.mesh.id}";
+                            text += $"Mesh system: {meta.mesh.system}; loc:{meta.mesh.matrix}_{meta.mesh.id}\n";
                         }
                         text += (Grid.Cells.Get(selected) != null) ? GetConnectedForCell(selected) : "";
                         text += WorldRegions.GetTileRegion(selected) != -1 ? WorldRegions.GetTileRegion(selected).ToString() +
                             Environment.NewLine : "";
-                        text += WorldRegions.Unreachable.Contains(selected) ? "<color=red> Pruned from pathfinding; unreachable </color>" : "";
+                        text += WorldRegions.Unreachable.Contains(selected) ? "<color=red> - Pruned from pathfinding; unreachable</color>" : "";
 
                         DebugExt.dLog(text);
                     }
@@ -96,6 +97,35 @@ namespace Elevation
                             DebugExt.dLog(cell2.Center, false, cell2.Center);
                     }
 
+                    // Threaded Pathing Visualizers
+                    //int thread = -1;
+                    //if (Input.GetKeyDown(KeyCode.V))
+                    //    thread = 0;
+                    //if (Input.GetKeyDown(KeyCode.B))
+                    //    thread = 1;
+                    //if (Input.GetKeyDown(KeyCode.N))
+                    //    thread = 2;
+                    //if (Input.GetKeyDown(KeyCode.M))
+                    //    thread = 3;
+                    //if (Input.GetKeyDown(KeyCode.Comma))
+                    //    thread = 4;
+                    //if (Input.GetKeyDown(KeyCode.Period))
+                    //    thread = 5;
+                    //if(thread != -1)
+                    //{
+                    //    Pathfinder[] pathers = (Pathfinder[])typeof(ThreadedPathing).GetField("pather", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(World.inst.threadedPather);
+                    //    int hash = pathers[thread].GetHashCode();
+
+                    //    foreach (DebugPathVisualizer visualizer in DebugPathVisualizer.visualizers.Values)
+                    //        visualizer.Active = false;
+
+                    //    if (!DebugPathVisualizer.visualizers.ContainsKey(hash))
+                    //        DebugPathVisualizer.visualizers.Add(hash, new DebugPathVisualizer());
+
+                    //    DebugPathVisualizer.visualizers[hash].Active = true;
+                    //}
+
+
                     // Visuals
                     if (Input.GetKeyDown(Settings.keycode_refreshTerrain))
                         ElevationManager.RefreshTerrain();
@@ -112,13 +142,13 @@ namespace Elevation
                     }
 
                     // Profiler
-                    if (Input.GetKeyDown(KeyCode.P))
-                    {
-                        if (!SelectiveProfiler.instance.Active)
-                            SelectiveProfiler.instance.Activate();
-                        else
-                            SelectiveProfiler.instance.Deactivate();
-                    }
+                    //if (Input.GetKeyDown(KeyCode.P))
+                    //{
+                    //    if (!SelectiveProfiler.instance.Active)
+                    //        SelectiveProfiler.instance.Activate();
+                    //    else
+                    //        SelectiveProfiler.instance.Deactivate();
+                    //}
                 }
                 if (Input.GetKeyDown(Settings.inst.c_CameraControls.s_activateKey.Key))
                 {
@@ -130,8 +160,22 @@ namespace Elevation
             private static string GetConnectedForCell(Cell cell)
             {
                 CellMeta meta = Grid.Cells.Get(cell);
-                string text = "";
-                if (ElevationPathfinder.current is PrebakedPathfinder)
+                string text = "\n";
+
+                if(ElevationPathfinder.main is ExternalPathfinder)
+                {
+                    ExternalPathfinder pathfinder = ElevationPathfinder.main as ExternalPathfinder;
+                    ExternalPathfinder.Node node = pathfinder.aStar.SearchSpace[cell.x, cell.z];
+
+                    text += $"Path Grid Size: {pathfinder.aStar.SearchSpace.GetLength(0)}x{pathfinder.aStar.SearchSpace.GetLength(1)}";
+
+                    if(node != null)
+                    {
+                        text += " - Cell has PF Node";
+                    }
+                }
+
+                if (ElevationPathfinder.main is PrebakedPathfinder)
                 {
                     PrebakedPathfinder.Node node = PrebakedPathfinder.GetAt(meta.cell);
 
@@ -154,7 +198,7 @@ namespace Elevation
                     return text;
                 }
 
-                text = "Connected: \n";
+                text += "\nConnected: \n";
                 foreach (CellMeta neighbor in meta.neighborsPlusFast)
                     if (neighbor != null)
                         text += $"neighbor: {neighbor.ToString()}{Environment.NewLine}";

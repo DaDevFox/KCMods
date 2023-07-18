@@ -104,9 +104,11 @@ namespace Elevation
 
             // Settings
             Settings.Init();
-            
+
             //// Buildings
             //Buildings.Register();
+
+            //Rendering.Setup();
         }
 
         [Profile]
@@ -182,7 +184,7 @@ namespace Elevation
                 MapGenerator.Generate();
 
                 // Pathfinding
-                ElevationPathfinder.current.Init(World.inst.GridWidth, World.inst.GridHeight);
+                ElevationPathfinder.InitAll(World.inst.GridWidth, World.inst.GridHeight);
 
                 // Update Visuals
                 ElevationManager.RefreshTerrain();

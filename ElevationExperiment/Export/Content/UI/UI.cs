@@ -40,6 +40,8 @@ namespace Elevation
 
         void SceneLoaded()
         {
+            TweeningManager instance = new GameObject("TweeningManager").AddComponent<TweeningManager>();
+
             GameObject raiseLowerUIObj = GameObject.Instantiate(
                 raiseLowerUIPrefab,
                 GameState.inst.mainMenuMode.mapEditUI.transform);
@@ -55,8 +57,5 @@ namespace Elevation
             created = true;
             Mod.dLog("UI Created");
         }
-
-
-
     }
 }

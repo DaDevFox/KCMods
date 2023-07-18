@@ -42,7 +42,8 @@ namespace Elevation
                 RefreshTile(cell, true);
                 WorldRegions.MarkDirty(cell);
 
-                Cell[] neighbors = World.inst.GetNeighborCells(cell);
+                Cell[] neighbors = new Cell[8];
+                World.inst.GetNeighborCells(cell, ref neighbors);
                 foreach (Cell neighbor in neighbors)
                 {
                     RefreshTile(neighbor);

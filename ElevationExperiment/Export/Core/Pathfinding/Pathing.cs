@@ -118,6 +118,9 @@ namespace Elevation
 
 				if (BlocksForBuilding(cell))
 					blocked = true;
+
+				if (cell.deepWater)
+					blocked = true;
 			}
 			return blocked;
 		}

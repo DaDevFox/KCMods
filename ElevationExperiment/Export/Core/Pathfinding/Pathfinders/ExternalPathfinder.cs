@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,28 +11,32 @@ namespace Elevation
 {
     public class ExternalPathfinder : ElevationPathfinder
     {
-        public static int width {get; private set; }
-        public static int height {get; private set; }
+        public int width {get; private set; }
+        public int height {get; private set; }
 
-        public static SpatialAStar<Node, Cell> aStar;
+        public SpatialAStar<Node, Cell> aStar;
 
-        public static bool allowingDiagonals = false;
+        public bool allowingDiagonals = false;
+
+        public Stopwatch pathing = new Stopwatch();
 
         public override void Init(int width, int height)
         {
-            ExternalPathfinder.width = width;
-            ExternalPathfinder.height = height;
+            this.width = width;
+            this.height = height;
 
             Node[,] grid = new Node[width, height];
             for (int x = 0; x < width; x++)
                 for (int z = 0; z < height; z++)
-                    grid[x, z] = new Node(World.inst.GetCellDataClamped(x, z));
+                    grid[x, z] = new Node(World.inst.GetCellDataClamped(x, z), this);
 
             aStar = new SpatialAStar<Node, Cell>(grid);
         }
 
         public override void Path(Vector3 startPos, bool upperGridStart, Vector3 endPos, bool upperGridEnd, ref List<Vector3> path, Pathfinder.blocksPathTest blocksPath, Pathfinder.blocksPathTest pull, Pathfinder.applyExtraCost extraCost, int team, bool doDiagonal, bool doTrimming, bool allowIntergridTravel)
         {
+            pathing.Restart();
+
             allowingDiagonals = doDiagonal;
             //try
             //{
@@ -73,26 +78,38 @@ namespace Elevation
             //    DebugExt.HandleException(ex);
             //}
 
-            LinkedList<Node> pathNodes = aStar.Search(new Node(startCell), new Node(endCell), startCell);
+            LinkedList<Node> pathNodes = aStar.Search(new Node(startCell, this), new Node(endCell, this), startCell);
 
             if(path.Count > 0)
                 path.Clear();
+
+            path.Add(startPos);
+
             foreach (Node node in pathNodes)
                 path.Add(node.cell.Center);
 
+            path.Add(endPos);
+
             //DebugExt.dLog($"path {startPos}{(upperGridStart ? "u" : "l")} to {endPos}{(upperGridEnd ? "u" : "l")} size {path.Count}");
+
+            allowingDiagonals = false;
+
+            pathing.Stop();
         }
 
         public class Node : IPathNode<Cell>
         {
+            public ExternalPathfinder pathfinder;
+
             public int X => cell.x;
             public int Y => cell.z;
 
             public Cell cell;
 
-            public Node(Cell cell)
+            public Node(Cell cell, ExternalPathfinder pathfinder)
             {
                 this.cell = cell;
+                this.pathfinder = pathfinder;
             }
 
             public bool IsWalkable(Cell other)
@@ -106,7 +123,7 @@ namespace Elevation
                         return true;
                 }
 
-                if (!allowingDiagonals && Pathing.GetDiagonal(other, cell, out Diagonal diagonal))
+                if (!pathfinder.allowingDiagonals && Pathing.GetDiagonal(other, cell, out Diagonal diagonal))
                     return false;
 
                 if (Pathing.BlockedCompletely(cell))

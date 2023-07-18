@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Harmony;
-using DG.Tweening;
 using System.Reflection;
 
 namespace Elevation
@@ -42,18 +41,18 @@ namespace Elevation
 
         internal void AnimateButtonActive(GameObject button)
         {
-            DOTween.To(
-                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+            TweeningManager.Instance.TweenValue(
                 button.transform.Find("BG").GetComponent<Image>().fillAmount,
-                1, animationTime);
+                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+                animationTime);
         }
 
         internal void AnimateButtonInactive(GameObject button)
         {
-            DOTween.To(
-                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+            TweeningManager.Instance.TweenValue(
                 button.transform.Find("BG").GetComponent<Image>().fillAmount,
-                0f, animationTime);
+                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+                animationTime);
         }
 
         void Start()

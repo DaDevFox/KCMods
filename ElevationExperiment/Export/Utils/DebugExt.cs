@@ -20,7 +20,7 @@ namespace Elevation
         {
             if (Settings.debug)
             {
-                KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 1 : 20), GameObjectOrVector3);
+                KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 0.1f : 2f), GameObjectOrVector3);
                 IDs.Add(1);
             }
         }

@@ -988,68 +988,71 @@ namespace Elevation.Patches
 		private static Stopwatch timer = new Stopwatch();
 
 		static bool Prefix(
-		Vector3 startPos,
-		bool startUseUpperGrid,
-		Vector3 endPos,
-		bool endUseUpperGrid,
+			Pathfinder __instance,
 
-		ref List<Vector3> path,
+			Vector3 startPos,
+			bool startUseUpperGrid,
+			Vector3 endPos,
+			bool endUseUpperGrid,
 
-		Pathfinder.blocksPathTest bt,
-		Pathfinder.blocksPathTest pullBlock,
-		Pathfinder.applyExtraCost ec,
+			ref List<Vector3> path,
 
-		int teamId,
+			Pathfinder.blocksPathTest bt,
+			Pathfinder.blocksPathTest pullBlock,
+			Pathfinder.applyExtraCost ec,
 
-		bool doDiagonal,
-		bool doTrimming,
-		bool allowUpperGrid)
+			int teamId,
+
+			bool doDiagonal,
+			bool doTrimming,
+			bool allowUpperGrid)
 		{
-			if (Settings.debug)
-				timer.Start();
+			//if (Settings.debug)
+			//	timer.Start();
 
-			if (ElevationPathfinder.current != null)
-			{
-				try
-				{
-					ElevationPathfinder.current.Path(
-						startPos,
-						startUseUpperGrid,
-						endPos,
-						endUseUpperGrid,
+			//if (ElevationPathfinder.main != null)
+			//{
+			//	try
+			//	{
+			//		ElevationPathfinder.Path(
+			//			startPos,
+			//			startUseUpperGrid,
+			//			endPos,
+			//			endUseUpperGrid,
 
-						ref path,
+			//			ref path,
 
-						bt,
-						pullBlock,
-						ec,
+			//			bt,
+			//			pullBlock,
+			//			ec,
 
-						teamId,
+			//			teamId,
 
-						doDiagonal,
-						doTrimming,
-						allowUpperGrid);
+			//			doDiagonal,
+			//			doTrimming,
+			//			allowUpperGrid,
+			//			__instance.GetHashCode());
 
-				}
-				catch(Exception ex)
-                {
-					DebugExt.HandleException(ex);
-                }
+			//	}
+			//	catch(Exception ex)
+   //             {
+			//		DebugExt.HandleException(ex);
+   //             }
 
-				if (path.Count == 1 && startPos != endPos)
-					Mod.dLog($"Failed to path from {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}");
+			//	if (path.Count == 0)
+			//		Mod.dLog($"Failed to path from {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")} in {timer.ElapsedMilliseconds} ms");
 
-				if (Settings.debug)
-				{
-					timer.Stop();
-					if (timer.ElapsedMilliseconds > msThreshold)
-						Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
-				}
+			//	if (Settings.debug)
+			//	{
+			//		timer.Stop();
+			//		if (timer.ElapsedMilliseconds > msThreshold)
+			//			Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
+			//	}
 
 
-				return false;
-			}
-			else
+			//	return false;
+			//}
+			//else
 				return true;
 		}
 
@@ -1061,7 +1064,7 @@ namespace Elevation.Patches
 
 			ref List<Vector3> path)
         {
-			if (Settings.debug && ElevationPathfinder.current == null)
+			if (Settings.debug && ElevationPathfinder.main == null)
 			{
 				timer.Stop();
 				if (timer.ElapsedMilliseconds > msThreshold)
@@ -1079,9 +1082,9 @@ namespace Elevation.Patches
 			Pathfinder.blocksPathTest bt, Pathfinder.applyExtraCost ec,
 			int teamId)
 		{
-			if (ElevationPathfinder.current != null)
+			if (ElevationPathfinder.main != null)
 			{
-				ElevationPathfinder.current.Path(
+				ElevationPathfinder.main.Path(
 					startPos, false,
 					endPos, false,
 
@@ -1149,20 +1152,37 @@ namespace Fox.Debugging
 
 			if (selected != lastSelected || Input.GetKeyDown(Settings.keycode_updatePathView))
 			{
-				DebugExt.dLog(_line != null, true);
+				Log(__instance.villager);
 				if (__instance.villager != null)
 				{
 					_line.numPositions = __instance.villager.travelPath.Count;
-					_line.SetPositions(__instance.villager.travelPath.ToArray());
+					_line.SetPositions(__instance.villager.travelPath.data);
 				}
 				else
 					_line.SetPositions(new Vector3[0]);
-				DebugExt.dLog(_line.positionCount);
 
 				lastSelected = selected;
 			}
 			//}
 		}
+
+		public static void Log(Villager villager)
+        {
+			GamePath path = (typeof(Villager).GetField("deferredPath", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(villager) as GamePath);
+
+			string text = "";
+
+			text += $"Paralyzed: {villager.paralyzed}";
+			//text += $"Debug: {path.debug}";
+			text += $"\nGamePath: \n\tStatus: {path.status}\n\tStart: {path.start}\n\tEnd: {path.end}\n\tResult: size {path.result.Count}";
+			text += $"\nTravelPath: size {villager.travelPath.Count}";
+
+			DebugExt.dLog(text);
+			DebugExt.dLog("Start", false, path.start);
+			DebugExt.dLog("End", false, path.end);
+			if (villager.travelPath.Count > 0)
+				DebugExt.dLog("Current", false, villager.travelPath.data[0]);
+        }
 	}
 
 }

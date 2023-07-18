@@ -48,6 +48,9 @@ namespace Fox.Debugging
         
         public static void Tick()
         {
+            if (Settings.debug)
+                DebugPathVisualizer.TickAll();
+
             if (active)
             {
                 List<Line> toDispose = new List<Line>();

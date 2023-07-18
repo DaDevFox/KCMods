@@ -8,12 +8,14 @@ using Fox.Rendering.VoxelRendering;
 namespace Elevation
 {
     /// <summary>
-    /// Rendering mode that utilizes minecraft style voxel rendering; makes better face culling and multiple tiles on one XZ grid space possible, also uses subdivided faces allowing diveting
+    /// Rendering mode that utilizes voxel style face-based rendering; makes better face culling and multiple tiles on one XZ grid space possible, also uses subdivided faces allowing diveting
     /// </summary>
     public class VoxelRenderingMode : RenderingMode
     {
         private VoxelDataRenderer voxels;
         private Mesh mesh;
+
+        public bool setup = false;
 
         public override void Init()
         {
@@ -28,34 +30,56 @@ namespace Elevation
 
             Voxel[,,] data = new Voxel[World.inst.GridWidth, ElevationManager.maxElevation + 1, World.inst.GridHeight];
 
-            for (int x = 0; x < World.inst.GridWidth; x++)
+            for (int x = 0; x < World.inst.GridWidth - 1; x++)
             {
-                for(int z = 0; x < World.inst.GridHeight; z++)
+                for(int z = 0; z < World.inst.GridHeight - 1; z++)
                 {
-                    for(int y = 0; y < ElevationManager.maxElevation + 1; y++)
+                    for(int y = 0; y < ElevationManager.maxElevation; y++)
                     {
-                        Cell cell = World.inst.GetCellData(x, z);
+                        //Cell cell = World.inst.GetCellData(x, z);
                         CellMeta meta = Grid.Cells.Get(x, z);
-                        if (meta && y <= meta.elevationTier)
+
+                        data[x, y, z] = new Voxel();
+
+                        if (meta != null && y <= meta.elevationTier)
                         {
-                            voxels.data[x, y, z].opacity = 1f;
-                            voxels.data[x, y, z].uvOffset = new Vector2(y, 0f);
+                            data[x, y, z].opacity = 1f;
+                            data[x, y, z].uvOffset = new Vector2(y, 0f);
                         }
                         else
-                            voxels.data[x, y, z].opacity = 0f;
+                            data[x, y, z].opacity = 0f;
+
+                        if (y == 0 || y == 2)
+                            data[x, y, z].opacity = 0f;
+
+                        if (x % 3 == 0)
+                            data[x, y, z].opacity = 0f;
+                        if (z % 4 == 0)
+                            data[x, y, z].opacity = 1f;
+
+
+                        data[x, y, z].index = new Vector3Int(x, y, z);
                     }
                 }
             }
 
+            Mod.dLog("Finished grid setting");
+
+            voxels.dimensions = new Vector3Int(World.inst.GridWidth, ElevationManager.maxElevation + 1, World.inst.GridHeight);
+            voxels.voxelSize = 1f;
+            voxels._32BitBuffer = true;
             mesh = voxels.Rebuild(data);
 
-
+            setup = true;
 
             Mod.dLog("Voxel Rendering Mode Initialized");
         }
 
         public override void Update(Cell cell, bool forced = false)
         {
+            if (!setup)
+                return;
+
             cell.CheckNull("cell");
 
             int x = cell.x;
@@ -76,7 +100,9 @@ namespace Elevation
 
         public override void Tick()
         {
-            Graphics.DrawMesh(mesh, new Vector3(World.inst.GridWidth / 2f, 1f, World.inst.GridHeight / 2f), Quaternion.identity, ColorManager.terrainMat, 0);
+            if (!setup)
+                return;
+            Graphics.DrawMesh(mesh, new Vector3(0f, 0f, 0f), Quaternion.identity, ColorManager.terrainMat, 0);
         }
     }
 }

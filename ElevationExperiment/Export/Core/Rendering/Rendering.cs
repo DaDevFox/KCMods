@@ -137,10 +137,12 @@ namespace Elevation
             Mesh cube = obj.GetComponent<MeshFilter>().mesh;
 
             // Correction
-            cube.uv = GetCorrectedElevationUVFromMesh(cube.vertices);
+            //cube.uv = GetCorrectedElevationUVFromMesh(cube.vertices);
 
             // Create mesh data
             InitTiers(cube, ColorManager.terrainMat);
+
+            //World.inst.SaveTexture(Mod.helper.modPath + "/texture.png", ColorManager.terrainMat.mainTexture as Texture2D);
 
             // Destroy unneccessary GameObject
             GameObject.Destroy(obj);
@@ -152,7 +154,7 @@ namespace Elevation
             for (int i = ElevationManager.minElevation; i < ElevationManager.maxElevation + 1; i++)
             {
                 Material tierMat = new Material(mat);
-                tierMat.mainTextureScale = new Vector3(1f, ColorManager.tilingConstant * (float)i - TierColorBuffer);
+                //tierMat.mainTextureScale = new Vector3(1f, ColorManager.tilingConstant * (float)i - TierColorBuffer);
 
                 meshSystem.AddSystem(i.ToString(), mesh, tierMat);
             }
