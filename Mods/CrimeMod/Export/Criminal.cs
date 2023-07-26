@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace CrimeMod
 {
-    public class Criminal : MonoBehaviour
+    public abstract class Criminal : MonoBehaviour
     {
 
         #region Timing
@@ -20,28 +20,31 @@ namespace CrimeMod
         protected MinMax crimeRandomOffset = new MinMax(0f, 1f);
 
         public bool CrimeInProgress { get; private set; } = false;
+        public bool Active { get; private set; } = false;
 
         #endregion
 
         #region Criminal Type Settings
 
-        public float c_severity = 0.2f;
-        public string c_name = "Criminal";
-        public string c_id = "criminal_default";
+        public virtual float c_severity { get; } = 0.2f;
+        public virtual string c_name { get; } = "Criminal";
+        public abstract string c_id { get; } 
 
         #endregion
 
         #region Criminal Settings
 
         public float CrimeAccumulatedWeightage { get; protected set; }
-        protected delegate void OnCapturedEventHandler();
-        protected event OnCapturedEventHandler OnCapture;
+        /// <summary>
+        /// What to do right before the criminal is deactivated and the villager is escorted to a holding cell
+        /// </summary>
+        protected event Action OnCapture;
 
         #endregion
 
         public Villager Host { get; set; }
 
-        void Update(float dt)
+        private void Update()
         {
 
             crimeTime += Time.deltaTime;
@@ -50,7 +53,7 @@ namespace CrimeMod
 
         
         
-        void CheckCrimeInterval()
+        private void CheckCrimeInterval()
         {
             if (crimeTime > crimeInterval)
             {
@@ -59,16 +62,18 @@ namespace CrimeMod
             }
         }
 
-
+        /// <summary>
+        /// Begins a crime and suspends the host's job
+        /// </summary>
         protected virtual void DoCrime()
         {
             this.MarkCrimeBegin();
-            SuspendVillagerJob(Host);
         }
 
         protected void MarkCrimeBegin()
         {
             this.CrimeInProgress = true;
+            SuspendVillagerJob(Host);
         }
 
         protected void MarkCrimeEnded()

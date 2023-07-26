@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InsaneDifficultyMod.Events
 {
-    class EventManager
+    public class EventManager
     {
         public static List<IDModEvent> events = new List<IDModEvent>()
         {

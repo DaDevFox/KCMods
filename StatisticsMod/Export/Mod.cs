@@ -21,6 +21,8 @@ namespace StatisticsMod
 
             var harmony = HarmonyInstance.Create("harmony");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+            //Application.logMessageReceived += (condition, stackTrace, logType) => { if (logType == LogType.Exception) DebugExt.Log($"{condition}\n\t{stackTrace}", true); };
         }
 
         void Update()
@@ -63,13 +65,15 @@ namespace StatisticsMod
             text += "Stats Summary" + Environment.NewLine;
             text += "<color=yellow>------------</color>" + Environment.NewLine;
 
-            
-
-            text += Data.Extrapolater.exp_FoodInsufficiency(lastYear);
 
             text += Data.Extrapolater.exp_FoodProductionCurrent();
 
-            text += Data.Extrapolater.exp_FoodProductionMax();
+            if (Data.Analytics.GetHousingForKingdom() > Data.Analytics.GetPlayerKingdomPopulation())
+            {
+                text += Data.Extrapolater.exp_FoodConsumptionCurrent();
+            }
+
+            text += Data.Extrapolater.exp_FoodConsumptionMax();
 
             text += "<color=yellow>------------</color>";
 
@@ -90,7 +94,7 @@ namespace StatisticsMod
                 }
                 catch(Exception ex)
                 {
-                    DebugExt.HandleException(ex);
+                    //DebugExt.HandleException(ex);
                 }
             }
         }

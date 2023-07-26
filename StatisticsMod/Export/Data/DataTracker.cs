@@ -9,8 +9,39 @@ namespace StatisticsMod.Data
 {
     class DataTracker
     {
+        public static Dictionary<Guid, float> yearsOfVillagerCreation = new Dictionary<Guid, float>();
 
+        [HarmonyPatch(typeof(Villager))]
+        [HarmonyPatch("Init")]
+        public class VillagerCreatedPatch
+        {
+            static void Postfix(Villager __instance)
+            {
+                yearsOfVillagerCreation.Add(__instance.guid, (float)Player.inst.CurrYear + Weather.inst.GetYearProgress());
+            }
+        }
 
+        [HarmonyPatch(typeof(Player.PlayerSaveData))]
+        [HarmonyPatch("Unpack")]
+        public class VillagerUnpackPatch
+        {
+            static void Postfix()
+            {
+                foreach(Villager villager in Player.inst.Workers.data)
+                    if(villager != null)
+                        yearsOfVillagerCreation.Add(villager.guid, (float)Player.inst.CurrYear + Weather.inst.GetYearProgress());
+            }
+        }
+
+        [HarmonyPatch(typeof(Villager))]
+        [HarmonyPatch("Shutdown")]
+        public class VillagerRemovedPatch
+        {
+            static void Postfix(Villager __instance)
+            {
+                yearsOfVillagerCreation.Remove(__instance.guid);
+            }
+        }
 
         [HarmonyPatch(typeof(Villager))]
         [HarmonyPatch("TryEat")]

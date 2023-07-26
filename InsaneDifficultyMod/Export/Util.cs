@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using KCModUtils.Debugging;
 
-namespace KCModUtils
+namespace InsaneDifficultyMod
 {
     static class Util
     {
@@ -74,7 +73,7 @@ namespace KCModUtils
                 case ResourceType.Stone:
                     Util.AnnhiliateCell(cell, vanishBuildings, wreckBuildings);
                     Util.SetLandTile(cell);
-                    World.inst.PlaceStone((int)cell.Center.x, (int)cell.Center.z, ResourceType.Stone);
+                    World.inst.PlaceStone(cell, ResourceType.Stone);
                     break;
                 case ResourceType.Water:
                     Util.AnnhiliateCell(cell, vanishBuildings, wreckBuildings);
@@ -83,12 +82,12 @@ namespace KCModUtils
                 case ResourceType.UnusableStone:
                     Util.AnnhiliateCell(cell, vanishBuildings, wreckBuildings);
                     Util.SetLandTile(cell);
-                    World.inst.PlaceStone((int)cell.Center.x, (int)cell.Center.z, ResourceType.UnusableStone);
+                    World.inst.PlaceStone(cell, ResourceType.UnusableStone);
                     break;
                 case ResourceType.IronDeposit:
                     Util.AnnhiliateCell(cell, vanishBuildings, wreckBuildings);
                     Util.SetLandTile(cell);
-                    World.inst.PlaceStone((int)cell.Center.x, (int)cell.Center.z, ResourceType.IronDeposit);
+                    World.inst.PlaceStone(cell, ResourceType.IronDeposit);
                     break;
                 case ResourceType.EmptyCave:
                     Util.AnnhiliateCell(cell, vanishBuildings, wreckBuildings);
@@ -160,7 +159,7 @@ namespace KCModUtils
             {
                 try
                 {
-                    World.inst.cellsToLandmass[cell.landMassIdx].Remove(cell);
+                    World.inst.cellsToLandmass[cell.landMassIdx].RemoveAt(World.inst.cellsToLandmass[cell.landMassIdx].IndexOf(cell));
                 }
                 catch (Exception ex)
                 {
@@ -235,7 +234,7 @@ namespace KCModUtils
         {
             foreach (int landmass in Player.inst.PlayerLandmassOwner.ownedLandMasses.data)
             {
-                if (Player.inst.DoesAnyBuildingHaveUniqueNameOnLandMass("keep", landmass))
+                if (Player.inst.DoesAnyBuildingHaveUniqueNameOnLandMass("keep", landmass, false))
                 {
                     return landmass;
                 }

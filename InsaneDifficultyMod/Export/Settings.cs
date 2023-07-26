@@ -4,40 +4,168 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Harmony;
+using Assets.Code;
+using Zat.Shared.ModMenu.Interactive;
+using Zat.Shared.ModMenu.API;
+using UnityEngine;
+using System.Reflection;
 
 namespace InsaneDifficultyMod
 {
+    [Mod("Insane Difficulty Mod", "0.3.1 Beta", "Agentfox")]
     public class Settings
     {
-        public static int mode = 1;
-        public static bool debug = false;
+        public static Settings inst { get; private set; }
+        public InteractiveConfiguration<Settings> Config { get; private set; }
+        public ModSettingsProxy Proxy { get; private set; }
 
-        #region Mod Settings
+        public static Dictionary<int, string> Modes { get; } = new Dictionary<int, string>()
+        {
+            { 0, "Easy" },
+            { 1, "Difficult" },
+            { 2, "Challenging" },
+            { 3, "Expert" },
+            { 4, "Insane" }
+        };
 
-        public static bool randomEvents = true;
 
-        public static float earthquakeChance = 0.15f;
-        public static MinMax earthquakeStrength = new MinMax(1f, 4f);
-        public static MinMax earthquakeVariance = new MinMax(0.1f, 0.9f);
-        public static MinMax earthquakeLandElevation = new MinMax(0f, 0.3f);
-        public static MinMax earthquakeWaterElevation = new MinMax(-2f, -0.25f);
+        #region Interactive
 
-        public static float droughtChance = 5;
-        public static int droughtLength = 2;
-        public static Assets.Code.ResourceAmount droughtFoodPenalty = new Assets.Code.ResourceAmount();
+        public static int Mode {
+            get
+            {
+                if (Settings.inst != null)
+                    return (int)Settings.inst?.s_Mode.Value;
+                else
+                    return 0;
+            }
+            set
+            {
+                if (Settings.inst != null)
+                    Settings.inst.s_Mode.Value = value;
+            }
+        }
 
-        public static bool happinessMods = true;
+        [Setting("Difficulty Preset", "A preset of settings tailored to a specific difficulty")]
+        [Slider(0f, 4f, 0f, "Easy", true)]
+        public InteractiveSliderSetting s_Mode { get; private set; }
 
-        public static float foodPenalty = 2f;
+        public static bool debug = true;
 
-        public static int vikingRaidYearSpan = 3;
-        public static int vikingRaidYearRange = 1;
 
-        public static MinMax fireBurnoutTimeRange = new MinMax(8f, 15f);
-        public static float firePersistance = 1f;
+        [Setting("Events/Random Events", "Whether or not random events will be triggered; if also using Natural Disasters, turn this off or else twice as many disasters will be spawned")]
+        [Toggle(true, "")]
+        public InteractiveToggleSetting s_RandomEvents { get; private set; }
 
-        public static int minArmyAmountForOppression = 3;
-        public static int oppresssionRamp = 8;
+        public static bool RandomEvents
+        {
+            get
+            {
+                if (Settings.inst != null)
+                    return Settings.inst.s_RandomEvents.Value;
+                else
+                    return true;
+            }
+            set
+            {
+                if (Settings.inst != null)
+                    Settings.inst.s_RandomEvents.Value = value;
+            }
+        }
+
+        [Setting("Events/Earthquakes/Formation Chance", "The chance of an earthquake happening at the beggining of a year")]
+        [Slider(0.05f, 0.95f, 0.15f, "0.15")]
+        public InteractiveSliderSetting s_EarthquakeChance { get; private set; }
+
+        public static float EarthquakeChance {
+            get
+            {
+                if (Settings.inst != null)
+                    return Settings.inst.s_EarthquakeChance.Value;
+                else
+                    return 0.15f;
+            }
+            set
+            {
+                if (Settings.inst != null)
+                    Settings.inst.s_EarthquakeChance.Value = value;
+
+            }
+        }
+
+        [Setting("Events/Earthquakes/Minimum Strength", "The min magnitude of an earthquake. ")]
+        [Slider(1f, 10f, 1f, "1", true)]
+        public InteractiveSliderSetting s_EarthquakeStrengthMin { get; private set; }
+
+        [Setting("Events/Earthquakes/Maximum Strength", "The max magnitude of an earthquake. ")]
+        [Slider(1f, 10f, 4f, "1", true)]
+        public InteractiveSliderSetting s_EarthquakeStrengthMax { get; private set; }
+
+        public static MinMax EarthquakeStrength {
+            get
+            {
+                if (Settings.inst != null)
+                    return new MinMax(Mathf.Clamp(Settings.inst.s_EarthquakeStrengthMin.Value, 0, Settings.inst.s_EarthquakeStrengthMax.Value - 1f), Settings.inst.s_EarthquakeStrengthMax.Value);
+                else
+                    return null;
+            }
+            set
+            {
+                if (Settings.inst != null)
+                    SetMinMax(Settings.inst.s_EarthquakeStrengthMin, Settings.inst.s_EarthquakeStrengthMax, value);
+            }
+        }
+
+        [Setting("Events/Earthquakes/Randomness", "The randomness of the earthquake line")]
+        [Slider(0.05f, 0.95f, 0.8f, "0.8", false)]
+        public InteractiveSliderSetting s_EarthquakeVariance { get; private set; }
+
+        public static MinMax EarthquakeVariance
+        {
+            get
+            {
+                if (Settings.inst != null)
+                    return new MinMax(0.5f - inst.s_EarthquakeVariance.Value / 2f, 0.5f + inst.s_EarthquakeVariance.Value / 2f);
+                else
+                    return new MinMax(0.1f, 0.9f);
+            }
+            set
+            {
+                if (Settings.inst != null)
+                    inst.s_EarthquakeVariance.Value = value.Max - value.Min;
+            }
+        }
+
+        public static MinMax EarthquakeLandElevation = new MinMax(0f, 0.3f);
+        public static MinMax EarthquakeWaterElevation = new MinMax(-2f, -0.25f);
+
+
+        public static float DroughtChance { get; private set; } = 5f;
+        public static MinMax DroughtLength { get; private set; } = new MinMax(1, 2);
+        public static ResourceAmount droughtFoodPenalty = new ResourceAmount();
+
+        public static bool HappinessMods { get; private set; } = true;
+
+        public static float FoodPenalty { get; private set; } = 2f;
+
+        //TODO: convert to minmax
+        public static int VikingRaidYearSpan { get; private set; } = 3;
+        public static int VikingRaidYearRange { get; private set; } = 1;
+
+        //DONE: Added a modifier for viking raid strength
+        public static float VikingEscalationModifier { get; private set; } = 2.1f;
+
+        public static MinMax DragonAttackYearSpan { get; private set; } = new MinMax(6, 11);
+        public static MinMax DragonAmountPerAttack { get; private set; } = new MinMax(1, 20);
+
+        public static MinMax FireBurnoutTimeRange { get; private set; } = new MinMax(8f, 15f);
+        public static float FirePersistance { get; private set; } = 1f;
+
+        public static int minArmyAmountForOppression { get; } = 3;
+        public static int oppresssionRamp { get; } = 8;
+        public static int PopulationOppressionUnit { get; private set; } = 100;
+        public static int MinOppressionHappiness { get; private set; } = -40;
+        public static int MaxOppressionHappiness { get; private set; } = 40;
 
         public static int riotMaxSize = 20;
         public static int riotStartSize = 10;
@@ -50,73 +178,183 @@ namespace InsaneDifficultyMod
             droughtFoodPenalty.Set(FreeResourceType.Apples, 4);
         }
 
-        public static void Update()
+        public static void SetMinMax(InteractiveSliderSetting min, InteractiveSliderSetting max, MinMax newValue)
+        {
+            min.Value = newValue.Min;
+            max.Value = newValue.Max;
+        }
+
+        public static void OnMinMaxUpdate(InteractiveSliderSetting min, InteractiveSliderSetting max)
+        {
+            if (min.Value > max.Value)
+            {
+                max.Value = min.Value;
+                min.TriggerUpdate();
+            }
+
+            if(max.Value < min.Value)
+            {
+                min.Value = max.Value;
+                max.TriggerUpdate();
+            }
+        }
+
+        public static void UpdateSlider(SettingsEntry entry, float factor = 0.01f)
+        {
+            entry.slider.label = Util.RoundToFactor(entry.slider.value, 0.01f).ToString();
+            Update(entry);
+        }
+
+        public static void Update(SettingsEntry entry)
+        {
+            Settings.inst.Proxy.UpdateSetting(entry, OnSuccesfulSettingUpdate, OnUnsuccesfulSettingUpdate);
+        }
+
+
+
+        public static void Setup()
+        {
+            var config = new InteractiveConfiguration<Settings>();
+            Settings.inst = config.Settings;
+            Settings.inst.Config = config;
+
+            AddListeners();
+
+            ModSettingsBootstrapper.Register(config.ModConfig,
+                (proxy, saved) =>
+                {
+                    OnModRegistered(proxy, saved);
+                },
+                (ex) =>
+                {
+                    OnModRegistrationFailed(ex);
+                });
+        }
+
+        private static void AddListeners()
+        {
+
+            inst.s_EarthquakeChance.OnUpdatedRemotely.AddListener((s) => { UpdateSlider(s); });
+            inst.s_EarthquakeVariance.OnUpdatedRemotely.AddListener((s) => { UpdateSlider(s); });
+
+            inst.s_EarthquakeStrengthMin.OnUpdatedRemotely.AddListener((s) =>
+            {
+                UpdateSlider(s);
+                OnMinMaxUpdate(inst.s_EarthquakeStrengthMin, inst.s_EarthquakeStrengthMax);
+            });
+
+            inst.s_EarthquakeStrengthMax.OnUpdatedRemotely.AddListener((s) =>
+            {
+                UpdateSlider(s);
+                OnMinMaxUpdate(inst.s_EarthquakeStrengthMin, inst.s_EarthquakeStrengthMax);
+            });
+        }
+
+
+        #region Utils
+
+        private static string GetLabelForMode(int mode)
+        {
+            return Modes.ContainsKey(mode) ? Modes[mode] : "Undefined Difficulty";
+        }
+
+        #endregion
+
+        #region Handling
+
+        private static void OnModRegistered(ModSettingsProxy proxy, SettingsEntry[] oldSettings)
+        {
+            Settings.inst.Proxy = proxy;
+            Settings.inst.Config.Install(proxy, oldSettings);
+            Mod.helper.Log("Mod registration to ModMenu Succesful");
+        }
+
+        private static void OnModRegistrationFailed(Exception ex)
+        {
+            Mod.helper.Log("Mod registration to ModMenu failed");
+            DebugExt.HandleException(ex);
+        }
+
+        private static void OnSuccesfulSettingUpdate()
+        {
+            Mod.dLog("Setting Update Successful");
+        }
+
+        private static void OnUnsuccesfulSettingUpdate(Exception ex)
+        {
+            Mod.Log("Setting Update Unsuccsesful");
+            DebugExt.HandleException(ex);
+        }
+
+        #endregion
+
+        public static void UpdateMode(int mode)
         {
             switch (mode)
             {
                 case 0:
-                    randomEvents = true;
-                    happinessMods = true;
-                    foodPenalty = 1;
-                    earthquakeChance = 0.05f;
-                    earthquakeStrength = new MinMax(1f, 4f);
-                    droughtChance = 3;
-                    vikingRaidYearRange = 2;
-                    vikingRaidYearSpan = 7;
-                    fireBurnoutTimeRange = new MinMax(8f, 15f);
-                    firePersistance = 1f;
+                    RandomEvents = true;
+                    HappinessMods = true;
+                    FoodPenalty = 1;
+                    EarthquakeChance = 0.05f;
+                    EarthquakeStrength = new MinMax(1f, 4f);
+                    DroughtChance = 3;
+                    VikingRaidYearRange = 2;
+                    VikingRaidYearSpan = 7;
+                    FireBurnoutTimeRange = new MinMax(8f, 15f);
+                    FirePersistance = 1f;
                     break;
                 case 1:
-                    randomEvents = true;
-                    happinessMods = true;
-                    earthquakeChance = 0.10f;
-                    earthquakeStrength = new MinMax(2f, 5f);
-                    droughtChance = 7;
-                    droughtLength = 1;
-                    foodPenalty = 1.2f;
-                    vikingRaidYearRange = 1;
-                    vikingRaidYearSpan = 6;
-                    fireBurnoutTimeRange = new MinMax(5f, 15f);
-                    firePersistance = 1f;
+                    RandomEvents = true;
+                    HappinessMods = true;
+                    EarthquakeChance = 0.10f;
+                    EarthquakeStrength = new MinMax(2f, 5f);
+                    DroughtChance = 7;
+                    DroughtLength = new MinMax(1,2);
+                    FoodPenalty = 1.2f;
+                    VikingRaidYearRange = 1;
+                    VikingRaidYearSpan = 6;
+                    FireBurnoutTimeRange = new MinMax(5f, 15f);
+                    FirePersistance = 1f;
                     break;
                 case 2:
-                    randomEvents = true;
-                    happinessMods = true;
-                    earthquakeChance = 0.125f;
-                    earthquakeStrength = new MinMax(3f, 6f);
-                    droughtChance = 12;
-                    droughtLength = 1;
-                    foodPenalty = 1.5f;
-                    vikingRaidYearRange = 2;
-                    vikingRaidYearSpan = 5;
-                    fireBurnoutTimeRange = new MinMax(5f, 13f);
-                    firePersistance = 2f;
+                    RandomEvents = true;
+                    HappinessMods = true;
+                    EarthquakeChance = 0.125f;
+                    EarthquakeStrength = new MinMax(3f, 6f);
+                    DroughtChance = 12;
+                    DroughtLength = new MinMax(1, 2);
+                    FoodPenalty = 1.5f;
+                    VikingRaidYearRange = 2;
+                    VikingRaidYearSpan = 5;
+                    FireBurnoutTimeRange = new MinMax(5f, 13f);
+                    FirePersistance = 2f;
                     break;
                 case 3:
-                    randomEvents = true;
-                    happinessMods = true;
-                    earthquakeChance = 0.14f;
-                    earthquakeStrength = new MinMax(2f, 7f);
-                    droughtChance = 14;
-                    droughtLength = 2;
-                    foodPenalty = 1.8f;
-                    vikingRaidYearRange = 2;
-                    vikingRaidYearSpan = 4;
-                    fireBurnoutTimeRange = new MinMax(5f, 12f);
-                    firePersistance = 4f;
+                    RandomEvents = true;
+                    HappinessMods = true;
+                    EarthquakeChance = 0.14f;
+                    EarthquakeStrength = new MinMax(2f, 7f);
+                    DroughtChance = 14;
+                    DroughtLength = new MinMax(1, 3);
+                    FoodPenalty = 1.8f;
+                    VikingRaidYearRange = 2;
+                    VikingRaidYearSpan = 4;
+                    FireBurnoutTimeRange = new MinMax(5f, 12f);
+                    FirePersistance = 4f;
                     break;
                 case 4:
-                    randomEvents = true;
-                    happinessMods = true;
-                    earthquakeChance = 0.2f;
-                    earthquakeStrength = new MinMax(2f, 9f);
-                    droughtChance = 16;
-                    droughtLength = 4;
-                    foodPenalty = 2.5f;
-                    vikingRaidYearRange = 2;
-                    vikingRaidYearSpan = 4;
-                    fireBurnoutTimeRange = new MinMax(2f, 10f);
-                    firePersistance = 10f;
+                    RandomEvents = true;
+                    HappinessMods = true;
+                    EarthquakeChance = 0.2f;
+                    EarthquakeStrength = new MinMax(2f, 9f);
+                    DroughtChance = 16;
+                    DroughtLength = new MinMax(1, 4);
+                    FoodPenalty = 2.5f;
+                    VikingRaidYearRange = 2;
+                    VikingRaidYearSpan = 4;
+                    FireBurnoutTimeRange = new MinMax(2f, 10f);
+                    FirePersistance = 10f;
                     break;
             }
             ApplyGameVars();
@@ -124,11 +362,10 @@ namespace InsaneDifficultyMod
 
         public static void ApplyGameVars() 
         {
-            Player.inst.SecondsPerEat = 150f / foodPenalty;
+            Player.inst.SecondsPerEat = 150f / FoodPenalty;
 
-            RaiderSystem.inst.MinAttackYearSpan = vikingRaidYearSpan - vikingRaidYearRange;
-            RaiderSystem.inst.MaxAttackYearSpan = vikingRaidYearSpan + vikingRaidYearRange;
-
+            RaiderSystem.inst.MinAttackYearSpan = VikingRaidYearSpan - VikingRaidYearRange;
+            RaiderSystem.inst.MaxAttackYearSpan = VikingRaidYearSpan + VikingRaidYearRange;
         }
 
         [HarmonyPatch(typeof(Fire), "Init")]
@@ -136,12 +373,30 @@ namespace InsaneDifficultyMod
         {
             static void Prefix(Fire __instance)
             {
-                __instance.BurnoutTimeRange = Settings.fireBurnoutTimeRange;
-                __instance.life = Settings.firePersistance;
-
-
+                __instance.BurnoutTimeRange = Settings.FireBurnoutTimeRange;
+                __instance.life = Settings.FirePersistance;
             }
+        }
 
+        [HarmonyPatch(typeof(RaiderSystem),"SetupRaid")]
+        class VikingRaidMagnitudePatch
+        {
+            static void Prefix()
+            {
+                float escPoints = (float)typeof(RaiderSystem).GetField("escalationPoints", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(RaiderSystem.inst);
+                escPoints *= VikingEscalationModifier;
+                typeof(RaiderSystem).GetField("escalationPoints", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(RaiderSystem.inst, escPoints);
+            }
+        }
+
+
+
+        [HarmonyPatch(typeof(DragonSpawn), "Update")]
+        class DragonAmountPatch
+        {
+            static void Postfix()
+            {
+            }
         }
 
 

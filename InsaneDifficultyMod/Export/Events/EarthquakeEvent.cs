@@ -10,8 +10,6 @@ namespace InsaneDifficultyMod.Events
 {
     class EarthquakeEvent : IDModEvent
     {
-        float percentChance = Settings.earthquakeChance;
-
         public override void Init() {
             base.Init();
             
@@ -21,14 +19,14 @@ namespace InsaneDifficultyMod.Events
         public override bool Test()
         {
             base.Test();
-            return Util.Randi() < percentChance && Settings.randomEvents;
+            return Util.Randi() < Settings.EarthquakeChance && Settings.RandomEvents;
         }
 
         public override void Run()
         {
             base.Run();
 
-            float magnitude = Util.LinearWeightedRandom(Settings.earthquakeStrength.Min, Settings.earthquakeStrength.Max) + Settings.earthquakeVariance.Rand();
+            float magnitude = Util.LinearWeightedRandom(Settings.EarthquakeStrength.Min, Settings.EarthquakeStrength.Max) + Settings.EarthquakeVariance.Rand();
             float m_weightage = magnitude / 10f;
 
             float burnLine_terrafromChance = 0.8f;
@@ -63,7 +61,7 @@ namespace InsaneDifficultyMod.Events
             float i = line.Length;
 
             Vector3 midpoint = line[line.Length / 2].Center;
-            KingdomLog.TryLog("earthquakeStruck", "My lord, " + GetAdjectiveForMagnitude(magnitude) + " earthquake of magnitude " + Util.RoundToFactor(magnitude,0.1f).ToString() + " has struck the land! ", KingdomLog.LogStatus.Warning, 1, midpoint);
+            KingdomLog.TryLog("earthquakeStruck", "My lord, " + GetAdjectiveForMagnitude(magnitude) + " earthquake has struck upon nearby land! ", KingdomLog.LogStatus.Warning, 1, midpoint);
 
             foreach (Cell point in line)
             {
@@ -102,7 +100,7 @@ namespace InsaneDifficultyMod.Events
 
                             if(currentCell.Type != ResourceType.Water)
                             {
-                                float height = Settings.earthquakeLandElevation.Rand();
+                                float height = Settings.EarthquakeLandElevation.Rand();
 
                                 if (likeType)
                                 {
@@ -112,7 +110,7 @@ namespace InsaneDifficultyMod.Events
                                 }
                                 else
                                 {
-                                    height = Settings.earthquakeWaterElevation.Rand();
+                                    height = Settings.EarthquakeWaterElevation.Rand();
                                     Util.AnnhiliateCell(currentCell);
                                     Util.SetWaterTile(currentCell, height);
                                     Util.SetCellLandmass(currentCell, landmass);
@@ -121,7 +119,7 @@ namespace InsaneDifficultyMod.Events
                             }
                             else
                             {
-                                float height = Settings.earthquakeWaterElevation.Rand();
+                                float height = Settings.EarthquakeWaterElevation.Rand();
 
                                 if (likeType)
                                 {
@@ -131,7 +129,7 @@ namespace InsaneDifficultyMod.Events
                                 }
                                 else
                                 {
-                                    height = Settings.earthquakeLandElevation.Rand();
+                                    height = Settings.EarthquakeLandElevation.Rand();
                                     Util.AnnhiliateCell(currentCell);
                                     Util.SetLandTile(currentCell, 0, height);
                                     Util.SetCellLandmass(currentCell, landmass);
@@ -167,7 +165,7 @@ namespace InsaneDifficultyMod.Events
 
                                 if (_cell.Type != ResourceType.Water)
                                 {
-                                    float height = Settings.earthquakeLandElevation.Rand();
+                                    float height = Settings.EarthquakeLandElevation.Rand();
 
                                     if (likeType)
                                     {
@@ -177,7 +175,7 @@ namespace InsaneDifficultyMod.Events
                                     }
                                     else
                                     {
-                                        height = Settings.earthquakeWaterElevation.Rand();
+                                        height = Settings.EarthquakeWaterElevation.Rand();
                                         Util.AnnhiliateCell(_cell);
                                         Util.SetWaterTile(_cell, height);
                                         Util.SetCellLandmass(_cell, landmass);
@@ -186,7 +184,7 @@ namespace InsaneDifficultyMod.Events
                                 }
                                 else
                                 {
-                                    float height = Settings.earthquakeWaterElevation.Rand();
+                                    float height = Settings.EarthquakeWaterElevation.Rand();
 
                                     if (likeType)
                                     {
@@ -196,7 +194,7 @@ namespace InsaneDifficultyMod.Events
                                     }
                                     else
                                     {
-                                        height = Settings.earthquakeLandElevation.Rand();
+                                        height = Settings.EarthquakeLandElevation.Rand();
                                         Util.AnnhiliateCell(_cell);
                                         Util.SetLandTile(_cell, 0, height);
                                         Util.SetCellLandmass(_cell, landmass);
@@ -307,11 +305,10 @@ namespace InsaneDifficultyMod.Events
             static void Postfix(Building __instance)
             {
                 Cell cell = __instance.GetCell();
-                if (cell.Type != ResourceType.Water)
+                if (cell.Type != ResourceType.Water && !cell.SubStructureCompareUniqueNameAll("pier".GetHashCode()))
                 {
                     TerrainGen.inst.SetLandTile((int)cell.Center.x, (int)cell.Center.z);
                 }
-
             }
         }
 

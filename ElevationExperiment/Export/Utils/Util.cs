@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace ElevationExperiment.Utils
+namespace Elevation.Utils
 {
     public static class Util
     {

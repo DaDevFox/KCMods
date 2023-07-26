@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace InsaneDifficultyMod
+namespace InsaneDifficultyMod.Events
 {
     public class RiotRallyMarker : MonoBehaviour, ISelectable
-    { 
+    {
+        public Vector3 basePosition;
         public Vector3 pos;
         private Assets.ObjectHighlighter highlighter;
-        public RiotSpawn riot;
+        public Riot riot;
 
         public float hoverHeight = 1f;
         public float hoverAmplitude = 0.2f;
@@ -40,7 +41,7 @@ namespace InsaneDifficultyMod
         public bool InsideSelectionBounds(int minx, int minz, int maxx, int maxz)
         {
             KingdomLog.TryLog("test-1-212-12","test1212113",KingdomLog.LogStatus.Neutral);
-            Vector3 c = riot.rallyPos;
+            Vector3 c = transform.position;
             return (minx < c.x && c.x < maxx) && (minz < c.z && c.z < maxz);
         }
 
@@ -72,7 +73,20 @@ namespace InsaneDifficultyMod
 
         void Update()
         {
-            transform.localPosition = new Vector3(riot.rallyPos.x, riot.rallyPos.y + ((float)Math.Sin(Time.time) * hoverAmplitude) + hoverHeight, riot.rallyPos.z);
+            transform.localPosition = new Vector3(basePosition.x, basePosition.y + ((float)Math.Sin(Time.time) * hoverAmplitude) + hoverHeight, basePosition.z);
+        }
+
+        public bool IntersectsRay(Ray ray, out float hitDist)
+        {
+            hitDist = float.MaxValue;
+            float radius = 0.45f;
+            Vector3 vector = base.transform.position;
+            if (Mathff.RaySphereIntersect(ray, vector, radius))
+            {
+                hitDist = Mathff.Dist(ray.origin, vector) - radius;
+                return true;
+            }
+            return false;
         }
     }
 }

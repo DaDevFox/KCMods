@@ -30,6 +30,23 @@ namespace StatisticsMod.Data
             return num;
         }
 
+        public static float GetPlayerKingdomEatingPopulationTime()
+        {
+            float total = 0f;
+            foreach (Villager villager in Villager.villagerPool.data)
+            {
+                if (villager != null)
+                {
+                    if (DataTracker.yearsOfVillagerCreation.ContainsKey(villager.guid) && villager.Residence != null)
+                    {
+                        total += UnityEngine.Mathf.Clamp((float)Player.inst.CurrYear - DataTracker.yearsOfVillagerCreation[villager.guid], 0f, 1f);
+                        //DebugExt.Log($"{Player.inst.CurrYear}, {DataTracker.yearsOfVillagerCreation[villager.guid]}");
+                    }
+                }
+            }
+            return total;
+        }
+
         public static int GetHousingForLandmass(int landmassIdx)
         {
             return Player.inst.TotalResidentialSlotsOnLandMass(landmassIdx);
@@ -48,24 +65,81 @@ namespace StatisticsMod.Data
             return num;
         }
 
+        public static bool FoodProductionPollutedByFishingHuts()
+        {
+            return Player.inst.DoesAnyBuildingHaveUniqueNameOnPlayerLandMass("fishinghut", true);
+        }
 
         public static int GetProductionPowerForResourceOnLandmass(FreeResourceType type, int landmassIdx)
         {
             int production = 0;
             ArrayExt<Building> buildings = Player.inst.GetBuildingListForLandMass(landmassIdx);
-
-            foreach(Building building in buildings.data)
+            try
             {
-                if (building != null)
-                { 
-                    if (building.Yield != null)
+                foreach (Building building in buildings.data)
+                {
+                    if (building != null)
                     {
-                        if (building.Yield.Get(type) > 0)
+                        if (!building.Yield().IsEmpty())
                         {
-                            production += (int)(building.Yield.Get(type));
+                            if (building.Yield().Get(type) > 0)
+                            {
+                                int buildingValue = (int)(building.Yield().Get(type));
+
+                                //DebugExt.Log($"yield building: {building.UniqueName}, yields {building.Yield().Get(type)} {type.ToString()}", true);
+                                // Special bonuses for fields
+                                if (building.GetComponent<Field>())
+                                {
+                                    int newValue = buildingValue;
+
+                                    newValue += (int)((float)(typeof(Field).GetMethod("GetTotalBonus", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(building.GetComponent<Field>(), new object[0])));
+
+                                    //DebugExt.Log("1", true);
+                                    int windmillsNearby = (int)typeof(Field).GetField("windmillsNearby", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(building.GetComponent<Field>());
+                                    int bonusPerWindmill = (int)typeof(Field).GetField("bonusPerWindmill", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(building.GetComponent<Field>());
+                                    newValue += (windmillsNearby * bonusPerWindmill);
+
+                                    if (Assets.StreamerEffects.Flag_BetterCropYield)
+                                    {
+                                        newValue = ((int)Math.Ceiling((double)newValue * 1.5));
+                                    }
+
+                                    production += newValue;
+                                    //DebugExt.Log($"farm: {building.UniqueName}, ACTUALLY yields {newValue} {type.ToString()}", true);
+
+                                }
+                                // Special bonuses for orchards
+                                else if (building.GetComponent<Orchard>())
+                                {
+                                    int newValue = buildingValue;
+
+                                    newValue += (int)building.GetComponent<Orchard>().GetTotalBonus();
+
+                                    int barrenCells = (int)typeof(Orchard).GetField("barrenCells", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(building.GetComponent<Orchard>());
+                                    newValue = (int)UnityEngine.Mathf.Lerp(newValue, 0f, (float)barrenCells / 4f);
+
+
+                                    if (Assets.StreamerEffects.Flag_BetterCropYield)
+                                    {
+                                        newValue = ((int)Math.Ceiling((double)newValue * 1.5));
+                                    }
+
+                                    production += newValue;
+
+                                    //DebugExt.Log($"orchard: {building.UniqueName}, ACTUALLY yields {newValue} {type.ToString()}", true);
+                                }
+                                else
+                                {
+                                    production += buildingValue;
+                                }
+                            }
                         }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                //DebugExt.Log(ex.ToString());
             }
 
 
@@ -136,7 +210,7 @@ namespace StatisticsMod.Data
                     production.woodForester += _production.woodForester;
                     production.charcoalCharcoalMaker += _production.charcoalCharcoalMaker;
 
-                    production.amtByShip += _production.amtByShip;
+                    production.amtByShip.Add(_production.amtByShip);
                 }
             }
 

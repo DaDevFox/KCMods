@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InsaneDifficultyMod.Events
 {
-    class IDModEvent
+    public class IDModEvent
     {
         public String saveID = "";
         public Type saveObject;

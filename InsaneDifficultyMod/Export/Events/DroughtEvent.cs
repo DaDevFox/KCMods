@@ -7,6 +7,54 @@ using Harmony;
 using System.Reflection;
 using UnityEngine;
 using I2.Loc;
+using Assets.Code;
+
+namespace InsaneDifficultyMod
+{
+    public static class BuildingUtils
+    {
+        /// <summary>
+        /// Returns a reference to the yield of a building
+        /// </summary>
+        /// <param name="building"></param>
+        /// <returns></returns>
+        public static ResourceAmount Yield(this Building building)
+        {
+            YieldProducer producer = building.GetComponent<YieldProducer>();
+            YieldProducerSeason seasonalProducer = building.GetComponent<YieldProducerSeason>();
+
+            if (producer)
+                return producer.Yield;
+            if (seasonalProducer)
+                return ResourceAmount.Make(seasonalProducer.YieldType, seasonalProducer.YieldAmt);
+
+            return new ResourceAmount();
+        }
+
+        /// <summary>
+        /// Sets the yield of a building to a new ResourceAmount. 
+        /// <para>May only be a ResourceAmount with one resource type if targeting a seasonal producer (field/agricultural producer typically). </para>
+        /// </summary>
+        /// <param name="building"></param>
+        /// <param name="amount"></param>
+        public static void Yield(this Building building, ResourceAmount amount)
+        {
+            YieldProducer producer = building.GetComponent<YieldProducer>();
+            YieldProducerSeason seasonalProducer = building.GetComponent<YieldProducerSeason>();
+            if (producer)
+                producer.Yield = amount;
+            if (seasonalProducer)
+            {
+                FreeResourceType type = FreeResourceType.Apples;
+                for (int i = 0; i < (int)FreeResourceType.NumTypes; i++)
+                    if (amount.Get((FreeResourceType)i) > 0)
+                        type = (FreeResourceType)i;
+                seasonalProducer.YieldType = type;
+                seasonalProducer.YieldAmt = amount.Get(type);
+            }
+        }
+    }
+}
 
 namespace InsaneDifficultyMod.Events
 {
@@ -14,7 +62,8 @@ namespace InsaneDifficultyMod.Events
     {
         private int timeRemaining = 0;
         public static bool droughtRunning = false;
-        public static float originalWaterHeight;
+        public static float originalWaterHeight = -0.39f;
+        public static float droughtWaterHeight = -0.78f;
 
         public static Dictionary<String, Assets.Code.ResourceAmount> foodBuildingYields = new Dictionary<string, Assets.Code.ResourceAmount>()
         {
@@ -26,11 +75,11 @@ namespace InsaneDifficultyMod.Events
         public override bool Test()
         {
             base.Test();
-            if (Settings.randomEvents)
+            if (Settings.RandomEvents)
             {
-                if (SRand.Range(0, 100) < Settings.droughtChance)
+                if (SRand.Range(0, 100) < Settings.DroughtChance)
                 {
-                    timeRemaining = Settings.droughtLength;
+                    timeRemaining = (int)Settings.DroughtLength.Rand();
                     droughtRunning = true;
                     return true;
                 }
@@ -63,12 +112,11 @@ namespace InsaneDifficultyMod.Events
         {
             base.Run();
 
-            KingdomLog.TryLog("drought", "My Lord, a terrible drought has struck our land, for the next <color=yellow>" + Settings.droughtLength.ToString() + " " + (Settings.droughtLength == 1 ? "year" : "years") + "</color>, our harvest will be poor!", KingdomLog.LogStatus.Neutral);
 
-            timeRemaining = Settings.droughtLength;
+            timeRemaining = (int)Settings.DroughtLength.Rand();
             droughtRunning = true;
-            originalWaterHeight = -0.65f;
 
+            KingdomLog.TryLog("drought", "My Lord, a terrible drought has struck our land, for the next <color=yellow>" + timeRemaining.ToString() + " " + (timeRemaining == 1 ? "year" : "years") + "</color>, our harvest will be poor!", KingdomLog.LogStatus.Neutral);
         }
 
 
@@ -83,6 +131,7 @@ namespace InsaneDifficultyMod.Events
 
         #region Patches
 
+        // DONE Fixed fish height being misaligned with water height during drought. 
         [HarmonyPatch(typeof(Weather))]
         [HarmonyPatch("Update")]
         class WeatherUpdatePatch
@@ -92,13 +141,15 @@ namespace InsaneDifficultyMod.Events
                 if (droughtRunning)
                 {
                     Vector3 vector = __instance.Water.transform.position;
-                    vector = Vector3.Lerp(vector, new Vector3(vector.x, -0.78f, vector.z), Time.deltaTime * 0.25f);
+                    vector = Vector3.Lerp(vector, new Vector3(vector.x, droughtWaterHeight, vector.z), Time.deltaTime * 0.25f);
+                    FishSystem.inst.fishHeightY = vector.y;
                     __instance.Water.transform.position = vector;
                 }
                 else
                 {
                     Vector3 vector = __instance.Water.transform.position;
                     vector = Vector3.Lerp(vector, new Vector3(vector.x, originalWaterHeight, vector.z), Time.deltaTime * 0.25f);
+                    FishSystem.inst.fishHeightY = vector.y;
                     __instance.Water.transform.position = vector;
                 }
             }
@@ -115,12 +166,12 @@ namespace InsaneDifficultyMod.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName] - Settings.droughtFoodPenalty;
+                    b.Yield(foodBuildingYields[b.UniqueName] - Settings.droughtFoodPenalty);
                 }
                 else
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName];
+                    b.Yield(foodBuildingYields[b.UniqueName]);
                 }
             }
         }
@@ -135,12 +186,12 @@ namespace InsaneDifficultyMod.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName] - Settings.droughtFoodPenalty;
+                    b.Yield(foodBuildingYields[b.UniqueName] - Settings.droughtFoodPenalty);
                 }
                 else
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName];
+                    b.Yield(foodBuildingYields[b.UniqueName]);
                 }
             }
         }
@@ -156,21 +207,38 @@ namespace InsaneDifficultyMod.Events
             {
                 if (droughtRunning)
                 {
-                    __instance.status = FishingShip.Status.WaitAtHutFull;
+                    if(__instance.status != FishingShip.Status.SailingToHut)
+                        __instance.status = FishingShip.Status.WaitAtHutFull;
                 }
             }
         }
 
+        //DONE: Added text to fishing hut during drought to indicate fishing boat is inactive. 
         //Change fishing hut text during drought
         [HarmonyPatch(typeof(FishingHut))]
         [HarmonyPatch("GetExplanation")]
         class FishingHutTextPatch
         {
-            static void Postfix(FishingHut __instance, String __result)
+            static void Postfix(FishingHut __instance, ref String __result)
             {
                 if (droughtRunning)
                 {
-                    __result = "<color=yellow> Waters too shallow to fish: waiting until drought ends to resume </color>";
+                    __result = "<color=yellow>Waters too shallow to fish. </color>";
+                    __result += Environment.NewLine;
+                    __result += Environment.NewLine + ScriptLocalization.MarketTitle;
+                    __result += Environment.NewLine;
+                    int num = __instance.fishStack.Count();
+                    int num2 = __instance.fishStack.MaxCapacity();
+                    __result = String.Concat(new object[]
+                    {
+                        __result,
+                        ResourceAmount.FriendlyName(FreeResourceType.Fish),
+                        ": ",
+                        num,
+                        " / ",
+                        num2,
+                        Environment.NewLine
+                    });
                 }
             }
         }

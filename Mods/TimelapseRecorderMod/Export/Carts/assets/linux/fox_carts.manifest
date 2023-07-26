@@ -1,0 +1,32 @@
+ManifestFileVersion: 0
+CRC: 3861438963
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 93b7fa8db4cfefdd7b0a5976e34616d8
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 50a0c8d074850144c7dedb9b24dc4560
+HashAppended: 1
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 20
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+Assets:
+- Assets/Mod/Cart.prefab
+Dependencies: []
