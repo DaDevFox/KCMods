@@ -32,6 +32,8 @@ namespace Elevation
         /// <returns></returns>
         public static bool TryProcessElevationChange(Cell cell, int tierChange)
         {
+            if (cell == null)
+                return false;
             CellMeta meta = Grid.Cells.Get(cell);
             bool valid = ValidElevation(meta.elevationTier + tierChange) && ValidTileForElevation(cell);
             
@@ -99,6 +101,8 @@ namespace Elevation
         /// <param name="forced"></param>
         public static void RefreshTile(Cell cell, bool forced = false)
         {
+            if (cell == null)
+                return;
             UpdateCellMetaForTile(cell, forced);
             UpdatePatchesForTile(cell);
         }
@@ -127,6 +131,9 @@ namespace Elevation
             Patches.WitchHutPatch.UpdateCell(cell);
             Patches.WoflDenPatch.UpdateCell(cell);
             Patches.EmptyCavePatch.UpdateCell(cell);
+
+
+            BuildingFormatter.UpdateBuildingsOnCell(cell);
         }
 
         /// <summary>
@@ -139,15 +146,20 @@ namespace Elevation
             Patches.WitchHutPatch.UpdateWitchHuts();
             Patches.WoflDenPatch.UpdateWolfDens();
             Patches.EmptyCavePatch.UpdateEmptyCaves();
+
+            //foreach (BuildingMeta buildingMeta in Grid.Buildings.GetAll())
+            //    BuildingFormatter.UpdateBuilding(buildingMeta.building);
         }
 
         /// <summary>
-        /// Updates only the visuals of an elevation block on a tile
+        /// Updates an elevation block on a tile
         /// </summary>
         /// <param name="cell"></param>
         /// <param name="forced">wether or not to update, even when the elevation of the tile has not changed since the last update</param>
         public static void UpdateCellMetaForTile(Cell cell, bool forced = false)
         {
+            if (cell == null)
+                return;
             CellMeta meta = Grid.Cells.Get(cell);
             if(meta)
             {
@@ -157,15 +169,16 @@ namespace Elevation
         }
 
         /// <summary>
-        /// Updates only the visuals of all elevation blocks in the world
+        /// Updates all elevation blocks in the world
         /// </summary>
         /// <param name="forced"></param>
         public static void UpdateCellMetas(bool forced = false)
         {
+            Rendering.UpdateAll();
             foreach(CellMeta meta in Grid.Cells)
             {
-                meta.UpdateVisuals(forced);
                 meta.UpdatePathing();
+                BuildingFormatter.UpdateBuildingsOnCell(meta.cell);
             }
         }
 

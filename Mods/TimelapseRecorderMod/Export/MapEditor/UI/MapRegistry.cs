@@ -17,11 +17,136 @@ namespace Fox.Maps
 
     public class MapRegistry : MonoBehaviour
     {
+
+        public static Color noneB = new Color(216f, 216f, 54f);
+        public static Color noneF = new Color(116f, 156f, 7f);
+        public static Color noneV = new Color(68f, 102f, 0f);
+
+        public static Color woodB = new Color(90f, 137f, 16f);
+        public static Color woodF = new Color(59f, 118f, 2f);
+        public static Color woodV = new Color(43f, 102f, 0f);
+
+        public static Color unusablestoneB = new Color(84, 84, 34);
+        public static Color unusablestoneF = new Color(53, 65, 19);
+        public static Color unusablestoneV = new Color(38, 46, 17);
+
+        public static Color stoneB = new Color(117, 189, 132);
+        public static Color stoneF = new Color(146, 170, 117);
+        public static Color stoneV = new Color(131, 154, 115);
+
+        public static Color irondepositB = new Color(207, 148, 37);
+        public static Color irondepositF = new Color(68, 102, 0);
+        public static Color irondepositV = new Color(68, 102, 0);
+
+        public static Color witchhut = new Color(68, 102, 0);
+        public static Color cave = new Color(68, 102, 0);
+        public static Color waterDeep = new Color(35, 35, 178);
+        public static Color waterDeepFish = new Color(89, 89, 183);
+        public static Color waterShallow = new Color(45, 76, 229);
+        public static Color waterFish = new Color(89f, 130f, 255f);
+
+        public static bool realisticWaterColors = false;
+
+        public static bool active = false;
+
         private Dictionary<string, MapRegistryItem> items = new Dictionary<string, MapRegistryItem>();
+
+        private Animator animator = new Animator();
 
         public void Toggle()
         {
             gameObject.SetActive(!gameObject.activeSelf);
+            active = gameObject.activeSelf;
+        }
+
+        void Start()
+        {
+            // resource type colors
+
+            // none
+            noneB.r /= 255f;
+            noneB.g /= 255f;
+            noneB.b /= 255f;
+            noneF.r /= 255f;
+            noneF.g /= 255f;
+            noneF.b /= 255f;
+            noneV.r /= 255f;
+            noneV.g /= 255f;
+            noneV.b /= 255f;
+
+            // wood
+            woodB.r /= 255f;
+            woodB.g /= 255f;
+            woodB.b /= 255f;
+            woodF.r /= 255f;
+            woodF.g /= 255f;
+            woodF.b /= 255f;
+            woodV.r /= 255f;
+            woodV.g /= 255f;
+            woodV.b /= 255f;
+
+            // unusablestone
+            unusablestoneB.r /= 255f;
+            unusablestoneB.g /= 255f;
+            unusablestoneB.b /= 255f;
+            unusablestoneF.r /= 255f;
+            unusablestoneF.g /= 255f;
+            unusablestoneF.b /= 255f;
+            unusablestoneV.r /= 255f;
+            unusablestoneV.g /= 255f;
+            unusablestoneV.b /= 255f;
+
+            // stone
+            stoneB.r /= 255f;
+            stoneB.g /= 255f;
+            stoneB.b /= 255f;
+            stoneF.r /= 255f;
+            stoneF.g /= 255f;
+            stoneF.b /= 255f;
+            stoneV.r /= 255f;
+            stoneV.g /= 255f;
+            stoneV.b /= 255f;
+
+            // irondeposit
+            irondepositB.r /= 255f;
+            irondepositB.g /= 255f;
+            irondepositB.b /= 255f;
+            irondepositF.r /= 255f;
+            irondepositF.g /= 255f;
+            irondepositF.b /= 255f;
+            irondepositV.r /= 255f;
+            irondepositV.g /= 255f;
+            irondepositV.b /= 255f;
+
+            // witchhut
+            witchhut.r /= 255f;
+            witchhut.g /= 255f;
+            witchhut.b /= 255f;
+
+            // cave
+            cave.r /= 255f;
+            cave.g /= 255f;
+            cave.b /= 255f;
+
+            // waterDeep
+            waterDeep.r /= 255f;
+            waterDeep.g /= 255f;
+            waterDeep.b /= 255f;
+
+            // waterShallow
+            waterShallow.r /= 255f;
+            waterShallow.g /= 255f;
+            waterShallow.b /= 255f;
+
+            // waterDeepFish
+            waterDeepFish.r /= 255f;
+            waterDeepFish.g /= 255f;
+            waterDeepFish.b /= 255f;
+
+            // waterFish
+            waterFish.r /= 255f;
+            waterFish.g /= 255f;
+            waterFish.b /= 255f;
         }
 
         void Update()
@@ -59,39 +184,40 @@ namespace Fox.Maps
 
             return item;
         }
+
+        public class Animator
+        {
+            public MapRegistry registry;
+
+            private float value = 0f;
+            private float desiredValue = 0f;
+
+            private int initialValue = -1;
+
+            public float transitionSpeed = 2f;
+
+            public void Update()
+            {
+                RectTransform transform = registry.transform as RectTransform;
+
+                if (active)
+                    desiredValue = 1f;
+                else
+                    desiredValue = 0f;
+
+                value = Mathf.Lerp(value, desiredValue, Time.deltaTime * transitionSpeed);
+
+                //if(initialValue == -1f)
+                //    initialValue = transform.
+            }
+        }
     }
 
     public class MapRegistryItem : MonoBehaviour
     {
-        public static Color noneB;
-        public static Color noneF;
-        public static Color noneV;
-
-        public static Color treeB;
-        public static Color treeF;
-        public static Color treeV;
-
-        public static Color unusablestoneB;
-        public static Color unusablestoneF;
-        public static Color unusablestoneV;
-
-        public static Color stoneB;
-        public static Color stoneF;
-        public static Color stoneV;
-
-        public static Color irondepositB;
-        public static Color irondepositF;
-        public static Color irondepositV;
-
-        public static Color witchhut;
-        public static Color cave;
-        public static Color waterDeep;
-        public static Color waterShallow;
-        public static Color waterFish;
 
 
-
-        public MapSaveLoad.MapSaveData data;
+        public MapSaveLoad.MapSaveData data { get; set; }
 
         private RawImage preview;
         private TextMeshProUGUI nameText;
@@ -122,7 +248,6 @@ namespace Fox.Maps
             stonesText.Left();
             ironsText.Left();
             copyButton.transform.GetChild(0).gameObject.Center();
-
 
             UpdateInformation();
 
@@ -157,9 +282,15 @@ namespace Fox.Maps
         public void UpdateInformation()
         {
             Analyze(out int trees, out int rocks, out int stones, out int irons);
-
-            Texture2D texture = Preview(data);
-            preview.texture = texture;
+            try
+            {
+                Texture2D texture = Preview(data);
+                preview.texture = texture;
+            }
+            catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
 
             nameText.text = data.name;
             dimensionsText.text = $"{data.terrainData.gridWidth} x {data.terrainData.gridHeight}";
@@ -200,6 +331,14 @@ namespace Fox.Maps
 
                 Color color = Color.blue;
 
+
+                if (cell == null)
+                {
+                    color = Color.black;
+                    texture.SetPixel(x, z, color);
+                    continue;
+                }
+
                 Color water = Water.inst.waterMat.GetColor("_Color");
                 Color deepWater = Water.inst.waterMat.GetColor("_DeepColor");
                 Color saltWater = Water.inst.waterMat.GetColor("_SaltColor");
@@ -210,24 +349,72 @@ namespace Fox.Maps
                     color = water;
 
                     if (cell.deepWater)
-                        color = deepWater;
+                        color = MapRegistry.realisticWaterColors ? deepWater : MapRegistry.waterDeep;
+                    else if (!MapRegistry.realisticWaterColors)
+                        color = MapRegistry.waterShallow;
 
-                    if (cell.saltWater)
+                    if (cell.saltWater && MapRegistry.realisticWaterColors)
                         color = saltWater;
 
                     if (cell.deepWater && cell.saltWater)
-                        color = saltDeepWater;
-
+                        color = MapRegistry.realisticWaterColors ? saltDeepWater : MapRegistry.waterDeep;
 
                     if (data.fishData.fishPerCell[i] > 0)
-                        color = waterFish;
+                        color = MapRegistry.waterFish;
+
+                    if (cell.deepWater && data.fishData.fishPerCell[i] > 0 && !MapRegistry.realisticWaterColors)
+                        color = MapRegistry.waterDeepFish;
                 }
 
                 else if (cell.type == ResourceType.WitchHut)
                     color = new Color(0.5490196f, 0.3490196f, 0.01960784f);
-
                 else if (cell.type == ResourceType.EmptyCave || cell.type == ResourceType.WolfDen)
-                    color = cave;
+                    color = MapRegistry.cave;
+                //else if(cell.type == ResourceType.None)
+                //{
+                //    if (cell.fertile == 0)
+                //        color = noneB;
+                //    if (cell.fertile == 1)
+                //        color = noneF;
+                //    if (cell.fertile == 2)
+                //        color = noneV;
+                //}
+                //else if(cell.type == ResourceType.Wood)
+                //{
+                //    if (cell.fertile == 0)
+                //        color = woodB;
+                //    if (cell.fertile == 1)
+                //        color = woodF;
+                //    if (cell.fertile == 2)
+                //        color = woodV;
+                //}
+                //else if (cell.type == ResourceType.Stone)
+                //{
+                //    if (cell.fertile == 0)
+                //        color = stoneB;
+                //    if (cell.fertile == 1)
+                //        color = stoneF;
+                //    if (cell.fertile == 2)
+                //        color = stoneV;
+                //}
+                //else if (cell.type == ResourceType.UnusableStone)
+                //{
+                //    if (cell.fertile == 0)
+                //        color = unusablestoneB;
+                //    if (cell.fertile == 1)
+                //        color = unusablestoneF;
+                //    if (cell.fertile == 2)
+                //        color = unusablestoneV;
+                //}
+                //else if (cell.type == ResourceType.IronDeposit)
+                //{
+                //    if (cell.fertile == 0)
+                //        color = irondepositB;
+                //    if (cell.fertile == 1)
+                //        color = irondepositF;
+                //    if (cell.fertile == 2)
+                //        color = irondepositV;
+                //}
                 else
                 {
                     color = (Color)typeof(MapRegistry).GetField(cell.type.ToString().ToLower() + (cell.fertile == 0 ? "B" : (cell.fertile == 1 ? "F" : "V")), BindingFlags.Static | BindingFlags.Public).GetValue(this);
@@ -247,7 +434,7 @@ namespace Fox.Maps
                 //if (cell.type == ResourceType.IronDeposit)
                 //    color = new Color(0.6f, 0.4039216f, 0.3647059f);
 
-                //if (cell.type == ResourceType.Wood)
+                //if (cell.type == ResourceType.Wood || cell.amount > 0)
                 //    color = new Color(0.00f, 0.30f, 0.00f);
 
                 texture.SetPixel(x, z, color);

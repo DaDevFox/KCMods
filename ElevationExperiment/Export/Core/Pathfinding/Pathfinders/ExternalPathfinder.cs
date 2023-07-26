@@ -46,11 +46,11 @@ namespace Elevation
             Cell endCell = World.inst.GetCellDataClamped(endPos);
             if (
                 //!WorldRegions.Reachable(startCell, endCell) || 
-                blocksPath(endCell, team))
+                blocksPath(World.inst.GetPathCell(endCell), team))
             {
                 endCell = World.inst.FindMatchingSurroundingCell(World.inst.GetCellDataClamped(endPos), false, 2, c =>
                 {
-                    return !(blocksPath(c, team)
+                    return !(blocksPath(World.inst.GetPathCell(c), team)
                     //&& WorldRegions.Reachable(startCell, c)
                     );
                 });

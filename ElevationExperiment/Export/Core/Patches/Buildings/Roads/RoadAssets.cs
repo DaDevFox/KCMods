@@ -26,12 +26,10 @@ namespace Elevation
 
             UI.LoadAll();
             RoadAssets.LoadAll();
+            BuildingAssets.LoadAll();
 
             Mod.dLog("Mod Assets Loaded");
         }
-
-
-
     }
 
 

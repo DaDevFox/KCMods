@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define ALPHA
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -124,8 +126,7 @@ namespace Fox.Maps
         {
             UI.MapSaveUI.mapName.text = data.name;
 
-            //typeof(World).GetField("gridWidth", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(World.inst, data.terrainData.gridWidth);
-            //typeof(World).GetField("gridHeight", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(World.inst, data.terrainData.gridHeight);
+            typeof(World).GetMethod("Setup", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(World.inst, new object[] { data.terrainData.gridWidth, data.terrainData.gridHeight });
 
             data.terrainData.Unpack(World.inst);
             data.fishData.Unpack(FishSystem.inst);
@@ -160,7 +161,7 @@ namespace Fox.Maps
 
         public static bool Contains(MapSaveData map) => Contains(map.name);
 
-        public static LoadSaveContainer CompileRegistry()
+        public static LoadSaveContainer CompileRegistryJSON()
         {
             LoadSaveContainer container = new LoadSaveContainer()
             {
@@ -168,7 +169,9 @@ namespace Fox.Maps
             };
 
             container.CustomSaveData["localmaps"] = JsonConvert.SerializeObject(registry);
-            
+
+            Mod.Log(container.CustomSaveData["localmaps"]);
+
             return container;
         }
 
@@ -197,7 +200,12 @@ namespace Fox.Maps
             {
                 JToken cell = cells.ElementAt(i);
 
+#if ALPHA
+                Cell.CellSaveData cellData = new Cell.CellSaveData();
+#else
                 Cell.CellSaveData cellData = new Cell.CellSaveData(dummy);
+#endif
+
                 cellData.type = (ResourceType)(int)cell["type"];
                 cellData.amount = (int)cell["amount"];
                 cellData.fertile = (int)cell["fertile"];
@@ -240,7 +248,7 @@ namespace Fox.Maps
 
             Mod.Log(5);
 
-            #endregion
+#endregion
 
             terrainData.placedCavesWitches = (bool)token["terrainData"]["placedCavesWitches"];
             terrainData.placedFish = (bool)token["terrainData"]["placedFish"];
@@ -250,9 +258,9 @@ namespace Fox.Maps
 
             data.terrainData = terrainData;
 
-            #endregion
+#endregion
 
-            #region Fish Data
+#region Fish Data
 
             FishSystem.FishSystemSaveData fishData = new FishSystem.FishSystemSaveData();
 
@@ -264,7 +272,7 @@ namespace Fox.Maps
 
             data.fishData = fishData;
 
-            #endregion
+#endregion
 
             return data;
         }
@@ -275,7 +283,7 @@ namespace Fox.Maps
             static bool Prefix(ref LoadSaveContainer __result)
             {
                 if (packing)
-                    __result = CompileRegistry();
+                    __result = CompileRegistryJSON();
 
                 return !packing;
             }

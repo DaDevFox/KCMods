@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using StatisticsMod.Assets;
+using KCModUtils.AssetManagement;
 
 namespace StatisticsMod.UI
 {

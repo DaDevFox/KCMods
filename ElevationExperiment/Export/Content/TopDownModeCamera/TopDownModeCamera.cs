@@ -15,7 +15,7 @@ namespace Elevation
         // all the class members are public, this is because harmony decided to not work in subclasses specifically for this file, idk why
         // So I had to adjust my code, and it is now awful. 
 
-        public static float maxCamHeight = 100f;
+        public static float maxCamHeight = 150f;
         public static float minCamHeight = 20f;
         public static float startCamHeight = 50f;
 
@@ -187,11 +187,15 @@ namespace Elevation
 
         private static void CalcPos(Vector3 movement, float speed, bool movedThisFrame)
         {
-            Vector3 clampedPos = World.inst.ClampToWorld(Cam.inst.DesiredTrackingPos + (movement * speed));
+            Vector3 clampedPos = (Cam.inst.DesiredTrackingPos + (movement * speed));
 
             Cell cell = World.inst.GetCellDataClamped(clampedPos);
             if (cell != null && Grid.Cells.Get(cell))
+            {
+                clampedPos.x = cell.Center.x;
                 clampedPos.y = Grid.Cells.Get(cell).Elevation;
+                clampedPos.z = cell.Center.z;
+            }
 
 
             Cam.inst.SetDesiredTrackingPos(clampedPos);

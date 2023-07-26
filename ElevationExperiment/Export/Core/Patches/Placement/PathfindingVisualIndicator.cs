@@ -122,7 +122,7 @@ namespace Elevation.Patches
 
             
 
-            static void FindBestPath(Cell c, ref List<Vector3> positions, int maxRadius = 15, int teamID = 0)
+            static void FindBestPath(Cell c, ref ArrayExt<Vector3> positions, int maxRadius = 15, int teamID = 0)
             {
                 SimplePriorityQueue<Cell> queue = new SimplePriorityQueue<Cell>();
 

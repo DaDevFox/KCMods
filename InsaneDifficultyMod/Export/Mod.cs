@@ -34,6 +34,7 @@ namespace InsaneDifficultyMod
 
             assets = AssetBundleManager.Unpack(helper.modPath + "/assetbundle/", modID);
             //legacyAssets = AssetBundleManager.Unpack(helper.modPath + "/legacy_assetbundle/", legacyModID);
+
             if (Settings.debug)
                 Application.logMessageReceived += onLogMessageReceived;
         }

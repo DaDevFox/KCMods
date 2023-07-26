@@ -24,7 +24,7 @@ namespace InsaneDifficultyMod.Events
         public string uniqueID;
         public int priority;
         public float weight;
-        public int capacity;
+        public int capacity = 5;
 
         public string[] fillStyle = { "jobPositions" };
 
@@ -138,6 +138,16 @@ namespace InsaneDifficultyMod.Events
                     new Vector3(0.75f, 0f, 1f),
                     new Vector3(0.25f, 0f, 1f),
                     new Vector3(0.5f, 0f, 0f), } },
+
+            { 8, new Vector3[] {
+                    new Vector3(1f, 0f, 1f),
+                    new Vector3(0f, 0f, 1f),
+                    new Vector3(1f, 0f, 0f),
+                    new Vector3(0f, 0f, 0f),
+                    new Vector3(0.5f, 0f, 1f),
+                    new Vector3(0f, 0f, 0.5f),
+                    new Vector3(0.5f, 0f, 0f),
+                    new Vector3(1f, 0f, 0.5f), } },
 
         };
 
@@ -317,7 +327,7 @@ namespace InsaneDifficultyMod.Events
         };
 
         private static Dictionary<Guid, float> dissatisfaction = new Dictionary<Guid, float>();
-        private static Dictionary<int, Riot> landmassRiots = new Dictionary<int, Riot>();
+        public static Dictionary<int, Riot> landmassRiots = new Dictionary<int, Riot>();
 
         public static float fear = 20f;
 
@@ -329,7 +339,7 @@ namespace InsaneDifficultyMod.Events
             base.Init();
 
             for (int i = 0; i < Player.inst.Residentials.Count; i++)
-                dissatisfaction.Add(((Building)Player.inst.Residentials[i]).guid, 0f);
+                dissatisfaction.Add((Player.inst.Residentials.data[i].GetComponent<Building>()).guid, 0f);
 
             testFrequency = 1;
 
@@ -339,34 +349,40 @@ namespace InsaneDifficultyMod.Events
 
         public static void Iterate()
         {
+
+            foreach (Riot riot in landmassRiots.Values)
+                riot.Iterate();
+
             for (int i = 0; i < Player.inst.Residentials.Count; i++)
             {
-                IResidence residence = Player.inst.Residentials[i];
+                IResidence residence = Player.inst.Residentials.data[i];
                 Building building = ((MonoBehaviour)residence).GetComponent<Building>();
                 Guid guid = building.guid;
 
                 if(!dissatisfaction.ContainsKey(guid))
                     dissatisfaction.Add(guid, 0f);
 
-                if(Player.inst.Residentials[i].GetHappiness() < happinessThreshold)
+                if(Player.inst.Residentials.data[i].GetHappiness() < happinessThreshold)
                 {
                     List<Villager> residents = residence.GetResidents();
-                    int amount = (int)Util.LinearWeightedRandom(1f, residents.Count);
-                    List<Villager> toAdd = new List<Villager>();
+                    //int amount = (int)Util.LinearWeightedRandom(1f, residents.Count);
+                    //List<Villager> toAdd = new List<Villager>();
 
-                    for (int j = 0; j < amount; j++)
-                        toAdd.Add(residents[i]);
+                    //for (int j = 0; j < amount; j++)
+                    //    toAdd.Add(residents[i]);
 
-                    foreach(Villager target in toAdd)
+                    foreach(Villager target in residents)
                     {
+                        DebugExt.Log(target.name, true);
                         Riot riot = FindRiot(target);
                         if (riot.Add(target))
-                            RemovePerson(target);
+                        {
+                            SetPersonForRiot(target);
+                            DebugExt.Log("confirmed", true);
+                        }
                     }
                 }
             }
-            foreach (Riot riot in landmassRiots.Values)
-                riot.Iterate();
         }
 
         public static void EndAll()
@@ -381,11 +397,12 @@ namespace InsaneDifficultyMod.Events
                 riot.Update();
         }
 
-        private static void RemovePerson(Villager person)
+        private static void SetPersonForRiot(Villager person)
         {
-            Player.inst.RemovePersonFromWorld(person);
-            //person.QuitJob(true);
-            //person.LeaveHome();
+            //Player.inst.RemovePersonFromWorld(person);
+            //person.paralyzed = true;
+            //person.QuitJob(false);
+            person.LeaveHome();
             //Player.inst.Workers.Remove(person);
             //Player.inst.Homeless.Remove(person);
         }
@@ -425,10 +442,6 @@ namespace InsaneDifficultyMod.Events
         public override bool Test()
         {
             base.Test();
-
-
-
-
 
             if (Player.inst.KingdomHappiness < happinessThreshold)
             {
@@ -518,6 +531,8 @@ namespace InsaneDifficultyMod.Events
 
         private static Texture riotImage;
 
+        public RiotRallyMarker marker;
+
         public Riot(int landmass)
         {
             this.landmass = landmass;
@@ -532,8 +547,8 @@ namespace InsaneDifficultyMod.Events
             // TODO: fix 'ghost rioters'
             foreach(Villager villager in villagers)
             {
-                Player.inst.ReturnPerson(villager, villager.transform.position);
-                villager.body.GetComponent<MeshRenderer>().material = World.inst.villagerColors[SRand.Range(0, World.inst.villagerColors.Length)];
+                Player.inst.ReturnPerson(villager, villager.Pos);
+                //villager.body.GetComponent<MeshRenderer>().material = VillagerSystem.inst.bodyColors[SRand.Range(0, VillagerSystem.inst.bodyColors.Length)];
             }
             foreach(RiotBuildingMeta meta in orderedBuildings)
             {
@@ -548,26 +563,136 @@ namespace InsaneDifficultyMod.Events
 
         public void Iterate()
         {
+            ReformatBuildings();
+
             // TODO: Fix riot marching phase
-            if(villagers.Count > RiotSystem.popForMarch)
+            if (villagers.Count > RiotSystem.popForMarch)
             {
                 BeginMarch();
             }
 
 
-            for(int i = 0; i < villagers.Count; i++)
-            {
-                VillagerMeta meta = villagerMetas[i];
-                if (meta.location != null)
-                {
-                    int index = meta.location.IndexOf(villagers[i]);
+            //for(int i = 0; i < villagers.Count; i++)
+            //{
+            //    VillagerMeta meta = villagerMetas[i];
+            //    if (meta.location != null)
+            //    {
+            //        int index = meta.location.IndexOf(villagers[i]);
 
-                    Vector3 loc = meta.location.Reference.FillNext(meta.location.target, index, meta.location.capacity);
-                    villagers[i].MoveToDeferred(loc);
+            //        Vector3 loc = meta.location.Reference.FillNext(meta.location.target, index, meta.location.capacity);
+            //        villagers[i].MoveToDeferred(loc);
+            //    }
+            //}
+
+        }
+
+        public void ReformatBuildings(bool force = false)
+        {
+            ArrayExt<Building> buildings = Player.inst.GetBuildingListForLandMass(landmass);
+            List<KeyValuePair<Guid, RiotBuildingMeta>> toRemove = new List<KeyValuePair<Guid, RiotBuildingMeta>>();
+            foreach (var meta in keyedBuildings)
+                if (!buildings.Contains(meta.Value.target))
+                    toRemove.Add(meta);
+
+            foreach (var pair in toRemove)
+            {
+                keyedBuildings.Remove(pair.Key);
+                orderedBuildings.Remove(pair.Value);
+
+                for (int i = 0; i < pair.Value.villagers.Count; i++)
+                    villagerMetas[pair.Value.indices[i]].location = null;
+                pair.Value.villagers.Clear();
+                pair.Value.indices.Clear();
+            }
+
+            for (int i = 0; i < buildings.Count; i++)
+            {
+                if (!keyedBuildings.ContainsKey(buildings.data[i].guid))
+                {
+                    keyedBuildings.Add(buildings.data[i].guid, new RiotBuildingMeta() { riot = this, target = buildings.data[i] });
+                    orderedBuildings.Add(keyedBuildings[buildings.data[i].guid]);
                 }
             }
 
-            ReformatBuildings();
+            orderedBuildings.Sort((meta, other) =>
+            {
+                if (meta == null || other == null)
+                    return 0;
+                if (meta.Reference != null && other.Reference != null)
+                    return other.priority - meta.priority;
+                return 0;
+            });
+
+            ReformatAssignments(force);
+            SetMarker();
+        }
+
+        public void SetMarker()
+        {
+            if (marker == null)
+            {
+                GameObject markerPrefab = Mod.assets.GetByName<GameObject>("RiotRallyMarker.prefab");
+                if (markerPrefab != null)
+                {
+                    GameObject rallyMarkerGO = GameObject.Instantiate(markerPrefab, Vector3.zero, Quaternion.identity);
+                    marker = rallyMarkerGO.AddComponent<RiotRallyMarker>();
+                    marker.riot = this;
+                }
+                else if (Settings.debug)
+                    Mod.dLog("marker prefab not loaded");
+            }
+
+            RiotBuildingMeta main = null;
+            foreach (RiotBuildingMeta building in orderedBuildings)
+                if (main == null || building.capacity * building.Reference.weight > main.capacity * main.Reference.weight)
+                    main = building;
+
+            float offset = 2f;
+            marker.transform.position = main.target.GetPos() + Vector3.up * offset;
+            marker.basePosition = main.target.GetPos();
+
+            DebugExt.Log("marker", false, KingdomLog.LogStatus.Neutral, marker.transform.position);
+        }
+
+        [HarmonyPatch(typeof(UnitSystem), "InitCategoriesGen")]
+        class CategoriesGenPatch
+        {
+            static void Postfix(UnitSystem __instance)
+            {
+                for (int i = 0; i < __instance.playerArmySet.Count; i++)
+                {
+                    UnitSystem.ArmyDef armyDef = __instance.playerArmySet[i];
+
+                    UnitSystem.UnitCategory unitCategory = new UnitSystem.UnitCategory();
+                    unitCategory.weaponLocalOffset = armyDef.weaponLocalOffset;
+                    unitCategory.mesh = armyDef.mesh;
+                    unitCategory.weaponMesh = armyDef.weaponMesh;
+                    unitCategory.life = armyDef.unitLife;
+                    unitCategory.generalLife = armyDef.generalLife;
+                    unitCategory.teamId = 6;
+                    unitCategory.armyDef = armyDef;
+                    unitCategory.type = armyDef.type;
+                    
+                    List<UnitSystem.UnitCategory> categories = (List<UnitSystem.UnitCategory>)typeof(UnitSystem).GetField("unitCategoriesGen", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(__instance);
+                    categories.Add(unitCategory);
+                    typeof(UnitSystem).GetField("unitCategoriesGen", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(__instance, categories);
+                }
+
+                List<UnitSystem.UnitCategory> _categories = (List<UnitSystem.UnitCategory>)typeof(UnitSystem).GetField("unitCategoriesGen", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(__instance);
+
+                for (int l = 0; l < _categories.Count; l++)
+                {
+                    for (int m = 0; m < 1023; m++)
+                    {
+                        _categories[l].units[m] = new UnitSystem.Unit();
+                        _categories[l].units[m].pos = new Vector3(SRand.Range(5f, 15f), 0f, SRand.Range(5f, 15f));
+
+                        typeof(UnitSystem).GetMethod("ResetUnit", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[] { _categories[l].units[m] });
+                    }
+                }
+
+                typeof(UnitSystem).GetField("unitCategoriesGen", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(__instance, _categories);
+            }
         }
 
         public void BeginMarch()
@@ -577,7 +702,7 @@ namespace InsaneDifficultyMod.Events
 
             stage = Stage.Marching;
 
-            ReformatAssignments(true);
+            //ReformatAssignments(true);
 
             Mod.dLog(orderedBuildings.Count);
 
@@ -595,7 +720,7 @@ namespace InsaneDifficultyMod.Events
                 {
                     if (next.capacity > minBuildingCapacity && next.villagers.Count > 0)
                     {
-                        IMoveableUnit army = RaiderSystem.inst.SpawnArmy(orderedBuildings[buildingIdx].target.GetPos(), next.villagers.Count, UnitSystem.ArmyType.Default, true);
+                        UnitSystem.Army army = UnitSystem.inst.MakeArmy(orderedBuildings[buildingIdx].target.GetPos(), AIBrainsContainer.inst.kingdoms.Count + 2, UnitSystem.ArmyType.Default, true);
 
                         int count = next.villagers.Count;
                         for (int k = 0; k < count; k++)
@@ -615,7 +740,7 @@ namespace InsaneDifficultyMod.Events
 
             Mod.mod.StartCoroutine(MarchCoroutine(true));
 
-            ReformatAssignments(true);
+            //ReformatAssignments(true);
         }
 
         public IEnumerator MarchCoroutine(bool stopIfAnyReach = false)
@@ -630,8 +755,8 @@ namespace InsaneDifficultyMod.Events
                 times[i] = SRand.Range(0f, 3f);
 
             // Target Queues
-            List<Cell> searchSpace = new List<Cell>();
-            World.inst.GetNonBusyCellInRadius(origin.Center, 6f, ref searchSpace);
+            List<Cell> searchSpace = World.inst.cellsToLandmass[landmass].data.ToList();
+            //World.inst.GetNonBusyCellInRadius(origin.Center, 6f, ref searchSpace);
 
             List<Building>[] targetQueues = new List<Building>[armies.Count];
             for (int i = 0; i < armies.Count; i++) 
@@ -651,6 +776,7 @@ namespace InsaneDifficultyMod.Events
                         {
                             Building considering = cell.BottomStructure;
 
+                            // TODO: Rioteres target government buildings using weighted dictionary
                             value = 1f + (SRand.Range(0.5f, 1f) * Vector3.Distance(cell.Center, origin.Center)) + considering.ModifiedMaxLife;
 
                             if (value > highest)
@@ -737,32 +863,34 @@ namespace InsaneDifficultyMod.Events
         {
             for (int i = 0; i < villagers.Count; i++)
             {
-                float delta = Time.deltaTime * Player.inst.timeScale;
+                //float delta = Time.deltaTime * Player.inst.timeScale;
                 Villager villager = villagers[i];
 
-                villager.textThought = "<color=red>Rioting!</color>";
-                villager.UpdateMind(delta);
+                //villager.textThought = "<color=red>Rioting!</color>";
+                //villager.UpdateMind(delta);
 
-                typeof(Villager).GetMethod("ConsumePath", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[0]);
-                typeof(Villager).GetMethod("WalkPath", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[] { delta });
-                typeof(Villager).GetMethod("UpdateAnim", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[] { delta });
+                //typeof(Villager).GetMethod("ConsumePath", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[0]);
+                //typeof(Villager).GetMethod("WalkPath", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[] { delta });
+                //typeof(Villager).GetMethod("UpdateAnim", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[] { delta });
 
-                float fixedTime = (float)typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(villager);
-                typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(villager, fixedTime + delta);
+                //float fixedTime = (float)typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(villager);
+                //typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(villager, fixedTime + delta);
 
-                villager.UpdateSpeed();
+                //villager.UpdateSpeed();
 
-                if (fixedTime + delta > 0.5f)
-                {
+                villager.MeshType = VillagerSystem.MeshType.Axeman;
+                villager.thought.thought = ThoughtBubbleSystem.Thought.GeneralError;
 
-                    MaterialPropertyBlock block = (MaterialPropertyBlock)typeof(ThoughtBubble).GetField("block", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(villager.thought);
-                    block.SetTexture("_MainTex", riotImage);
-                    villager.thought.meshRenderer.SetPropertyBlock(block);
-                    villager.thought.SetVisible(true, false);
+                //if (fixedTime + delta > 0.5f)
+                //{
 
-                    typeof(Villager).GetMethod("UpdateSkills", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[0]);
-                    typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(villager, (fixedTime + delta) % 0.5f);
-                }
+                //    //MaterialPropertyBlock block = (MaterialPropertyBlock)typeof(ThoughtBubble).GetField("block", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(villager.thought);
+                //    //block.SetTexture("_MainTex", riotImage);
+                //    //villager.thought.meshRenderer.SetPropertyBlock(block);
+
+                //    typeof(Villager).GetMethod("UpdateSkills", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(villager, new object[0]);
+                //    typeof(Villager).GetField("fixedTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(villager, (fixedTime + delta) % 0.5f);
+                //}
             }
         }
 
@@ -770,16 +898,21 @@ namespace InsaneDifficultyMod.Events
         {
             RiotBuildingMeta available = GetNextAvailable();
 
-            if (available != null) {
+            if (villagers.Contains(villager))
+                DebugExt.Log("Repeat");
+
+            if (available != null && !villagers.Contains(villager)) {
                 villagers.Add(villager);
                 villagerMetas.Add(new VillagerMeta(villager, available));
                 available.Add(villager, villagers.Count - 1);
 
-                villager.textThought = "<color=red>Rioting!</color>";
-                villager.body.GetComponent<MeshRenderer>().material = peasantMat;
+                //villager.textThought = "<color=red>Rioting!</color>";
+                //villager.body.GetComponent<MeshRenderer>().material = peasantMat;
 
                 Vector3 loc = available.Reference.FillNext(available.target, available.villagers.Count, available.capacity);
                 villager.MoveToDeferred(loc);
+
+                DebugExt.Log($"Riot size: {villagers.Count}");
 
                 return true;
             }
@@ -787,45 +920,7 @@ namespace InsaneDifficultyMod.Events
             return false;
         }
 
-        public void ReformatBuildings(bool force = false)
-        {
-            ArrayExt<Building> buildings = Player.inst.GetBuildingListForLandMass(landmass);
-            List<KeyValuePair<Guid, RiotBuildingMeta>> toRemove = new List<KeyValuePair<Guid, RiotBuildingMeta>>();
-            foreach (var meta in keyedBuildings)
-                if (!buildings.Contains(meta.Value.target))
-                    toRemove.Add(meta);
-
-            foreach (var pair in toRemove)
-            {
-                keyedBuildings.Remove(pair.Key);
-                orderedBuildings.Remove(pair.Value);
-
-                for (int i = 0; i < pair.Value.villagers.Count; i++)
-                    villagerMetas[pair.Value.indices[i]].location = null;
-                pair.Value.villagers.Clear();
-                pair.Value.indices.Clear();
-            }
-
-            for (int i = 0; i < buildings.Count; i++)
-            {
-                if (!keyedBuildings.ContainsKey(buildings.data[i].guid))
-                {
-                    keyedBuildings.Add(buildings.data[i].guid, new RiotBuildingMeta() { target = buildings.data[i] });
-                    orderedBuildings.Add(keyedBuildings[buildings.data[i].guid]);
-                }
-            }
-
-            orderedBuildings.Sort((meta, other) =>
-            {
-                if (meta == null || other == null)
-                    return 0;
-                if (meta.Reference != null && other.Reference != null)
-                    return other.priority - meta.priority;
-                return 0;
-            });
-
-            ReformatAssignments(force);
-        }
+        
 
         public void ReformatAssignments(bool force = false)
         {
@@ -872,6 +967,8 @@ namespace InsaneDifficultyMod.Events
             {
                 RiotBuildingMeta meta = this.orderedBuildings[i];
 
+                DebugExt.Log(meta.capacity.ToString());
+
                 if (meta.villagers.Count < meta.capacity)
                     return meta;
             }
@@ -897,9 +994,9 @@ namespace InsaneDifficultyMod.Events
             ShiftIndicesLeft(index);
 
             if (returnToPlayer)
-                Player.inst.ReturnPerson(villager, villager.pos);
+                Player.inst.ReturnPerson(villager, villager.Pos);
             else
-                villager.Release();
+                World.inst.RemoveVillagerFromLandmass(villager);
         }
 
         public void ShiftIndicesLeft(int displaced)
@@ -937,7 +1034,7 @@ namespace InsaneDifficultyMod.Events
             }
         }
 
-        public class RiotBuildingMeta
+        public class RiotBuildingMeta : IEmployer
         {
             public List<Villager> villagers { get; } = new List<Villager>();
             public List<int> indices { get; } = new List<int>();
@@ -967,6 +1064,8 @@ namespace InsaneDifficultyMod.Events
                 }
             }
 
+            public Riot riot;
+
             public int capacity => Reference != null ? Reference.capacity : 0;
 
             public void Add(Villager villager, int index)
@@ -975,6 +1074,12 @@ namespace InsaneDifficultyMod.Events
                     Riot.DisableBuilding(target);
                 this.villagers.Add(villager);
                 this.indices.Add(index);
+
+                RioterJob job = new RioterJob(this) { index = index };
+                JobSystem.inst.AddNewJob(job);
+                job.AssignEmployee(villager);
+
+                DebugExt.Log("recruited rioter", true, KingdomLog.LogStatus.Neutral, villager.Pos);
             }
 
             public int IndexOf(Villager villager)
@@ -984,6 +1089,57 @@ namespace InsaneDifficultyMod.Events
                         return i;
                 return -1;
             }
+
+            public Vector3 GetPositionForPerson(Villager p)
+            {
+                int indexInBuilding = villagers.IndexOf(p);
+                return reference.FillNext(target, indexInBuilding, capacity);
+            }
+
+            public bool IsOpen()
+            {
+                return true;
+            }
+
+            public void OnAssigned(Villager p)
+            {
+                
+            }
+
+            public void OnUnAssigned(Villager p)
+            {
+                int indexInBuilding = villagers.IndexOf(p);
+
+                riot.RemoveVillager(indices[indexInBuilding]);
+
+                villagers.RemoveAt(indexInBuilding);
+                indices.RemoveAt(indexInBuilding);
+
+                Reformat();
+
+                DebugExt.Log($"Villager left riot: {p.name}", true);
+            }
+
+            public void Reformat()
+            {
+                if(villagers.Count == 0)
+                {
+                    // TODO: procedure for riot in which all people have died or reallocated
+                }
+
+
+                for(int i = 0; i < villagers.Count; i++)
+                {
+                    villagers[i].SetWorkPosition(GetPositionForPerson(villagers[i]));
+                    villagers[i].MoveToDeferred(GetPositionForPerson(villagers[i]));
+                }
+            }
+
+            public string GetUsedSkill() => "";
+
+            public int LandMass() => target.LandMass();
+
+            public JobCategory GetJobCategory() => JobCategory.Undefined;
         }
 
         [HarmonyPatch(typeof(OutputUI), "Update")]

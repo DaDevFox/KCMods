@@ -39,9 +39,9 @@ namespace Elevation
         /// <summary>
         /// If this funciton returns true on a node, it can be used to travel from the path to the upper grid or vice versa
         /// </summary>
-        public static Func<Node, bool> CheckIntergridTravel { get; } = (n) => n.cell.isStairs;
+        public static Func<Node, bool> CheckIntergridTravel { get; } = (n) => World.inst.GetPathCell(n.cell).isStairs;
 
-        public static Func<Cell, int, bool> BlocksPath { get; } = (cell, team) =>
+        public static Func<PathCell, int, bool> BlocksPath { get; } = (cell, team) =>
         {
             return cell.Type == ResourceType.Water;
         };
@@ -132,8 +132,8 @@ namespace Elevation
         /// <returns></returns>
         public static Node GetAt(Cell cell, bool upperGrid = false)
         {
-            if (cell == null)
-                return null;
+            //if (cell == null)
+            //    return null;
             string id = CellMetadata.GetPositionalID(cell);
             return upperGrid ?
                 (_upperGrid.ContainsKey(id) ? _upperGrid[id] : null) :
@@ -150,8 +150,8 @@ namespace Elevation
         public static Node GetAt(int x, int z, bool upperGrid = false)
         {
             //Check for out of bounds coordinates
-            if (new Vector3(x, 0f, z) != World.inst.ClampToWorld(new Vector3(x, 0f, z)))
-                return null;
+            //if (new Vector3(x, 0f, z) != World.inst.ClampToWorld(new Vector3(x, 0f, z)))
+            //    return null;
             string id = CellMetadata.GetPositionalID(x, z);
             return upperGrid ?
                 (_upperGrid.ContainsKey(id) ? _upperGrid[id] : null) :
@@ -161,12 +161,12 @@ namespace Elevation
         public static Node GetClosestUnblocked(Node node, int team, Pathfinder.blocksPathTest blocks, bool upperGrid)
         {
             Node found = null;
-            if (blocks(node.cell, team) || node.connected.Count == 0)
+            if (blocks(World.inst.GetPathCell(node.cell), team) || node.connected.Count == 0)
             {
                 Cell cell = World.inst.FindMatchingSurroundingCell(node.cell, false, 2, c =>
                 {
                     Node n = GetAt(c);
-                    return !(blocks(c, team) && n.connected.Count != 0 && n.upperGrid == upperGrid);
+                    return !(blocks(World.inst.GetPathCell(c), team) && n.connected.Count != 0 && n.upperGrid == upperGrid);
                 });
 
                 found = cell != null ? GetAt(cell, upperGrid) : null;
@@ -267,8 +267,8 @@ namespace Elevation
             List<Node> openSet = new List<Node>();
             List<Node> closedSet = new List<Node>();
 
-            Cell startCell = World.inst.GetCellDataClamped(World.inst.ClampToWorld(startPos));
-            Cell endCell = World.inst.GetCellDataClamped(World.inst.ClampToWorld(endPos));
+            Cell startCell = World.inst.GetCellDataClamped((startPos));
+            Cell endCell = World.inst.GetCellDataClamped((endPos));
 
             Node start = GetAt(startCell, upperGridStart);
             Node end = GetAt(endCell, upperGridEnd);
@@ -329,11 +329,11 @@ namespace Elevation
                 for (int i = 0; i < connected.Count; i++)
                 {
                     KeyValuePair<Node, float> connection = connected.ElementAt(i);
-                    if (blocks(connection.Key.cell, team) || closedSet.Contains(connection.Key))
+                    if (blocks(World.inst.GetPathCell(connection.Key.cell), team) || closedSet.Contains(connection.Key))
                         continue;
 
                     float connectionCost = current.g +
-                        (CostPerNode * Dist(current, connection.Key) * connection.Value * extraCost(connection.Key.cell, team));
+                        (CostPerNode * Dist(current, connection.Key) * connection.Value * extraCost(World.inst.GetPathCell(connection.Key.cell), team));
 
                     if (connectionCost < connection.Key.g || !openSet.Contains(connection.Key))
                     {
@@ -387,7 +387,7 @@ namespace Elevation
                 while (parent != null)
                 {
                     bool flag = LineBlock(node, parent, extraCost, blocks, teamId);
-                    if (node.cell.isUpperGridBlocked && flag)
+                    if (World.inst.GetPathCell(node.cell).isUpperGridBlocked && flag)
                     {
                         node.parent = parent;
                         if (parent == start)
@@ -420,7 +420,7 @@ namespace Elevation
                 int x2 = b.cell.x;
                 int z2 = b.cell.z;
                 float y = a.cell.Center.y;
-                int startCost = extraCost(a.cell, teamId);
+                int startCost = extraCost(World.inst.GetPathCell(a.cell), teamId);
                 int num4 = Mathf.Abs(x2 - x1);
                 int num5 = (x1 >= x2) ? -1 : 1;
                 int num6 = Mathf.Abs(z2 - z1);
@@ -430,7 +430,7 @@ namespace Elevation
                 for (; ; )
                 {
                     Node node = a.upperGrid ? _upperGrid[a.id] : _pathGrid[a.id];
-                    if (GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(node.cell, teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
+                    if (GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(World.inst.GetPathCell(node.cell), teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
                     {
                         break;
                     }
@@ -446,7 +446,7 @@ namespace Elevation
                         {
 
                             node = GetAt(x1, z1 + num7, a.upperGrid);
-                            if (node == null || GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(node.cell, teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
+                            if (node == null || GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(World.inst.GetPathCell(node.cell), teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
                             {
                                 goto IL_1C3;
                             }
@@ -463,7 +463,7 @@ namespace Elevation
                         if ((float)(num4 - num10) < num9)
                         {
                             node = GetAt(num11 + num5, z1, a.upperGrid);
-                            if (node == null || GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(node.cell, teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
+                            if (node == null || GetPathBlocked(node, blockFunc, teamId) || startCost != extraCost(World.inst.GetPathCell(node.cell), teamId) || Mathf.Abs(node.cell.Center.y - y) > 0.01f)
                             {
                                 goto IL_25C;
                             }
@@ -492,12 +492,12 @@ namespace Elevation
         {
             if (n.upperGrid != true)
             {
-                if (bt(n.cell, teamId))
+                if (bt(World.inst.GetPathCell(n.cell), teamId))
                 {
                     return true;
                 }
             }
-            else if (n.cell.isUpperGridBlocked)
+            else if (World.inst.GetPathCell(n.cell).isUpperGridBlocked)
             {
                 return true;
             }

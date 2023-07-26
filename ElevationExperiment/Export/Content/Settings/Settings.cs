@@ -319,11 +319,11 @@ namespace Elevation
 
         #region Debug
 
-        public static bool debug = true;
+        public static bool debug = false;
 
 
-        public static KeyCode keycode_refreshTerrain { get; } = KeyCode.KeypadMinus;
-        public static KeyCode keycode_refreshTile { get; } = KeyCode.KeypadPlus;
+        public static KeyCode keycode_refreshTerrain { get; } = KeyCode.Minus;
+        public static KeyCode keycode_refreshTile { get; } = KeyCode.Equals;
 
         public static KeyCode keycode_raise { get; } = KeyCode.R;
         public static KeyCode keycode_lower { get; } = KeyCode.F;
@@ -362,6 +362,7 @@ namespace Elevation
         public static KeyCode keycode_topDownView = KeyCode.T;
         public static ElevationBiasType elevationBiasType = ElevationBiasType.Min;
 
+        public static bool useTerrainTexture = true;
         public static Dictionary<string, Dictionary<int,UnityEngine.Color>> elevationColorPresets = new Dictionary<string, Dictionary<int, UnityEngine.Color>>() 
         {
             { "Default", new Dictionary<int, UnityEngine.Color>()
@@ -475,6 +476,7 @@ namespace Elevation
         {
             Grid.Setup();
             MapGenerator.Generate();
+            ElevationManager.RefreshTerrain();
         }
 
         private static void OnColorPresetChanged(SettingsEntry entry)

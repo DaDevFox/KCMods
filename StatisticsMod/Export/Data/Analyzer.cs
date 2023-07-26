@@ -32,6 +32,11 @@ namespace StatisticsMod.Data
             int estRequiredFood = GetEstimatedRequiredFoodForPeople(numPeople, sampleData);
             Player.Production production = Analytics.GetGameCalculatedProductionForKingdom();
 
+            return estRequiredFood - (int)GetFoodProduction();
+        }
+
+        public static int GetFoodProduction()
+        {   
             float estFoodProductionW = Analytics.GetProductionPowerForResourceInKingdom(FreeResourceType.Wheat);
             float estFoodProductionA = Analytics.GetProductionPowerForResourceInKingdom(FreeResourceType.Apples);
             float estFoodProductionF = Analytics.GetProductionPowerForResourceInKingdom(FreeResourceType.Fish);
@@ -44,7 +49,7 @@ namespace StatisticsMod.Data
                 estFoodProductionF +
                 estFoodProductionP;
 
-            return estRequiredFood - (int)estFoodProduction;
+            return (int)estFoodProduction;
         }
 
         public static int GetEstimatedRequiredFoodForPeople(int numPeople, List<YearData> sampleData)

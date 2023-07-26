@@ -4,6 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fox.Rendering.VoxelRendering;
+using Elevation;
+using System.Reflection;
+using Language.Lua;
+using Elevation.Patches;
+using static PixelCrushers.InstantiatePrefabs;
 
 namespace Elevation
 {
@@ -13,9 +18,12 @@ namespace Elevation
     public class VoxelRenderingMode : RenderingMode
     {
         private VoxelDataRenderer voxels;
+        private VoxelDataRenderer[] chunks;
         private Mesh mesh;
+        private Mesh[] meshes;
+        private Material[] materials;
 
-        public bool setup = false;
+        public bool setup { get; private set; } = false;
 
         public override void Init()
         {
@@ -25,54 +33,85 @@ namespace Elevation
 
         public override void Setup()
         {
-            if (voxels == null)
-                return;
-
-            Voxel[,,] data = new Voxel[World.inst.GridWidth, ElevationManager.maxElevation + 1, World.inst.GridHeight];
-
-            for (int x = 0; x < World.inst.GridWidth - 1; x++)
+            try
             {
-                for(int z = 0; z < World.inst.GridHeight - 1; z++)
+                ColorManager.terrainMat = new Material(Shader.Find("Custom/Snow2"));
+
+                ColorManager.terrainMat.enableInstancing = true;
+                ColorManager.terrainMat.color = Color.white;
+                ColorManager.terrainMat.mainTexture = ColorManager.elevationMap;
+
+                chunks = new VoxelDataRenderer[TerrainGen.inst.terrainChunks.Count];
+                meshes = new Mesh[TerrainGen.inst.terrainChunks.Count];
+                materials = new Material[TerrainGen.inst.terrainChunks.Count];
+
+                for (int i = 0; i < chunks.Length; i++)
                 {
-                    for(int y = 0; y < ElevationManager.maxElevation; y++)
-                    {
-                        //Cell cell = World.inst.GetCellData(x, z);
-                        CellMeta meta = Grid.Cells.Get(x, z);
-
-                        data[x, y, z] = new Voxel();
-
-                        if (meta != null && y <= meta.elevationTier)
-                        {
-                            data[x, y, z].opacity = 1f;
-                            data[x, y, z].uvOffset = new Vector2(y, 0f);
-                        }
-                        else
-                            data[x, y, z].opacity = 0f;
-
-                        if (y == 0 || y == 2)
-                            data[x, y, z].opacity = 0f;
-
-                        if (x % 3 == 0)
-                            data[x, y, z].opacity = 0f;
-                        if (z % 4 == 0)
-                            data[x, y, z].opacity = 1f;
-
-
-                        data[x, y, z].index = new Vector3Int(x, y, z);
-                    }
+                    chunks[i] = new VoxelDataRenderer();
                 }
+
+                if (voxels == null)
+                    return;
+
+                for (int i = 0; i < TerrainGen.inst.terrainChunks.Count; i++)
+                {
+                    TerrainChunk chunk = TerrainGen.inst.terrainChunks[i];
+                    Voxel[,,] chunkData = new Voxel[chunk.SizeX, ElevationManager.maxElevation + 1, chunk.SizeZ];
+
+                    for (int z = 0; z < chunk.SizeZ; z++)
+                    {
+                        for (int x = 0; x < chunk.SizeX; x++)
+                        {
+                            for (int y = 0; y <= ElevationManager.maxElevation; y++)
+                            {
+                                try
+                                {
+                                    CellMeta meta = Grid.Cells.Get(chunk.x/2 + x, chunk.z/2 + z);
+
+                                    chunkData[x, y, z] = new Voxel();
+
+                                    if (meta != null && y
+                                        < meta.elevationTier
+                                        //< 8 - i
+                                        )
+                                    {
+                                        chunkData[x, y, z].opacity = 1f;
+                                        chunkData[x, y, z].uvOffset = new Vector2(y, 0f);
+                                    }
+                                    else
+                                    {
+                                        chunkData[x, y, z].opacity = 0f;
+                                    }
+
+                                    chunkData[x, y, z].index = new Vector3Int(x, y, z);
+                                }
+                                catch(Exception ex)
+                                {
+                                    Mod.Log($"Exception updating chunk {i}: ${ex}");
+                                }
+                            }
+                        }
+                    }
+
+                    chunks[i].dimensions = new Vector3Int(chunkData.GetLength(0), chunkData.GetLength(1), chunkData.GetLength(2));
+                    chunks[i].position = new Vector3Int(chunk.x/2, 0, chunk.z/2);
+                    chunks[i].data = chunkData;
+                    meshes[i] = chunks[i].Rebuild(chunkData);
+                    materials[i] = chunk.GetComponent<MeshRenderer>().material;
+
+                    Mod.dLog($"chunk {i} (x={chunk.x},z={chunk.z},w={chunk.SizeX * 2},h={chunk.SizeZ * 2}): built mesh given {chunkData.Length} voxels and with {chunks[i].mesh.vertexCount} vertices");
+                }
+
+                Mod.dLog("Finished grid setting");
             }
-
-            Mod.dLog("Finished grid setting");
-
-            voxels.dimensions = new Vector3Int(World.inst.GridWidth, ElevationManager.maxElevation + 1, World.inst.GridHeight);
-            voxels.voxelSize = 1f;
-            voxels._32BitBuffer = true;
-            mesh = voxels.Rebuild(data);
+            catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
 
             setup = true;
 
-            Mod.dLog("Voxel Rendering Mode Initialized");
+            Mod.Log("Voxel Rendering Mode Initialized");
         }
 
         public override void Update(Cell cell, bool forced = false)
@@ -80,17 +119,34 @@ namespace Elevation
             if (!setup)
                 return;
 
-            cell.CheckNull("cell");
+            if (cell == null)
+                return;
 
             int x = cell.x;
             int z = cell.z;
 
-            CellMeta meta = Grid.Cells.Get(cell);
+            int chunkX = x / TerrainGen.inst.chunkSize;
+            int chunkZ = z / TerrainGen.inst.chunkSize;
 
-            if (meta)
-                for (int i = ElevationManager.minElevation; i < ElevationManager.maxElevation; i++)
-                    if(voxels.GetAt(x, i, z))
-                        voxels[x, i, z].opacity = i <= meta.elevationTier ? 1f : 0f;
+            int index = chunkX + chunkZ * Mathf.CeilToInt((float)World.inst.GridWidth / (float)TerrainGen.inst.chunkSize);
+
+            VoxelDataRenderer chunk = ((VoxelRenderingMode)RenderingMode.current).chunks[index];
+
+            CellMeta meta = Grid.Cells.Get(cell);
+            try
+            {
+                if (meta && chunk != null)
+                    for (int i = ElevationManager.minElevation; i < ElevationManager.maxElevation; i++)
+                        if (chunk.GetAt(x, i, z))
+                            chunk[x, i, z].opacity = i <= meta.elevationTier ? 1f : 0f;
+
+                // Partially broken
+                chunk.Rebuild();
+            }
+            catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
         }
 
         public override void UpdateAll(bool forced = false)
@@ -102,8 +158,39 @@ namespace Elevation
         {
             if (!setup)
                 return;
-            Graphics.DrawMesh(mesh, new Vector3(0f, 0f, 0f), Quaternion.identity, ColorManager.terrainMat, 0);
+
+            ColorManager.terrainMat.SetFloat("_Snow", TerrainGen.inst.GetSnowFade());
+            
+            for(int i = 0; i < chunks.Length; i++)
+            {
+                Graphics.DrawMesh(meshes[i], Matrix4x4.TRS(chunks[i].position, Quaternion.identity, new Vector3(1f, ElevationManager.elevationInterval, 1f)), Settings.useTerrainTexture ? materials[i] : ColorManager.terrainMat, 0);
+            }
         }
+
+        public VoxelDataRenderer GetAt(Vector3 position) => GetAt((int)position.x, (int)position.z);
+
+        public VoxelDataRenderer GetAt(int x, int z)
+        {
+            int chunkX = x / TerrainGen.inst.chunkSize;
+            int chunkZ = z / TerrainGen.inst.chunkSize;
+
+
+            int index = chunkX + chunkZ * Mathf.CeilToInt(World.inst.GridWidth / (float)TerrainGen.inst.chunkSize);
+
+            return chunks[index];
+        }
+
+        public Voxel GetVoxelAt(int globalX, int globalY, int globalZ)
+        {
+            VoxelDataRenderer chunk = GetAt(globalX, globalZ);
+            if (chunk == null)
+                return null;
+            return chunk.GetAt(globalX % TerrainGen.inst.chunkSize, globalY, globalZ % TerrainGen.inst.chunkSize);
+        }
+
+        public Voxel GetVoxelAt(Vector3Int globalPosition) => GetVoxelAt(globalPosition.x, globalPosition.y, globalPosition.z);
+
+        public Voxel GetVoxelAt(VoxelDataRenderer chunk, int localX, int localY, int localZ) => chunk.GetAt(localX, localY, localZ);
     }
 }
 
@@ -119,6 +206,8 @@ namespace Fox.Rendering.VoxelRendering
 
         #region Settings
 
+        public Vector3Int position;
+
         /// <summary>
         /// The number of elements in each dimension of this chunk
         /// </summary>
@@ -127,6 +216,8 @@ namespace Fox.Rendering.VoxelRendering
         /// The world space size 1 voxel index represents
         /// </summary>
         public float voxelSize = 1f;
+
+        public float yTilingScale = 1f;
 
         /// <summary>
         /// divets create minor variations in the center point of each quad face
@@ -139,6 +230,8 @@ namespace Fox.Rendering.VoxelRendering
         /// <para>doubles memory footprint but allows up to 4 billion vertices versus the traditional 65535 vertex limit.  </para>
         /// </summary>
         public bool _32BitBuffer = true;
+
+        public bool closeOuterEdges = true;
 
         public Vector2 textureSize;
 
@@ -185,10 +278,17 @@ namespace Fox.Rendering.VoxelRendering
             }
 
             mesh = new Mesh();
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            List<Vector3> normals = new List<Vector3>();
+            List<Vector2> uv = new List<Vector2>();
             int master = 0;
 
             if (_32BitBuffer)
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+
+            bool hasTransparent = false;
 
             Loop((voxel) =>
             {
@@ -198,9 +298,14 @@ namespace Fox.Rendering.VoxelRendering
 
                 Vector3[] faceNormals = GetFaces(voxel);
 
+                if (faceNormals.Length > 0)
+                    hasTransparent = true;
+
                 foreach (Vector3 normal in faceNormals)
                 {
-                    Quad face = divetVariation > 0f ?
+                    bool divet = divetVariation > 0f && normal.y > 0f;
+
+                    Quad face = divet ?
                             RendererUtil.NinePointQuad(
                             new Vector2(voxelSize, voxelSize),
                             new Vector3(x, y, z) * voxelSize,
@@ -211,27 +316,46 @@ namespace Fox.Rendering.VoxelRendering
                             master);
                     face = face.SetRotation(
                             normal,
-                            new Vector3(voxelSize / 2f, voxelSize / 2f, voxelSize / 2f) +
+                            new Vector3(voxelSize * 0.5f, voxelSize * 0.5f, voxelSize * 0.5f) +
                             new Vector3(x, y, z) * voxelSize,
                             Vector3.up
                             );
 
-                    if (divetVariation > 0f)
-                        face.vertices[3] = face.vertices[3] + (normal * UnityEngine.Random.Range(-divetVariation, divetVariation));
+                    if (divet)
+                        face.vertices[3] = face.vertices[3] + (normal * UnityEngine.Random.Range(0f, divetVariation));
 
-                    for (int i = 0; i < face.vertices.Length; i++)
-                        face.uvs[i] = (face.uvs[i] / textureSize) - new Vector2(buffer, buffer)
-                        + (voxel.uvOffset / textureSize)
-                        ;
 
-                    mesh.Add(face);
+                    if (Settings.useTerrainTexture)
+                        for (int i = 0; i < face.vertices.Length; i++)
+                            face.uvs[i] = new Vector2((float)(x)/((float)dimensions.x) + buffer, ((float)z)/((float)dimensions.z) + buffer);
+                    else
+                        for (int i = 0; i < face.vertices.Length; i++)
+                            face.uvs[i] = new Vector2(1f - buffer, ((float)y) / ((float)ElevationManager.maxElevation) - buffer);
+
+                    vertices.AddRange(face.vertices);
+                    triangles.AddRange(face.triangles);
+                    normals.AddRange(face.normals);
+                    uv.AddRange(face.uvs);
 
                     master += face.vertices.Length;
                 }
             });
 
+            //IMS426120816
+            //IMN500812677
+            //LMS890122356
+            //IMN2663310
+            //IMS108469851
+
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+            mesh.normals = normals.ToArray();
+            mesh.uv = uv.ToArray();
+
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
+
+            Mod.dLog($"Mesh built; has transparent: {hasTransparent}");
 
             return mesh;
         }
@@ -261,8 +385,10 @@ namespace Fox.Rendering.VoxelRendering
             {
                 Voxel neighbor = GetAt(new Vector3Int((int)vector.x, (int)vector.y, (int)vector.z) + voxel.index);
                 if (neighbor != null)
-                    if (neighbor.opacity <= 0f)
+                    if (neighbor.opacity <= 0f || !InDimensions(neighbor.index)) // if not in dimensions but not null (meaning voxel exists), it is an external voxel, not an open face. 
                         found.Add(vector);
+                if (neighbor == null && closeOuterEdges)
+                    found.Add(vector);
             }
 
             return found.ToArray();
@@ -275,6 +401,27 @@ namespace Fox.Rendering.VoxelRendering
         /// <returns></returns>
         public virtual Voxel External(Vector3Int index)
         {
+            try
+            {
+                bool exists = ((VoxelRenderingMode)RenderingMode.current) != null;
+                if (index != null && exists && !InDimensions(index))
+                {
+                    VoxelDataRenderer adjacent = ((VoxelRenderingMode)RenderingMode.current).GetAt(position + index);
+                    if (adjacent != null)
+                    {
+                        Vector3Int adjacentIndex = new Vector3Int(Mathf.Abs(index.x % TerrainGen.inst.chunkSize), index.y, index.z % TerrainGen.inst.chunkSize);
+                        if (adjacent.data != null && adjacent.InDimensions(adjacentIndex))
+                            return adjacent.data[adjacentIndex.x, adjacentIndex.y, adjacentIndex.z];
+                    }
+
+                    //Mod.dLog($"{Mathf.Abs(index.x % TerrainGen.inst.chunkSize)}, {index.y}, {index.z % TerrainGen.inst.chunkSize}");
+                }
+                //if(!InDimensions(index) && ((VoxelRenderingMode)RenderingMode.current) != null)
+                //    return ((VoxelRenderingMode)RenderingMode.current).GetVoxelAt(position + index);
+            }catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
             return null;
         }
 
@@ -288,7 +435,9 @@ namespace Fox.Rendering.VoxelRendering
             }
             Voxel external = External(index);
             if (external != null && external.opacity <= 0f)
+            {
                 return external;
+            }
             return null;
         }
 

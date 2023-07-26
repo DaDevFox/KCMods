@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Elevation;
 using Fox.Utils;
+using System.Runtime.CompilerServices;
 
 namespace Fox.Rendering
 {
     public class MultiMeshSystem
     {
-        private Dictionary<string, InstanceMeshSystem> _systems = new Dictionary<string, InstanceMeshSystem>();
+        private bool clearDeferred = false;
+        public Dictionary<string, InstanceMeshSystem> _systems = new Dictionary<string, InstanceMeshSystem>();
 
 
         public void AddSystem(string id, Mesh mesh, Material mat) => _systems.Add(id, new InstanceMeshSystem(mesh, mat));
@@ -22,9 +24,26 @@ namespace Fox.Rendering
         {
             foreach (KeyValuePair<string, InstanceMeshSystem> pair in _systems)
                 pair.Value.Update();
+
+            if (clearDeferred)
+            {
+                _systems.Clear();
+                clearDeferred = false;
+            }
         }
 
-        public void Clear() => _systems.Clear();
+        public void Clear()
+        {
+            foreach (InstanceMeshSystem system in _systems.Values)
+                system.Clear();
+
+            _systems.Clear();
+        }
+
+        public void ClearDeferred()
+        {
+            clearDeferred = true;
+        }
 
         public InstanceMeshSystem this[string systemId]
         {
@@ -42,6 +61,8 @@ namespace Fox.Rendering
 
         private Dictionary<int, Dictionary<int, ItemData>> _items = new Dictionary<int, Dictionary<int, ItemData>>();
         private Dictionary<int, Dictionary<int, Matrix4x4>> _matrices = new Dictionary<int, Dictionary<int, Matrix4x4>>();
+
+        private List<Tuple<int, int>> toRemoveDeferred = new List<Tuple<int, int>>();
         
         public InstanceMeshSystem(Mesh mesh, Material mat)
         {
@@ -52,7 +73,19 @@ namespace Fox.Rendering
             _matrices.Add(0, new Dictionary<int, Matrix4x4>());
         }
 
-        public Tuple<int,int> GetFreeId()
+        public void Clear()
+        {
+            for (int matrix = 0; matrix < _matrices.Count; matrix++)
+                for (int idx = 0; idx < _matrices[matrix].Count; idx++)
+                    RemoveAt(matrix, idx);
+
+            _matrices.Clear();
+
+            mesh = null;
+            material = null;
+        }
+
+        public System.Tuple<int,int> GetFreeId()
         {
             int foundIdx = -1;
             int foundMatrix = -1;
@@ -81,13 +114,13 @@ namespace Fox.Rendering
                 idx++;
             }
 
-            return new Tuple<int, int>(foundMatrix, foundIdx);
+            return new System.Tuple<int, int>(foundMatrix, foundIdx);
         }
 
 
         public ItemData Add()
         {
-            Tuple<int, int> found = GetFreeId();
+            System.Tuple<int, int> found = GetFreeId();
 
             if (found == null)
                 throw new Exception("Could not find free id");
@@ -180,6 +213,9 @@ namespace Fox.Rendering
                 foreach(Dictionary<int, Matrix4x4> matrices in _matrices.Values)
                     foreach (Matrix4x4 matrix in matrices.Values)
                         UnityEngine.Graphics.DrawMesh(mesh, matrix, material, 0);
+
+            foreach (Tuple<int, int> tuple in toRemoveDeferred)
+                RemoveAt(tuple.Item1, tuple.Item2);
         }
 
         private bool Valid(int matrix, int idx)
@@ -314,6 +350,11 @@ namespace Fox.Rendering
                 return;
 
             _matrices[matrix].Remove(idx);
+        }
+
+        public void RemoveAtDeferred(int matrix, int idx)
+        {
+            toRemoveDeferred.Add(new Tuple<int, int>(matrix, idx));
         }
 
 

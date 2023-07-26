@@ -67,6 +67,8 @@ namespace Elevation
                 Application.logMessageReceived += onLogMessageReceived;
 
             // Harmony
+            if (Settings.debug)
+                HarmonyInstance.DEBUG = true;
             var harmony = HarmonyInstance.Create("harmony");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -87,6 +89,16 @@ namespace Elevation
 
             // Visuals
             Rendering.Init();
+
+            try
+            {
+                // Buildings
+                Buildings.Init();
+            }
+            catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
 
             // Other
             Init?.Invoke();
@@ -121,7 +133,7 @@ namespace Elevation
             // Colors
             ColorManager.Tick();
             // Debug Lines
-            DebugLines.Tick();
+            //DebugLines.Tick();
         }
 
         
@@ -184,7 +196,7 @@ namespace Elevation
                 MapGenerator.Generate();
 
                 // Pathfinding
-                ElevationPathfinder.InitAll(World.inst.GridWidth, World.inst.GridHeight);
+                //ElevationPathfinder.InitAll(World.inst.GridWidth, World.inst.GridHeight);
 
                 // Update Visuals
                 ElevationManager.RefreshTerrain();
@@ -200,12 +212,21 @@ namespace Elevation
 
         public static void OnSave(object sender, OnSaveEvent loadedEvent)
         {
-            LoadSave.SaveDataGeneric("elevation", "grid", Grid.Save());
+            LoadSave.SaveDataGeneric("elevation", "grid", Grid.SaveCells());
+            LoadSave.SaveDataGeneric("elevation", "buildings", Grid.SaveBuildings());
         }
 
         public static void OnLoad(object sender, OnLoadedEvent loadedEvent)
         {
-           Grid.Load(LoadSave.ReadDataGeneric("elevation", "grid"));
+           Grid.LoadCells(LoadSave.ReadDataGeneric("elevation", "grid"));
+            try
+            {
+                Grid.LoadBuildings(LoadSave.ReadDataGeneric("elevation", "buildings"));
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
         #endregion

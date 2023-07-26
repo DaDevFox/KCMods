@@ -43,7 +43,7 @@ namespace Fox.RoadSpeedAdjuster
         public static float stoneRoadSpeed { get => settings.s_stoneRoadSpeed ?? 10f; }
         public static float normalBridgeSpeed { get => settings.s_normalBridgeSpeed ?? 2.5f; }
         public static float stoneBridgeSpeed { get => settings.s_stoneBridgeSpeed ?? 10f; }
-        public static float drawbridgeSpeed { get => settings.s_stoneBridgeSpeed ?? 10f; }
+        public static float drawbridgeSpeed { get => settings.s_drawbridgeSpeed ?? 10f; }
 
 
         private void Preload(KCModHelper helper)
@@ -89,25 +89,26 @@ namespace Fox.RoadSpeedAdjuster
             return Mathf.Round(val / factor) * factor;
         }
 
-        [HarmonyPatch(typeof(World), "GetCellSpeedInfo")]
+        [HarmonyPatch(typeof(Villager), "UpdateSpeed")]
         private class SpeedPatch
         {
-            static void Postfix(Cell cell, ref float speedMod)
+            static void Prefix(Villager __instance)
             {
-                if (cell != null)
+
+                if (__instance.cell != null)
                 {
-                    if (cell.OccupyingStructure.Count > 0)
+                    if (__instance.cell.OccupyingStructure.Count > 0)
                     {
-                        if (cell.OccupyingStructure[0].uniqueNameHash == World.stoneRoadHash)
-                            speedMod = stoneRoadSpeed;
-                        if (cell.OccupyingStructure[0].uniqueNameHash == World.stoneBridgeHash)
-                            speedMod = stoneBridgeSpeed;
-                        if (cell.OccupyingStructure[0].uniqueNameHash == World.roadHash)
-                            speedMod = normalRoadSpeed;
-                        if (cell.OccupyingStructure[0].uniqueNameHash == World.bridgeName.GetHashCode())
-                            speedMod = normalBridgeSpeed;
-                        if (cell.OccupyingStructure[0].uniqueNameHash == World.drawBridgeName.GetHashCode())
-                            speedMod = drawbridgeSpeed;
+                        if (__instance.cell.OccupyingStructure[0].uniqueNameHash == World.stoneRoadHash)
+                            __instance.cell.speedModifier = stoneRoadSpeed;
+                        if (__instance.cell.OccupyingStructure[0].uniqueNameHash == World.stoneBridgeHash)
+                            __instance.cell.speedModifier = stoneBridgeSpeed;
+                        if (__instance.cell.OccupyingStructure[0].uniqueNameHash == World.roadHash)
+                            __instance.cell.speedModifier = normalRoadSpeed;
+                        if (__instance.cell.OccupyingStructure[0].uniqueNameHash == World.bridgeName.GetHashCode())
+                            __instance.cell.speedModifier = normalBridgeSpeed;
+                        if (__instance.cell.OccupyingStructure[0].uniqueNameHash == World.drawBridgeHash)
+                            __instance.cell.speedModifier = drawbridgeSpeed;
                     }
                 }
             }

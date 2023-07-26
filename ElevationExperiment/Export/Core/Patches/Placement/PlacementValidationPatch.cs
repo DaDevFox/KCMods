@@ -13,6 +13,10 @@ namespace Elevation.Patches
 
         public static bool CurrentPlacementOnBlockedCell { get; private set; } = false;
         public static bool ItemOnTerrainInvalid { get; private set; } = false;
+        public static bool InvalidScaffolding { get; private set; } = false;
+        public static bool LimitForScaffolding { get; private set; } = false;
+        public static bool InvalidDugout { get; private set; } = false;
+        public static bool LimitForDugout { get; private set; } = false;
 
 
         static void Postfix(Building PendingObj, ref PlacementValidationResult __result)
@@ -29,7 +33,7 @@ namespace Elevation.Patches
                 __result = PlacementValidationResult.MustBeOnFlatLand;
             }
 
-            if (Pathing.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)) && PendingObj.UniqueName != "outpost" && PendingObj.UniqueName != "keep")
+            if (Pathing.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)) && !(PendingObj.UniqueName == "destructioncrew" && (cell.Type == ResourceType.UnusableStone || cell.Type == ResourceType.Stone || cell.Type == ResourceType.IronDeposit)))
             {
                 __result = PlacementValidationResult.OutsideOfTerritory;
                 CurrentPlacementOnBlockedCell = true;
@@ -42,13 +46,51 @@ namespace Elevation.Patches
             if ((meta != null && meta.elevationTier > 0) &&
                 (PendingObj.UniqueName == "aqueduct" || 
                 PendingObj.UniqueName == "reservoir" || 
-                PendingObj.UniqueName == "noria"))
+                PendingObj.UniqueName == "largereservoir" ||
+                PendingObj.UniqueName == "noria" || 
+                PendingObj.UniqueName == "dock" || 
+                PendingObj.UniqueName == "moat"))
             {
                 __result = PlacementValidationResult.WellOnGround;
                 ItemOnTerrainInvalid = true;
             }
             else
                 ItemOnTerrainInvalid = false;
+
+            if (PendingObj.UniqueName == "scaffolding" && Scaffolding.scaffoldedCells.Contains($"{PendingObj.GetCell().x}_{PendingObj.GetCell().z}"))
+            {
+                __result = PlacementValidationResult.CastleBlockNoSupport;
+                InvalidScaffolding = true;
+            }
+            else
+                InvalidScaffolding = false;
+
+            if (PendingObj.UniqueName == "dugout" && Dugout.dugoutCells.Contains($"{PendingObj.GetCell().x}_{PendingObj.GetCell().z}"))
+            {
+                __result = PlacementValidationResult.CastleBlockNoSupport;
+                InvalidDugout = true;
+            }
+            else
+                InvalidDugout = false;
+
+            if (meta)
+            {
+                if (PendingObj.UniqueName == "scaffolding" && meta.elevationTier == ElevationManager.maxElevation)
+                {
+                    __result = PlacementValidationResult.CastleBlockNoSupport;
+                    LimitForScaffolding = true;
+                }
+                else
+                    LimitForScaffolding = false;
+
+                if (PendingObj.UniqueName == "dugout" && meta.elevationTier == 0)
+                {
+                    __result = PlacementValidationResult.CastleBlockNoSupport;
+                    LimitForDugout = true;
+                }
+                else
+                    LimitForDugout = false;
+            }
         }
     }
 
@@ -58,11 +100,22 @@ namespace Elevation.Patches
         static void Postfix(BuildInfoUI __instance)
         {
             if (PlacementValidationPatch.ItemOnTerrainInvalid)
-                __instance.ruleTextUI.text = "This building cannot be placed on elevation, sire. ";
+                __instance.ruleTextUI.text = "This building cannot be placed on elevation, highness. ";
 
             if (PlacementValidationPatch.CurrentPlacementOnBlockedCell)
-                __instance.ruleTextUI.text = "Our builders cannot find a way to reach this tile, sire. ";
+                __instance.ruleTextUI.text = "Our builders cannot find a way to reach this tile, your highness. ";
 
+            if(PlacementValidationPatch.InvalidScaffolding)
+                __instance.ruleTextUI.text = "Scaffolding has already been used on this tile, highness. It cannot safely be elevated any higher.";
+            
+            if(PlacementValidationPatch.LimitForScaffolding)
+                __instance.ruleTextUI.text = "This area is too high to be further landscaped.";
+            
+            if(PlacementValidationPatch.InvalidDugout)
+                __instance.ruleTextUI.text = "A dugout has already been used on this tile, highness. It cannot safely be dug into any more.";
+
+            if (PlacementValidationPatch.LimitForDugout)
+                __instance.ruleTextUI.text = "This area is already at sea level.";
         }
     }
 

@@ -76,7 +76,7 @@ namespace Elevation
 
                 foreach(Cell startingPos in BeginSearchPositions)
                 {
-                    List<Vector3> path = new List<Vector3>();
+                    ArrayExt<Vector3> path = new ArrayExt<Vector3>(World.inst.GridHeight*World.inst.GridWidth);
                     World.inst.FindFootPath(startingPos.Center, c.Center, ref path);
                     if (path.Count <= 2)
                         Unreachable.Add(c);

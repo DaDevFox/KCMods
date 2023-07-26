@@ -10,6 +10,22 @@ namespace Elevation
 {
     public static class BuildingFormatter
     {
+        public static Dictionary<string, float> offsets = new Dictionary<string, float>()
+        {
+            { "road", 0.05f },
+            { "stoneroad", 0.05f },
+            { "garden", 0.1f },
+            { "farm", 0.05f },
+            { "townsquare", 0.01f },
+            { "largefountain", 0.01f },
+            { "cemetery", 0.01f },
+            { "cemetery44", 0.01f },
+            { "cemeteryCircle", 0.01f },
+            { "cemeteryDiamond", 0.01f }
+        };
+
+        public static float defaultOffset = 0.005f;
+
         public static bool UnevenTerrain(this Building building)
         {
             Cell firstCell = building.GetCell();
@@ -204,9 +220,17 @@ namespace Elevation
             if (meta != null)
             {
                 // Better solution for [Experimental Elevation] required in this case; different buildings will be on different levels; perhaps need a building meta?
-                buidling.transform.localPosition = new Vector3(pos.x, meta.Elevation + stackHeight, pos.z);
+                float offset = offsets.ContainsKey(buidling.UniqueName) ? offsets[buidling.UniqueName] : 0f;
+                
+                buidling.transform.localPosition = new Vector3(pos.x, meta.Elevation + stackHeight + offset, pos.z);
                 buidling.UpdateShaderHeight();
             }
+        }
+
+        public static void UpdateBuildingsOnCell(Cell cell)
+        {
+            foreach(Building building in cell.OccupyingStructure)
+                UpdateBuilding(building);
         }
     }
 }

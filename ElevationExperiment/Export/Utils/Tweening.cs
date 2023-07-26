@@ -7,17 +7,17 @@ public class TweeningManager : MonoBehaviour
     private static TweeningManager instance;
     public static TweeningManager Instance => instance;
 
-    private void Awake()
+    void Awake()
     {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
+        //if (instance != null && instance != this)
+        //{
+        //    Destroy(gameObject);
+        //}
+        //else
+        //{
             instance = this;
             DontDestroyOnLoad(gameObject);
-        }
+        //}
     }
 
     // Tween a value over time, continuously acting on the current value using a lambda function

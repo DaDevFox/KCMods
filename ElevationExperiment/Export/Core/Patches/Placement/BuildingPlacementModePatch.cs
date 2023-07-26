@@ -17,10 +17,11 @@ namespace Elevation.Patches
             
             Cell cell = World.inst.GetCellData(b.transform.position);
             CellMeta meta = Grid.Cells.Get(cell);
-            float leveling = GetLevellingForBuilding(b);
+            //float leveling = GetLevellingForBuilding(b);
             if (cell != null && meta != null)
             {
-                b.transform.position = new Vector3(b.transform.position.x, leveling, b.transform.position.z);
+                //b.transform.position = new Vector3(b.transform.position.x, leveling, b.transform.position.z);
+                BuildingFormatter.UpdateBuilding(b);
             }
         }
 

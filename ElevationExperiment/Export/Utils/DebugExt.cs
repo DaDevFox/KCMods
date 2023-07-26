@@ -13,6 +13,7 @@ namespace Elevation
     {
 
         private static List<int> IDs = new List<int>();
+        private static int ID = 0;
         //private static List<LineRenderer> drawnLines = new List<LineRenderer>();
         //private static List<float> drawnLineDurations = new List<float>();
 
@@ -20,15 +21,16 @@ namespace Elevation
         {
             if (Settings.debug)
             {
-                KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 0.1f : 2f), GameObjectOrVector3);
-                IDs.Add(1);
+                KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + (repeatable ? (ID++).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 0.1f : 2f), GameObjectOrVector3);
+                
+                //IDs.Add(1);
             }
         }
 
         public static void Log(object message, bool repeatable = false, KingdomLog.LogStatus type = KingdomLog.LogStatus.Neutral, object GameObjectOrVector3 = null)
         {
-            KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + IDs.Count + (repeatable ? SRand.Range(0, 1).ToString() : ""), message.ToString(), type, (repeatable ? 1 : 20), GameObjectOrVector3);
-            IDs.Add(1);
+            KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + (repeatable ? (ID++).ToString() : ""), message.ToString(), type, (repeatable ? 1 : 20), GameObjectOrVector3);
+            //IDs.Add(1);
         }
 
         public static void HandleException(Exception ex)

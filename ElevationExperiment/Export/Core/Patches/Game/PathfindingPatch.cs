@@ -1082,26 +1082,26 @@ namespace Elevation.Patches
 			Pathfinder.blocksPathTest bt, Pathfinder.applyExtraCost ec,
 			int teamId)
 		{
-			if (ElevationPathfinder.main != null)
-			{
-				ElevationPathfinder.main.Path(
-					startPos, false,
-					endPos, false,
+			//if (ElevationPathfinder.main != null)
+			//{
+			//	ElevationPathfinder.main.Path(
+			//		startPos, false,
+			//		endPos, false,
 
-					ref path,
+			//		ref path,
 
-					bt,
-					bt,
-					ec,
+			//		bt,
+			//		bt,
+			//		ec,
 
-					teamId,
+			//		teamId,
 
-					false, false, false);
+			//		false, false, false);
 
 
-				return false;
-			}
-			else
+			//	return false;
+			//}
+			//else
 				return true;
 		}
 	}

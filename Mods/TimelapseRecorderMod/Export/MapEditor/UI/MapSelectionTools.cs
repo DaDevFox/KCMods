@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define ALPHA
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,9 +27,15 @@ namespace Fox.Maps
         public static Cell current { get; private set; }
 
         public static Cell mouseDown = null;
-        public static CellMeta[] selection { get; set; }
+        public static CellMeta[] selection { get; set; } = new CellMeta[0];
 
         public static Action held { get; private set; } = null;
+
+#if ALPHA
+        public static bool EditModeActive = false;
+#else
+        public static bool EditModeActive = true;
+#endif
 
         #region Utils
 
@@ -58,13 +66,35 @@ namespace Fox.Maps
             return World.inst.GetCellDataClamped(position);
         }
 
-        #endregion
+#endregion
+
+#if ALPHA
+
+        [HarmonyPatch(typeof(NewMapUI), "OnEdit")]
+        class OnEditPatch
+        {
+            static void Postfix()
+            {
+                EditModeActive = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(NewMapUI), "OnDone")]
+        class OnEditDonePatch
+        {
+            static void Postfix()
+            {
+                EditModeActive = false;
+            }
+        }
+
+#endif
 
         [HarmonyPatch(typeof(MapEdit), "Update")]
-        class SelectionPatch
+        public class SelectionPatch
         {
             public static Color selectedColor = Color.grey;
-
+            
             private static void UpdateCursor()
             {
                 Ray ray = PointingSystem.GetPointer().GetRay();
@@ -79,45 +109,55 @@ namespace Fox.Maps
             {
                 UpdateCursor();
 
-                if (__instance.brushMode == MapEdit.BrushMode.None)
-                {
-                    Cam.inst.disableDrag = true;
+                
 
-                    if (PointingSystem.GetPointer().GetPrimaryDown())
+                    if (__instance.brushMode == MapEdit.BrushMode.None)
                     {
-                        Cell current = MapSelectionTools.current;
+                        Cam.inst.disableDrag = true;
 
-                        if (mouseDown == null)
-                            mouseDown = current;
-                    }
-
-                    if (mouseDown != null)
-                    {
-                        FillCursor(current);
-
-                        if (PointingSystem.GetPointer().GetPrimaryUp())
+                        if (PointingSystem.GetPointer().GetPrimaryDown())
                         {
-                            Select();
-                            mouseDown = null;
+                            Cell current = MapSelectionTools.current;
+
+                            if (mouseDown == null)
+                                mouseDown = current;
+                        }
+
+                        if (mouseDown != null)
+                        {
+                            FillCursor(current);
+                            
+                            if (PointingSystem.GetPointer().GetPrimaryUp() || !EditModeActive)
+                            {
+                                Select();
+                                mouseDown = null;
+
+                                if(!EditModeActive)
+                                {
+                                    if (selection.Length > 0)
+                                        selection = new CellMeta[0];
+                                }
+                            }
+                        }
+                        else if (selection.Length > 0)
+                        {
+                            FillSelected();
+
+
+                            if (PointingSystem.GetPointer().GetSecondaryUp() || !EditModeActive)
+                                selection = new CellMeta[0];
                         }
                     }
-                    else if (selection.Length > 0)
+                    else
                     {
-                        FillSelected();
-
-
-                        if (PointingSystem.GetPointer().GetSecondaryUp())
+                        mouseDown = null;
+                        if (selection.Length > 0)
                             selection = new CellMeta[0];
                     }
-                }
-                else
-                {
-                    mouseDown = null;
-                    if (selection.Length > 0)
-                        selection = new CellMeta[0];
-                }
 
-                UpdateActions();
+
+                    UpdateActions();
+                
             }
 
             
@@ -150,7 +190,7 @@ namespace Fox.Maps
                     if (!held.inited)
                         held.OnInit();
 
-                    if (held.Cancel())
+                    if (held.Cancel() || !EditModeActive)
                         held = null;
 
                     if (held.Tick())
@@ -417,7 +457,7 @@ namespace Fox.Maps
             UpdateDimensions();
 
             // Update Input
-            //UpdateInput();
+            UpdateInput();
 
             // Update the overlay
             UpdateOverlay();
@@ -458,11 +498,14 @@ namespace Fox.Maps
             // Rotate if input read
             if (Input_Rotate())
             {
-                rotationDelta += (Mathf.PI / 2f);
+                rotationDelta += (Mathf.PI / 4f);
                 rotationDelta %= Mathf.PI * 2f;
 
                 if (!transformations.ContainsKey("rotate"))
-                    transformations.Add("rotate", (x, z) => Transformations.Rotate(x, z, ((CopyAction)MapSelectionTools.held).xCenter_untransformed, ((CopyAction)MapSelectionTools.held).zCenter_untransformed, ((CopyAction)MapSelectionTools.held).rotationDelta));
+                    transformations.Add("rotate", (x, z) => 
+                    {
+                        return Transformations.Rotate(x, z, MapSelectionTools.current.x, MapSelectionTools.current.z, rotationDelta);
+                    });
             }
         }
 
@@ -525,7 +568,7 @@ namespace Fox.Maps
             foreach (Transformation transformation in transformations.Values)
             {
                 Tuple<int, int> coords = transformation(x, z);
-                z = coords.Item1;
+                x = coords.Item1;
                 z = coords.Item2;
             }
 
@@ -620,19 +663,23 @@ namespace Fox.Maps
     {
         public static Tuple<int, int> Rotate(int x, int z, int originX, int originZ, float delta = Mathf.PI / 2f)
         {
-            x -= originX;
-            z -= originZ;
+            double _x = (double)originX + Math.Cos(delta) * (x - originX);
+            double _z = (double)originZ + Math.Sin(delta) * (z - originZ);
 
-            int xPrime = (int)(x * Mathf.Cos(delta) - z * Mathf.Sin(delta));
-            int zPrime = (int)(z * Mathf.Cos(delta) + x * Mathf.Sin(delta));
 
-            x = xPrime;
-            z = zPrime;
+            //_x -= originX;
+            //_z -= originZ;
 
-            x += originX;
-            z += originZ;
+            //int xPrime = (int)(x * Mathf.Cos(delta) - z * Mathf.Sin(delta));
+            //int zPrime = (int)(z * Mathf.Cos(delta) + x * Mathf.Sin(delta));
 
-            return new Tuple<int, int>(x, z);
+            //_x = xPrime;
+            //_z = zPrime;
+
+            //_x += originX;
+            //_z += originZ;
+
+            return new Tuple<int, int>((int)_x, (int)_z);
         }
     }
 }

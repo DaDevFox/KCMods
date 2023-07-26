@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Harmony;
 using Fox.Rendering;
+using System.Reflection;
+//using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+//using Language.Lua;
+using Elevation.Utils;
 
 namespace Elevation
 {
@@ -39,7 +43,7 @@ namespace Elevation
 
     public abstract class RenderingMode
     {
-        public static RenderingMode current { get; } = new InstanceRenderingMode();
+        public static RenderingMode current { get; } = new VoxelRenderingMode();
 
         /// <summary>
         /// Called once when the game is first loaded
@@ -124,20 +128,31 @@ namespace Elevation
 
         #region Instances
 
+        private static string SystemKey(CellMeta meta)
+        {
+            //TerrainChunkSelection selection = (TerrainChunkSelection) typeof(TerrainGen).GetMethod("GlobalSpaceToChunkLocal", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(TerrainGen.inst, new object[] { meta.cell.x, meta.cell.z });
+            return SystemKey(meta.elevationTier);
+        }
+
+        private static string SystemKey(int elevationTier) => $"{elevationTier}";
+        
+        //private static string SystemKey(int elevationTier, int chunkX, int chunkZ) => $"{chunkX};{chunkZ}:{elevationTier}";
+
         /// <summary>
         /// Sets up the mesh grid before any elevation data is created
         /// </summary>
         public override void Setup()
         {
             // Clear old mesh data
-            meshSystem.Clear();
+            //meshSystem.Clear();
 
             // Get the primitive cube
             GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Mesh cube = obj.GetComponent<MeshFilter>().mesh;
+            //obj.GetComponent<MeshRenderer>().material = TerrainGen.inst.terrainChunks[0].GetComponent<MeshRenderer>().material;
 
             // Correction
-            //cube.uv = GetCorrectedElevationUVFromMesh(cube.vertices);
+            cube.uv = GetCorrectedElevationUVFromMesh(cube.vertices);
 
             // Create mesh data
             InitTiers(cube, ColorManager.terrainMat);
@@ -151,12 +166,28 @@ namespace Elevation
 
         private static void InitTiers(Mesh mesh, Material mat)
         {
-            for (int i = ElevationManager.minElevation; i < ElevationManager.maxElevation + 1; i++)
+            for (int tier = ElevationManager.minElevation; tier < ElevationManager.maxElevation + 1; tier++)
             {
-                Material tierMat = new Material(mat);
-                //tierMat.mainTextureScale = new Vector3(1f, ColorManager.tilingConstant * (float)i - TierColorBuffer);
+                Material newMat =
+                //new Material(TerrainGen.inst.terrainChunks[chunk].GetComponent<MeshRenderer>().material);
+                //TreeSystem.inst.material;
+                    new Material(Shader.Find("Custom/Snow2"));
 
-                meshSystem.AddSystem(i.ToString(), mesh, tierMat);
+                newMat.mainTextureScale = new Vector3(1f, ColorManager.tilingConstant * (float)tier - TierColorBuffer);
+                //ColorManager.SetElevationMat(tierMat);
+                newMat.enableInstancing = true;
+                newMat.color = Color.white;
+                newMat.mainTexture = ColorManager.elevationMap;
+                //newMat.SetTexture("_MainTex", ColorManager.elevationMap);
+
+                meshSystem.AddSystem(SystemKey(tier), mesh, newMat);
+
+                //for (int chunk = 0; chunk < TerrainGen.inst.terrainChunks.Count; chunk++)
+                //{
+                //    World.inst.SaveTexture(Mod.helper.modPath + $"/chunks/chunk{chunk}.png", (Texture2D)TerrainGen.inst.terrainChunks[chunk].GetComponent<MeshRenderer>().material.GetTexture("_MainTex"));
+                //    Mod.dLog($"chunk uvs: {TerrainGen.inst.terrainChunks[chunk].GetComponent<MeshFilter>().mesh.uv.ToStringList()}");
+                //    Mod.dLog($"block uvs: {mesh.uv.ToStringList()}");
+                //}
             }
         }
 
@@ -172,8 +203,8 @@ namespace Elevation
                     continue;
                 }
 
-                string system = meta.elevationTier.ToString();
-                Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
+                string system = SystemKey(meta);
+                System.Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
 
                 var data = meshSystem[system].Add(result.Item1, Quaternion.identity, result.Item2);
 
@@ -192,30 +223,56 @@ namespace Elevation
         public override void Tick()
         {
             meshSystem.Update();
+            foreach (InstanceMeshSystem system in meshSystem._systems.Values)
+                system.material.SetFloat("_Snow", TerrainGen.inst.GetSnowFade());
+            //baseMaterial.SetFloat("_Snow", TerrainGen.inst.GetSnowFade());
         }
 
         public override void UpdateAll(bool forced = false)
         {
-            foreach (CellMeta meta in Grid.Cells) 
-            {
-                Update(meta.cell, forced);
-                //if (meta.mesh.system == meta.elevationTier.ToString())
-                //    continue;
-                //else
-                //{
-                //    meshSystem[meta.mesh.system].RemoveAt(meta.mesh.matrix, meta.mesh.id);
+            // Clear old mesh data
+            meshSystem.Clear();
 
-                //    Tuple<Vector3, Vector3> result = CalculateTransformScale(meta);
+            // Get the primitive cube
+            GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Mesh cube = obj.GetComponent<MeshFilter>().mesh;
+            //obj.GetComponent<MeshRenderer>().material = TerrainGen.inst.terrainChunks[0].GetComponent<MeshRenderer>().material;
 
-                //    meta.mesh.system = meta.elevationTier.ToString();
+            // Correction
+            cube.uv = GetCorrectedElevationUVFromMesh(cube.vertices);
 
-                //    // OK for struct
-                //    var data = meshSystem[meta.mesh.system].Add(result.Item1, Quaternion.identity, result.Item2);
+            // Create mesh data
+            InitTiers(cube, ColorManager.terrainMat);
 
-                //    meta.mesh.id = data.id;
-                //    meta.mesh.matrix = data.matrix;
-                //}
-            }
+            //World.inst.SaveTexture(Mod.helper.modPath + "/texture.png", ColorManager.terrainMat.mainTexture as Texture2D);
+
+            // Destroy unneccessary GameObject
+            GameObject.Destroy(obj);
+            Mod.dLog("Mesh system reinitialized");
+
+
+            foreach (CellMeta meta in Grid.Cells)
+                Update(meta.cell, true);
+
+            Mod.dLog("Mesh system updated");
+
+            //    //if (meta.mesh.system == meta.elevationTier.ToString())
+            //    //    continue;
+            //    //else
+            //    //{
+            //    //    meshSystem[meta.mesh.system].RemoveAt(meta.mesh.matrix, meta.mesh.id);
+
+            //    //    System.Tuple<Vector3, Vector3> result = CalculateTransformScale(meta);
+
+            //    //    meta.mesh.system = meta.elevationTier.ToString();
+
+            //    //    // OK for struct
+            //    //    var data = meshSystem[meta.mesh.system].Add(result.Item1, Quaternion.identity, result.Item2);
+
+            //    //    meta.mesh.id = data.id;
+            //    //    meta.mesh.matrix = data.matrix;
+            //    //}
+            //}
         }
 
         public override void Update(Cell cell, bool forced = false)
@@ -225,11 +282,12 @@ namespace Elevation
 
             if(meta.mesh.system == null)
             {
-                meta.mesh.system = meta.elevationTier.ToString();
+                meta.mesh.system = SystemKey(meta);
 
-                Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
+                System.Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
 
-                meshSystem[meta.mesh.system].CheckNull("meshSystem" + meta.mesh.system);
+                meshSystem[meta.mesh.system].CheckNull("meshSystem with id: " + meta.mesh.system);
+                meshSystem[meta.mesh.system].material.SetFloat("_Snow", TerrainGen.inst.GetSnowFade());
 
                 var data = meshSystem[meta.mesh.system].Add(result.Item1, Quaternion.identity, result.Item2);
 
@@ -239,7 +297,7 @@ namespace Elevation
                 return;
             }
 
-            if (meta.mesh.system == meta.elevationTier.ToString() && !forced)
+            if (meta.mesh.system == SystemKey(meta) && !forced)
                 return;
             else
             {
@@ -247,9 +305,9 @@ namespace Elevation
 
                 meshSystem[meta.mesh.system].RemoveAt(meta.mesh.matrix, meta.mesh.id);
 
-                Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
+                System.Tuple<Vector3, Vector3> result = CalculatePositionScale(meta);
 
-                meta.mesh.system = meta.elevationTier.ToString();
+                meta.mesh.system = SystemKey(meta);
                 // OK for struct
                 var data = meshSystem[meta.mesh.system].Add(result.Item1, Quaternion.identity, result.Item2);
 
@@ -281,14 +339,14 @@ namespace Elevation
         /// </summary>
         /// <param name="meta"></param>
         /// <returns></returns>
-        private static Tuple<Vector3, Vector3> CalculatePositionScale(CellMeta meta)
+        private static System.Tuple<Vector3, Vector3> CalculatePositionScale(CellMeta meta)
         {
             Cell cell = meta.cell;
 
             Vector3 calculatedPosition = new Vector3(cell.Center.x, ((ElevationManager.elevationInterval / 2) * meta.elevationTier) - (LowerBuffer / 2), cell.Center.z);
             Vector3 calculatedScale = meta.elevationTier != 0 ? new Vector3(1f, (meta.elevationTier * ElevationManager.elevationInterval) + LowerBuffer, 1f) : Vector3.zero;
 
-            return new Tuple<Vector3, Vector3>(calculatedPosition, calculatedScale);
+            return new System.Tuple<Vector3, Vector3>(calculatedPosition, calculatedScale);
         }
 
         #endregion
@@ -367,23 +425,6 @@ namespace Elevation
         #endregion
 
         #endregion
-
-        #endregion
-
-        #region Patches
-
-        [HarmonyPatch(typeof(InstanceManager), "Awake")]
-        public class InstanceManagerSiloCorrection
-        {
-            //static void Postfix(InstanceManager __instance)
-            //{
-            //    typeof(InstanceManager)
-            //        .GetField("InstanceSilos", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            //        .SetValue(__instance, new List<InstanceSilo>(10 + (ElevationManager.maxElevation - ElevationManager.minElevation) + 1));
-            //}
-        }
-
-
 
         #endregion
 

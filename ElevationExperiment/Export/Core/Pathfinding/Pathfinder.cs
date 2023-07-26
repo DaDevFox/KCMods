@@ -180,15 +180,44 @@ namespace Elevation
             bool allowIntergridTravel);
     }
 
+	// test patch
+
+	[HarmonyPatch(typeof(Pathfinder), "AddToOpenSet")]
+	static class NodeAddingPatch
+	{
+		static bool Prefix(Pathfinder.Node node, Pathfinder.Node parent)
+		{
+			CellMeta result = Grid.Cells.Get(node.cell.x, node.cell.z);
+			CellMeta origin = Grid.Cells.Get(parent.cell.x, parent.cell.z);
+
+            if (result != null && origin != null)
+				if (Math.Abs(result.elevationTier - origin.elevationTier) > 1)
+					return false;
+			
+			return true;
+		}
+	}
+
+   // [HarmonyPatch(typeof(World), "FindFootPath")]
+   // static class TestPatch
+   // {
+   //     static void Prefix(Vector3 start, Vector3 end, ArrayExt<Vector3> path, Pathfinder.blocksPathTest blockTest, Pathfinder.blocksPathTest stringPullBlockTest, Pathfinder.applyExtraCost costFunc, int teamId, ref bool doDiagonal)
+   //     {
+			//doDiagonal = false; 
+   //     }
+   // }
+
+
     // Base pathfinding inits before any terrain is generated; this is not possible with Elevation due to the fact that the shape of the terrain affects how the pathfinding needs to be setup
-    
+
 
     [HarmonyPatch(typeof(ThreadedPathing), "CalculatePaths")]
     static class RecalculatePatch
     {
 		static bool Prefix()
         {
-			return false;
+			return true;
+			//return false;
         }
 
         static void Postfix(ThreadedPathing __instance, object data)

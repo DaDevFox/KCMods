@@ -10,11 +10,11 @@ using Assets.Code.Jobs;
 
 namespace Fox.ForestFires
 {
-	public class Mod
+	public class Mod : MonoBehaviour
 	{
 		public static KCModHelper helper;
 
-		void SceneLoaded(KCModHelper helper)
+		private void Preload(KCModHelper helper)
 		{
 			Mod.helper = helper;
 		}
@@ -46,8 +46,8 @@ namespace Fox.ForestFires
 				}
 				else
 				{
-					if (cell.TreeAmount != 0)
-						Mod.helper.Log("Forest Fire Initing");
+					//if (cell.TreeAmount != 0)
+					//	Mod.helper.Log("Forest Fire Initing");
 
 					if (!(cell.busyObj is Fire))
 					{
@@ -66,8 +66,8 @@ namespace Fox.ForestFires
 						}
 						if (!cell.Busy)
 						{
-							if (cell.TreeAmount != 0)
-								Mod.helper.Log("Forest Fire");
+							//if (cell.TreeAmount != 0)
+							//	Mod.helper.Log("Forest Fire");
 
 							Fire fire = FireManager.inst.FirePrefab.Create(cell.Position, FireManager.inst.FirePrefab.transform.rotation);
 							fire.overrideForestChance = _forestChance;
@@ -75,10 +75,12 @@ namespace Fox.ForestFires
 							fire.overrideMeadowChance = _meadowChance;
 							fire.overrideCastleChance = _castleChance;
 							__result = fire;
+							return;
 						}
 					}
-					__result = null;
 				}
+
+				__result = null;
 			}        
 		}
     }

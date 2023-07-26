@@ -9,6 +9,16 @@ namespace Elevation.Utils
 {
     public static class EnumerableExtensions
     {
+        public static string ToStringList<T>(this T[] array, bool returnLine = false)
+        {
+            string result = "[";
+            for (int i = 0; i < array.Length; i++)
+                result += array[i].ToString() + (i + 1 < array.Length ? "," : "") + (returnLine ? "\n" : "");
+
+            result += "]";
+            return result;
+        }
+
         public static T[] Add<T>(this T[] array)
         {
             Array.Resize(ref array, array.Length + 1);

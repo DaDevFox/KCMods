@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Harmony;
 using System.Reflection;
+using System.Diagnostics;
+using System;
 
 namespace Elevation
 {
@@ -20,6 +22,8 @@ namespace Elevation
 
         public Button downButton;
         public Button upButton;
+
+        private static TempTerrainIndicators indicators;
 
         /// <summary>
         /// BrushModes in which elevation will be deleted on target cells
@@ -79,6 +83,7 @@ namespace Elevation
             downButton.onClick.AddListener(OnDownButtonClick);
             upButton.onClick.AddListener(OnUpButtonClick);
 
+            //indicators = new TempTerrainIndicators();
 
             Mod.dLog("Setup Raise/Lower UI");
         }
@@ -146,6 +151,40 @@ namespace Elevation
             AnimateButtonInactive(downButton.gameObject);
         }
 
+        public class TempTerrainIndicators
+        {
+            public List<Cell> displaying = new List<Cell>();
+
+            private Mesh mesh;
+            private Material material;
+
+
+            public void Init()
+            {
+                material = new Material(Shader.Find("Standard"));
+                material.color = Color.blue;
+
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                mesh = cube.GetComponent<MeshFilter>().sharedMesh;
+                GameObject.Destroy(cube);
+                
+                //mesh = UI.terrainVisualIndicatorPrefab.GetComponent<MeshFilter>().mesh;
+                //material = UI.terrainVisualIndicatorPrefab.GetComponent<MeshRenderer>().material;
+            }
+
+            public void Update()
+            {
+                foreach (Cell cell in displaying)
+                {
+                    CellMeta meta = Grid.Cells.Get(cell);
+                    if (meta)
+                    {
+                        Graphics.DrawMesh(mesh, meta.Center, Quaternion.identity, material, 0);
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(MapEdit), "SetBrushMode")]
         class ResetBrushPatch
         {
@@ -199,6 +238,15 @@ namespace Elevation
                 }
 
                 time += Time.deltaTime;
+                
+                //try
+                //{
+                //    indicators.Update();
+                //}
+                //catch(Exception ex)
+                //{
+                //    Mod.dLog(ex);
+                //}
             }
         }
 
@@ -206,6 +254,7 @@ namespace Elevation
         class CenterCellCorrectionPatch
         {
             private static bool clickThisFrame = false;
+            private static bool unclickThisFrame = false;
 
             static void Prefix(MapEdit __instance)
             {
@@ -220,6 +269,14 @@ namespace Elevation
 
                 clickThisFrame = last != hit && hit != null;
                 clickThisFrame &= InputManager.Primary();
+                unclickThisFrame = InputManager.PrimaryUp();
+
+                if (unclickThisFrame)
+                {
+                    Mod.dLog("unclick");
+                    //indicators.displaying.Clear();
+                    ElevationManager.RefreshTerrain(true);
+                }
             }
 
             static void Postfix(MapEdit __instance)
@@ -232,6 +289,23 @@ namespace Elevation
                 //    .GetField("radius", BindingFlags.Instance | BindingFlags.NonPublic)
                 //    .GetValue(__instance) <= 1f)
                 //    return;
+
+                if (__instance.brushMode == MapEdit.BrushMode.None || __instance.brushMode == MapEdit.BrushMode.DeepWater || __instance.brushMode == MapEdit.BrushMode.ShallowWater || __instance.brushMode == MapEdit.BrushMode.Fish)
+                {
+                    Ray ray = PointingSystem.GetPointer().GetRay();
+                    Plane plane = new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, 0f, 0f));
+                    float distance;
+                    plane.Raycast(ray, out distance);
+                    Vector3 point = ray.GetPoint(distance);
+                    Cell hit = World.inst.GetCellData(point);
+
+                    CellMeta meta = Grid.Cells.Get(hit);
+                    if (meta && meta.elevationTier > 0)
+                    {
+                        meta.elevationTier = 0;
+                        //indicators.displaying.Add(meta.cell);
+                    }
+                }
 
                 // Corrects an issue where, with a brush size greater than 1, the center cell gets applied an elevation increase twice
                 if (mode != Mode.None)
@@ -252,9 +326,12 @@ namespace Elevation
 
                         meta.elevationTier += mode == Mode.Raise ? -1 : 1;
                         meta.elevationTier = Mathf.Clamp(meta.elevationTier, ElevationManager.minElevation, ElevationManager.maxElevation);
+                        //indicators.displaying.Add(meta.cell);
                     }
-                    ElevationManager.RefreshTile(hit);
                 }
+                
+                
+
             }
         }
 

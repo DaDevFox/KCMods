@@ -62,6 +62,9 @@
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -88,6 +91,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Export\Content\Buildings\Scaffolding.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Bonuses\RadiusBonusPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\FieldPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\TransportCartPatch.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinderModified.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\PrebakedPathfinder%282%29.cs" />
@@ -107,46 +114,6 @@
     <Compile Include="Export\Libraries\CHusse\PriorityQueue.cs" />
     <Compile Include="Export\Libraries\CHusse\SpatialAStar.cs" />
     <Compile Include="Export\Libraries\Fox\Debugging\DebugLines.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ExceptionTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ExpressionTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\MapData.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ObserverTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\SolutionValidityTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\TestHelper.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\AlgorithmObserverFactory.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\AlgorithmProgress.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\AlgorithmState.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\AStar.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\BestFirstSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\IAlgorithmState.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\IterativeDeepeningAStar.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\RecursiveBestFirstSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\CombinedComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ComparerExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\DefaultComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\DistanceHelper.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Extensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ExtensionsOrderBy.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchBase.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchContains.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchExcept.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchInitial.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchOrderBy.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchSelect.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchSelectMany.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchWhere.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IAlgorithm.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IAlgorithmObserverFactory.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\INode.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\INodeComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IObservableAlgorithm.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Node.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\NormalComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\PointExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ProgressExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\VectorExtensions.cs" />
     <Compile Include="Export\Utils\RendererUtil.cs" />
     <Compile Include="Export\Core\Rendering\Rendering.cs" />
     <Compile Include="Export\Libraries\Fox\Profiling\Base\Analyzer.cs" />
@@ -245,14 +212,6 @@
     <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest" />
     <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest.meta" />
     <None Include="Export\Content\Assets\assetbundle\win64\win64.meta" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\Heuristic.Linq.Test.csproj" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\README.md" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Heuristic.Linq.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.sln" />
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\MapData.txt" />
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\testdiagram.svg" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

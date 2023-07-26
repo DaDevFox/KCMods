@@ -47,7 +47,7 @@ namespace Elevation
         public static void Update()
         {
             BakeElevationMap();
-            SetTerrainMat();
+            SetElevationMat(terrainMat);
             ElevationManager.UpdateCellMetas();
         }
 
@@ -55,7 +55,7 @@ namespace Elevation
         {
             tierColoring = Settings.elevationColorPresets["Default"];
             BakeElevationMap();
-            SetTerrainMat();   
+            SetElevationMat(terrainMat);   
         }
 
         public static void BakeElevationMap()
@@ -78,27 +78,27 @@ namespace Elevation
 
 
 
-        public static void SetTerrainMat()
+        public static void SetElevationMat(Material material)
         {
             tilingConstant = 1f / (ElevationManager.maxElevation - ElevationManager.minElevation);
-            terrainMat =
-                //World.inst.uniMaterial[0];
-                new Material(Shader.Find("Standard"));
-            terrainMat.enableInstancing = true;
+            if(material == null)
+                material = new Material(Shader.Find("Standard"));
 
-            terrainMat.SetFloat("_Glossiness", 0f);
-            terrainMat.SetFloat("_Metallic", 0f);
+            material.enableInstancing = true;
+
+            material.SetFloat("_Glossiness", 0f);
+            material.SetFloat("_Metallic", 0f);
 
             elevationMap.filterMode = FilterMode.Point;
 
-            terrainMat.mainTexture = elevationMap;
+            material.mainTexture = elevationMap;
 
-            terrainMat.color = Color.white;
+            material.color = Color.white;
 
             Mod.dLog("Terrain Material Setup");
 
-            if (terrainMat == null)
-                Mod.Log("could not find terrain material");
+            //if (terrainMat == null)
+            //    Mod.Log("could not find terrain material");
         }
 
         private static Texture2D GetWorldColorTexture()

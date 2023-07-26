@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Harmony;
 
-namespace InsaneDifficultyMod
+namespace InsaneDifficultyMod.Events
 {
     public class RiotSpawn : MonoBehaviour, IEmployer
     {
@@ -25,41 +26,41 @@ namespace InsaneDifficultyMod
 
         
 
-        public RiotSpawn(RiotSpawnSaveData data)
-        {
-            this.rioters.Clear();
-            foreach(Guid guid in data.rioterGuids)
-            {
-                this.rioters.Add(Player.inst.GetWorker(guid));
-            }
+        //public RiotSpawn(RiotSpawnSaveData data)
+        //{
+        //    this.rioters.Clear();
+        //    foreach(Guid guid in data.rioterGuids)
+        //    {
+        //        this.rioters.Add(Player.inst.GetWorker(guid));
+        //    }
 
-            this.riotersAtRally.Clear();
-            foreach (Guid guid in data.riotersAtRallyGuids)
-            {
-                this.riotersAtRally.Add(Player.inst.GetWorker(guid));
-            }
+        //    this.riotersAtRally.Clear();
+        //    foreach (Guid guid in data.riotersAtRallyGuids)
+        //    {
+        //        this.riotersAtRally.Add(Player.inst.GetWorker(guid));
+        //    }
 
-            allPresentAtRally = data.allAtRally;
+        //    allPresentAtRally = data.allAtRally;
 
-            SetRallyPoint(World.inst.GetCellData(data.rallyPointPos));
-        }
+        //    //SetRallyPoint(World.inst.GetCellData(data.rallyPointPos));
+        //}
 
-        public RiotSpawn(Cell cell)
-        {
-            SetRallyPoint(cell);
-        }
+        //public RiotSpawn(Cell cell)
+        //{
+        //    //SetRallyPoint(cell);
+        //}
 
-        public RiotSpawn(Vector3 pos)
-        {
-            SetRallyPoint(World.inst.GetCellData(pos));
-        }
+        //public RiotSpawn(Vector3 pos)
+        //{
+        //    //SetRallyPoint(World.inst.GetCellData(pos));
+        //}
 
         private void SetupRallyMarker() 
         {
-            GameObject markerPrefab = Mod.legacyAssets.GetByName<GameObject>("RiotRallyMarker.prefab");
+            GameObject markerPrefab = Mod.assets.GetByName<GameObject>("RiotRallyMarker.prefab");
             rallyMarkerGO = GameObject.Instantiate(markerPrefab, new Vector3(rallyPos.x,rallyPos.y,rallyPos.z), Quaternion.identity);
             rallyMarker = rallyMarkerGO.AddComponent<RiotRallyMarker>();
-            rallyMarker.riot = this;
+            //rallyMarker.riot = this;
         }
         
 
@@ -70,7 +71,7 @@ namespace InsaneDifficultyMod
             foreach (Villager rioter in rioters)
             {
                 KingdomLog.TryLog("vil", "vil", KingdomLog.LogStatus.Neutral);
-                ((RioterJob)rioter.job).SetRallyPoint(cell);
+                //((RioterJob)rioter.job).SetRallyPoint(cell);
             }
 
             //SetupRallyMarker();
@@ -143,12 +144,15 @@ namespace InsaneDifficultyMod
         void IEmployer.OnAssigned(Villager p)
         {
             rioters.Add(p);
-            ((RioterJob)p.job).SetRallyPoint(rallyCell);
+            //((RioterJob)p.job).SetRallyPoint(rallyCell);
         }
 
-        void IEmployer.OnUnAssigned()
+        public void OnUnAssigned(Villager p)
         {
+            throw new NotImplementedException();
         }
+
+
 
         String IEmployer.GetUsedSkill()
         {
@@ -167,7 +171,11 @@ namespace InsaneDifficultyMod
 
         #region Patches
 
-
+        [HarmonyPatch(typeof(Villager), "GetThought")]
+        public class ThoughtPatch
+        {
+            // TODO: Complete later
+        }
 
         #endregion
 
@@ -197,7 +205,6 @@ namespace InsaneDifficultyMod
             data.rallyPointPos = this.rallyPos;
             return data;
         }
-        
 
         #endregion
 

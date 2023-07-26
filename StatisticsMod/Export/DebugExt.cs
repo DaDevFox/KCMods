@@ -44,7 +44,7 @@ namespace StatisticsMod
 
         public static void HandleException(Exception ex)
         {
-            if (Debug)
+            if (Debug || helper == null)
                 DebugExt.Log(ex.Message + "\n" + ex.StackTrace);
             else
                 helper.Log(ex.Message + "\n" + ex.StackTrace);

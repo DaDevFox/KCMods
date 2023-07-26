@@ -13,6 +13,7 @@ namespace Elevation
         
         public static GameObject raiseLowerUIPrefab { get; private set; }
         public static GameObject loadingDialogPrefab { get; private set; }
+        public static GameObject terrainVisualIndicatorPrefab { get; private set; }
         
         public static RaiseLowerUI raiseLowerUI { get; private set; }
 
@@ -31,8 +32,11 @@ namespace Elevation
 
         public static void LoadAll()
         {
+            TweeningManager instance = new GameObject("TweeningManager").AddComponent<TweeningManager>();
+
             raiseLowerUIPrefab = ModAssets.DB.GetByName<GameObject>("ElevationRaiseLowerControls");
             loadingDialogPrefab = ModAssets.DB.GetByName<GameObject>("GeneratingOverlay");
+            terrainVisualIndicatorPrefab = ModAssets.DB.GetByName<GameObject>("TerrainIndicator");
 
             loaded = true;
             Mod.dLog("UI Assets Preloaded");
@@ -40,7 +44,7 @@ namespace Elevation
 
         void SceneLoaded()
         {
-            TweeningManager instance = new GameObject("TweeningManager").AddComponent<TweeningManager>();
+            
 
             GameObject raiseLowerUIObj = GameObject.Instantiate(
                 raiseLowerUIPrefab,

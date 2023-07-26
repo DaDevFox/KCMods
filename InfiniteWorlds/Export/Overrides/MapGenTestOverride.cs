@@ -35,7 +35,7 @@ namespace Elevation.InfiniteWorlds
 
     // IDEA: Async loading for smooth transitions
     // IDEA: Transport units; caravan for land, barge for water; transports peasants and resources, but controlled like a unit
-    // IDEA: Seamless trasition from region to main map view, by zooming camera, with no borders, but selection highlights to indicate regions. 
+    // IDEA: Seamless transition from region to main map view, by zooming camera, with no borders, but selection highlights to indicate regions. 
     // IDEA: Map colors for players, ai, vikings, dragons, [merchant empires?] show on map
     // IDEA: Interregional Object shows on map with color, icon, see Zat Minimap for example. 
 

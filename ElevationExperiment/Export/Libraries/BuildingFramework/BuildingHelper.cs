@@ -33,10 +33,11 @@ public class BuildingHelper
         typeof(Building).GetField("descOverride", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(b, info.descOverride);
         typeof(Building).GetField("Cost", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(b, info.buildingCost);
         b.personPositions = info.personPositions;
-        b.Yield = info.yield;
-        b.YieldInterval = info.yieldInterval;
+        //b.Yield = info.yield;
+        //b.YieldInterval = info.yieldInterval;
         b.WorkersForFullYield = info.workersForFullYield;
-        b.YieldIntervalMod = info.yieldIntervalMod;
+        //b.YieldIntervalMod = info.yieldIntervalMod;
+        //b.YieldIntervalMod = info.yieldIntervalMod;
         b.BuildAllowedWorkers = info.buildAllowedWorkers;
         b.JobCategory = info.jobCategory;
         b.CategoryName = info.categoryName;
@@ -283,7 +284,7 @@ public class BuildingHelper
                 BuildTab normal = tabs[0] as BuildTab;
                 BuildTabVR vr = tabs[1] as BuildTabVR;
 
-                __instance.AddBuilding(normal, vr, info.uniqueName, info.preqBuilding, Vector3.one);
+                //__instance.AddBuilding(normal, vr, info.uniqueName, info.preqBuilding, Vector3.one);
             }
 
             __instance.RefreshButtonLayout();

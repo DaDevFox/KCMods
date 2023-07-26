@@ -32,6 +32,21 @@ namespace Elevation.Patches
             public RoadType type;
         }
 
+        public static void HandleRoadChange(OnBuildingAddRemove obj)
+        {
+            if (!obj.added && obj.targetBuilding.GetComponent<Road>())
+            {
+                Road r = obj.targetBuilding.GetComponent<Road>();
+
+                if (!r.isBridge)
+                {
+                    if (RoadVisualPatch._data.ContainsKey(obj.targetBuilding.guid))
+                    {
+                        RoadVisualPatch._data.Remove(obj.targetBuilding.guid);
+                    }
+                }
+            }
+        }
 
         static void Postfix(Road __instance)
         {
@@ -96,7 +111,8 @@ namespace Elevation.Patches
 
         private static List<Cell> GetElevatedNeighbors(Cell cell)
         {
-            Cell[] cells = World.inst.GetNeighborCells(cell);
+            Cell[] cells = new Cell[4];
+            World.inst.GetNeighborCells(cell, ref cells);
             List<Cell> found = new List<Cell>();
 
             if (!Grid.Cells.Get(cell))
@@ -188,6 +204,62 @@ namespace Elevation.Patches
         }
     }
 
+    [HarmonyPatch(typeof(Garden), "GetAdjacencyInfo")]
+    public class GardenConnectPatch
+    {
+        static bool Prefix(Garden __instance, ref bool north, ref bool south, ref bool east, ref bool west, ref int count)
+        {
+            try
+            {
+                World.inst.ToGridCoord(__instance.transform.position, out int num, out int num2);
+                north = Road.ShouldConnect(World.inst.GetCellDataClamped(num + 1, num2));
+                south = Road.ShouldConnect(World.inst.GetCellDataClamped(num - 1, num2));
+                east = Road.ShouldConnect(World.inst.GetCellDataClamped(num, num2 + 1));
+                west = Road.ShouldConnect(World.inst.GetCellDataClamped(num, num2 - 1));
+
+                CellMeta roadMeta = Grid.Cells.Get(World.inst.GetCellDataClamped(__instance.transform.position));
+
+                CellMeta mNorth = Grid.Cells.Get(World.inst.GetCellDataClamped(num + 1, num2));
+                CellMeta mSouth = Grid.Cells.Get(World.inst.GetCellDataClamped(num - 1, num2));
+                CellMeta mEast = Grid.Cells.Get(World.inst.GetCellDataClamped(num, num2 + 1));
+                CellMeta mWest = Grid.Cells.Get(World.inst.GetCellDataClamped(num, num2 - 1));
+
+                if (roadMeta != null)
+                {
+                    if (mNorth != null)
+                        north &= Math.Abs(roadMeta.elevationTier - mNorth.elevationTier) <= 1;
+                    if (mSouth != null)
+                        south &= Math.Abs(roadMeta.elevationTier - mSouth.elevationTier) <= 1;
+                    if (mEast != null)
+                        east &= Math.Abs(roadMeta.elevationTier - mEast.elevationTier) <= 1;
+                    if (mWest != null)
+                        west &= Math.Abs(roadMeta.elevationTier - mWest.elevationTier) <= 1;
+                }
+
+                if (north)
+                {
+                    count++;
+                }
+                if (south)
+                {
+                    count++;
+                }
+                if (east)
+                {
+                    count++;
+                }
+                if (west)
+                {
+                    count++;
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugExt.HandleException(ex);
+            }
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(Road), "GetAdjacencyInfo")]
     public class RoadConnectPatch
@@ -245,26 +317,4 @@ namespace Elevation.Patches
             return false;
         }
     }
-
-    [HarmonyPatch(typeof(Road), "BuildingAddRemove")]
-    public class RoadDestroyPatch
-    {
-        static void Postfix(OnBuildingAddRemove obj)
-        {
-            if(!obj.added && obj.targetBuilding.GetComponent<Road>())
-            {
-                Road r = obj.targetBuilding.GetComponent<Road>();
-
-                if (!r.isBridge)
-                {
-                    if (RoadVisualPatch._data.ContainsKey(obj.targetBuilding.guid))
-                    {
-                        RoadVisualPatch._data.Remove(obj.targetBuilding.guid);
-                    }
-                }
-            }
-        }
-    }
-    
-
 }

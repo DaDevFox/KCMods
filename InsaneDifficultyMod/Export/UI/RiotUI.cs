@@ -87,7 +87,7 @@ namespace InsaneDifficultyMod
                 PreactiveTimerContainer.SetActive(false);
                 ActiveTimerContainer.SetActive(true);
 
-                DebugExt.Log("test");
+                //DebugExt.Log("test");
 
                 if (riot.stage == Riot.Stage.Collecting)
                 {

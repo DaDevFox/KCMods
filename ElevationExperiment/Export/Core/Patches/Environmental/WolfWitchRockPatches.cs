@@ -44,7 +44,7 @@ namespace Elevation.Patches
             if (cell.Type == ResourceType.Stone || cell.Type == ResourceType.UnusableStone || cell.Type == ResourceType.IronDeposit)
             {
                 World.inst.RemoveStone(cell, recombine);
-                World.inst.PlaceStone(cell.x, cell.z, type);
+                World.inst.PlaceStone(cell, type);
             }
         }
 
@@ -68,7 +68,7 @@ namespace Elevation.Patches
             foreach(TrackedRock rock in tracked)
             {
                 World.inst.RemoveStone(rock.cell);
-                World.inst.PlaceStone(rock.cell.x, rock.cell.z, rock.type);
+                World.inst.PlaceStone(rock.cell, rock.type);
             }
         }
 
