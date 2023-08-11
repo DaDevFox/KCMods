@@ -17,9 +17,7 @@ namespace Elevation
     /// </summary>
     public class VoxelRenderingMode : RenderingMode
     {
-        private VoxelDataRenderer voxels;
         private VoxelDataRenderer[] chunks;
-        private Mesh mesh;
         private Mesh[] meshes;
         private Material[] materials;
 
@@ -27,31 +25,38 @@ namespace Elevation
 
         public override void Init()
         {
-            voxels = new VoxelDataRenderer();
-            voxels.textureSize = new Vector2(ElevationManager.maxElevation - ElevationManager.minElevation, 1);
+            ColorManager.terrainMat = new Material(Shader.Find("Custom/Snow2"));
+
+            ColorManager.terrainMat.enableInstancing = true;
+            ColorManager.terrainMat.color = Color.white;
+            ColorManager.terrainMat.mainTexture = ColorManager.elevationMap;
+            
+
         }
 
         public override void Setup()
         {
             try
             {
-                ColorManager.terrainMat = new Material(Shader.Find("Custom/Snow2"));
-
-                ColorManager.terrainMat.enableInstancing = true;
-                ColorManager.terrainMat.color = Color.white;
-                ColorManager.terrainMat.mainTexture = ColorManager.elevationMap;
-
-                chunks = new VoxelDataRenderer[TerrainGen.inst.terrainChunks.Count];
-                meshes = new Mesh[TerrainGen.inst.terrainChunks.Count];
-                materials = new Material[TerrainGen.inst.terrainChunks.Count];
-
-                for (int i = 0; i < chunks.Length; i++)
+                if (chunks == null || chunks.Length != TerrainGen.inst.terrainChunks.Count)
                 {
-                    chunks[i] = new VoxelDataRenderer();
+                    chunks = new VoxelDataRenderer[TerrainGen.inst.terrainChunks.Count];
+                    meshes = new Mesh[TerrainGen.inst.terrainChunks.Count];
+                    materials = new Material[TerrainGen.inst.terrainChunks.Count];
                 }
 
-                if (voxels == null)
-                    return;
+                for (int i = 0; i < TerrainGen.inst.terrainChunks.Count; i++)
+                {
+                    if (chunks[i] == null)
+                        chunks[i] = new VoxelDataRenderer();
+                    else
+                    {
+                        chunks[i].data = null;
+                        chunks[i].mesh = null;
+                        meshes[i] = null;
+                        materials[i] = null;
+                    }
+                }
 
                 for (int i = 0; i < TerrainGen.inst.terrainChunks.Count; i++)
                 {
@@ -130,7 +135,9 @@ namespace Elevation
 
             int index = chunkX + chunkZ * Mathf.CeilToInt((float)World.inst.GridWidth / (float)TerrainGen.inst.chunkSize);
 
-            VoxelDataRenderer chunk = ((VoxelRenderingMode)RenderingMode.current).chunks[index];
+            VoxelDataRenderer chunk =
+                //((VoxelRenderingMode)RenderingMode.current).chunks[index];
+                ((VoxelRenderingMode)RenderingMode.current).GetAt(x, z);
 
             CellMeta meta = Grid.Cells.Get(cell);
             try
@@ -202,7 +209,7 @@ namespace Fox.Rendering.VoxelRendering
     /// </summary>
     public class VoxelDataRenderer
     {
-        public static float buffer { get; } = 0.001f;
+        public static float buffer { get; } = 0.00001f;
 
         #region Settings
 
@@ -232,12 +239,14 @@ namespace Fox.Rendering.VoxelRendering
         public bool _32BitBuffer = true;
 
         public bool closeOuterEdges = true;
+        public bool divetAll = false;
 
         public Vector2 textureSize;
 
         #endregion
 
         public Voxel[,,] data;
+        private Dictionary<string, List<int>> vertexPositionIndexLookup = new Dictionary<string, List<int>>();
 
         public Mesh mesh;
 
@@ -259,6 +268,7 @@ namespace Fox.Rendering.VoxelRendering
         public void Reset()
         {
             data = new Voxel[dimensions.x, dimensions.y, dimensions.z];
+            vertexPositionIndexLookup.Clear();
 
             Loop((x, y, z) =>
             {
@@ -277,6 +287,7 @@ namespace Fox.Rendering.VoxelRendering
                 dimensions = new Vector3Int(this.data.GetLength(0), this.data.GetLength(1), this.data.GetLength(2));
             }
 
+            vertexPositionIndexLookup.Clear();
             mesh = new Mesh();
 
             List<Vector3> vertices = new List<Vector3>();
@@ -289,6 +300,8 @@ namespace Fox.Rendering.VoxelRendering
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
             bool hasTransparent = false;
+
+            List<string> toDivet = new List<string>();
 
             Loop((voxel) =>
             {
@@ -304,6 +317,7 @@ namespace Fox.Rendering.VoxelRendering
                 foreach (Vector3 normal in faceNormals)
                 {
                     bool divet = divetVariation > 0f && normal.y > 0f;
+                    divet |= divetAll;
 
                     Quad face = divet ?
                             RendererUtil.NinePointQuad(
@@ -321,8 +335,54 @@ namespace Fox.Rendering.VoxelRendering
                             Vector3.up
                             );
 
-                    if (divet)
-                        face.vertices[3] = face.vertices[3] + (normal * UnityEngine.Random.Range(0f, divetVariation));
+
+
+                    for (int i = 0; i < face.vertices.Length; i++)
+                    {
+                        Vector3 vertex = face.vertices[i];
+                        string index = $"{Elevation.Utils.Util.RoundToFactor(vertex.x, 0.1f)}_{Elevation.Utils.Util.RoundToFactor(vertex.y, 0.1f)}_{Elevation.Utils.Util.RoundToFactor(vertex.z, 0.1f)}";
+                        if (!vertexPositionIndexLookup.ContainsKey(index))
+                            vertexPositionIndexLookup.Add(index, new List<int>());
+                        vertexPositionIndexLookup[index].Add(master + i);
+                    }
+
+                    if (divet) 
+                    {
+                        Vector3Int adjacent = position + new Vector3Int(0, 1, 0);
+
+                        toDivet.Add(GetIndex(face.vertices[3]));
+
+                        // specifically for up-facing diveted faces only
+                        //Voxel adjacentN = GetAt(adjacent + new Vector3Int(0, 0, 1));
+                        //Voxel adjacentE = GetAt(adjacent + new Vector3Int(1, 0, 0));
+                        //Voxel adjacentS = GetAt(adjacent + new Vector3Int(0, 0, -1));
+                        //Voxel adjacentW = GetAt(adjacent + new Vector3Int(-1, 0, 0));
+
+                        //if (adjacentN != null && adjacentN.opacity <= 0f)
+                        //{
+                        //    toDivet.Add(GetIndex(face.vertices[6]));
+                        //    toDivet.Add(GetIndex(face.vertices[7]));
+                        //    toDivet.Add(GetIndex(face.vertices[8]));
+                        //}
+                        //if (adjacentE != null && adjacentE.opacity <= 0f)
+                        //{
+                        //    toDivet.Add(GetIndex(face.vertices[4]));
+                        //    toDivet.Add(GetIndex(face.vertices[5]));
+                        //    toDivet.Add(GetIndex(face.vertices[6]));
+                        //}
+                        //if (adjacentS != null && adjacentS.opacity <= 0f)
+                        //{
+                        //    toDivet.Add(GetIndex(face.vertices[0]));
+                        //    toDivet.Add(GetIndex(face.vertices[1]));
+                        //    toDivet.Add(GetIndex(face.vertices[4]));
+                        //}
+                        //if (adjacentW != null && adjacentW.opacity <= 0f)
+                        //{
+                        //    toDivet.Add(GetIndex(face.vertices[0]));
+                        //    toDivet.Add(GetIndex(face.vertices[2]));
+                        //    toDivet.Add(GetIndex(face.vertices[8]));
+                        //}
+                    }
 
 
                     if (Settings.useTerrainTexture)
@@ -347,6 +407,18 @@ namespace Fox.Rendering.VoxelRendering
             //IMN2663310
             //IMS108469851
 
+            if (divetVariation > 0f)
+            {
+                foreach (string index in toDivet)
+                {
+                    string[] indexParts = index.Split('_');
+                    Vector3 pos = new Vector3(float.Parse(indexParts[0]), float.Parse(indexParts[1]), float.Parse(indexParts[2]));
+                    float divet = Mathf.PerlinNoise(pos.x / (dimensions.x * 10f), pos.z / (dimensions.z * 10f)) * divetVariation;
+                    foreach (int i in vertexPositionIndexLookup[index])
+                        vertices[i] = new Vector3(vertices[i].x, vertices[i].y + divet, vertices[i].z);
+                }
+            }
+
             mesh.vertices = vertices.ToArray();
             mesh.triangles = triangles.ToArray();
             mesh.normals = normals.ToArray();
@@ -360,6 +432,8 @@ namespace Fox.Rendering.VoxelRendering
             return mesh;
         }
 
+
+        private string GetIndex(Vector3 vertex) => $"{Elevation.Utils.Util.RoundToFactor(vertex.x, 0.1f)}_{Elevation.Utils.Util.RoundToFactor(vertex.y, 0.1f)}_{Elevation.Utils.Util.RoundToFactor(vertex.z, 0.1f)}";
 
         public Vector3[] GetFaces(Voxel voxel)
         {
@@ -429,14 +503,20 @@ namespace Fox.Rendering.VoxelRendering
 
         public Voxel GetAt(Vector3Int index)
         {
-            if (InDimensions(index))
+            try
             {
-                return data[index.x, index.y, index.z];
-            }
-            Voxel external = External(index);
-            if (external != null && external.opacity <= 0f)
+                if (InDimensions(index))
+                {
+                    return data[index.x, index.y, index.z];
+                }
+                Voxel external = External(index);
+                if (external != null && external.opacity <= 0f)
+                {
+                    return external;
+                }
+            }catch(Exception ex)
             {
-                return external;
+                Mod.dLog(ex);
             }
             return null;
         }

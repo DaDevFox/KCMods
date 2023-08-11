@@ -9,6 +9,7 @@ using UnityEngine;
 using Elevation.AssetManagement;
 using System.Reflection;
 using I2.Loc;
+using Fox.Localization;
 
 namespace Elevation
 {
@@ -124,7 +125,10 @@ namespace Elevation
             #endregion
         }
 
-
+        public static void Setup()
+        {
+            HappinessBonuses.Setup();
+        }
 
 
 
@@ -165,19 +169,19 @@ namespace Elevation
         {
             // Scaffolding
             if (Term == "Building scaffolding FriendlyName")
-                __result = "Scaffolding";
+                __result = Localization.Get("scaffolding_friendly_name");
             else if (Term == "Building scaffolding Description")
-                __result = "Adds 1 elevation tier to the tile once constructed. Can be used once on a tile without threatening the integrity of the ground.";
+                __result = Localization.Get("scaffolding_description");
             else if (Term == "Building scaffolding ThoughtOnBuilt")
-                __result = "Thinking reaching new heights is a fruitful endeavour.";
+                __result = Localization.Get("scaffolding_buildingthought");
 
             // Dugout
             if (Term == "Building dugout FriendlyName")
-                __result = "Dugout";
+                __result = Localization.Get("dugout_friendly_name");
             else if (Term == "Building dugout Description")
-                __result = "Reduces 1 elevation tier to the tile once constructed. Can be used once on a tile without threatening the integrity of the ground.";
+                __result = Localization.Get("dugout_description");
             else if (Term == "Building dugout ThoughtOnBuilt")
-                __result = "Wary of dwarves, trolls, and the dark of the mountain.";
+                __result = Localization.Get("dugout_buildingthought"); ;
         }
     }
 }

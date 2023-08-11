@@ -23,7 +23,7 @@ namespace Elevation
 
     
 
-    [Mod("Elevation", "v0.1", "Agentfox")]
+    [Mod("Elevation", "v0.4", "Agentfox")]
     public class Settings
     {
         public InteractiveConfiguration<Settings> Config { get; private set; }
@@ -32,10 +32,10 @@ namespace Elevation
 
         #region Interactive
 
-        [Category("Terrain Generation")]
-        public Generator c_Generator { get; private set; }
+        [Category("Terrain")]
+        public Terrain c_Terrain { get; private set; }
 
-        [Category("Coloring")]
+        //[Category("Coloring")]
         public Coloring c_Coloring { get; private set; }
 
         [Category("Camera Controls")]
@@ -47,24 +47,27 @@ namespace Elevation
         public class Visual
         {
 
-            [Setting("Pathfinding Indicator Enabled", "Wether or not the pathfinding indicator shown while building is enabled")]
+            [Setting("Pathfinding Indicator Enabled", "Whether or not the pathfinding indicator shown while placing buildings is enabled")]
             [Toggle(false,"")]
             public InteractiveToggleSetting s_VisualPathfindingIndicatorEnabled { get; private set; }
 
         }
 
-        public class Generator
+        public class Terrain
         {
-            [Setting("Regenerate Terrain", "Regenerates elevated terrain")]
+            [Setting("Regenerate Terrain", "Regenerates elevated terrain; acts as bugfix for (rare cases of) visual lack of elevation")]
             [Button("Regenerate")]
             public InteractiveButtonSetting s_Regenerate { get; private set; }
 
-            [Category("Advanced")]
-            public Advanced c_Advanced { get; private set; }
+            [Category("Generation")]
+            public Generation c_Generation { get; private set; }
 
-            public class Advanced
+            [Category("Processing")]
+            public Processing c_Processing { get; private set; }
+
+            public class Generation
             {
-                [Setting("Bias")]
+                [Setting("Generation Bias")]
                 [Select(1,"Rounded", "Min", "Max")]
                 public InteractiveSelectSetting s_ElevationBiasType { get; private set; }
                 public ElevationBiasType ElevationBiasType {
@@ -78,7 +81,9 @@ namespace Elevation
                     }
                 }
 
-                [Category("Noise")]
+
+
+                //[Category("Noise")]
                 public Noise c_Noise { get; private set; }
 
                 public class Noise
@@ -135,6 +140,13 @@ namespace Elevation
 
 
                 }
+            }
+
+            public class Processing
+            {
+                [Setting("Show Pruning on Map", "Show visual progress of unreachable tile pruning on map. ")]
+                [Toggle(false)]
+                public InteractiveToggleSetting s_showPruningOnMap { get; private set; }
             }
         }
 
@@ -319,7 +331,7 @@ namespace Elevation
 
         #region Debug
 
-        public static bool debug = false;
+        public static bool debug = true;
 
 
         public static KeyCode keycode_refreshTerrain { get; } = KeyCode.Minus;
@@ -417,6 +429,8 @@ namespace Elevation
 
         public static float topDownViewCamSnap = 1f;
 
+        public static bool showMapProcessing = false;
+
 
         #region Base
 
@@ -441,26 +455,28 @@ namespace Elevation
         private static void AddListeners()
         {
             // Generator
-            Settings.inst.c_Generator.s_Regenerate.OnButtonPressed.AddListener(OnRegenerateButtonClicked);
+            Settings.inst.c_Terrain.s_Regenerate.OnButtonPressed.AddListener(OnRegenerateButtonClicked);
 
             //Settings.inst.c_Generator.c_Advanced.c_Noise.s_Amplitue.OnUpdate.AddListener(UpdateSlider);
             //Settings.inst.c_Generator.c_Advanced.c_Noise.s_Scale.OnUpdate.AddListener(UpdateSlider);
+            
+            Settings.inst.c_Terrain.c_Processing.s_showPruningOnMap.OnUpdate.AddListener((entry) => { showMapProcessing = entry.toggle.value; });
 
             // Coloring
             //Settings.inst.c_Coloring.s_copyColorsToClipboard.OnButtonPressed.AddListener(CopyColorsToClipboard);
             //Settings.inst.c_Coloring.s_PasteColorsFromClipboard.OnButtonPressed.AddListener(PasteColorsFromClipboard);
 
 
-            Settings.inst.c_Coloring.s_preset.OnUpdatedRemotely.AddListener(OnColorPresetChanged);
+            //Settings.inst.c_Coloring.s_preset.OnUpdatedRemotely.AddListener(OnColorPresetChanged);
 
-            Settings.inst.c_Coloring.c_Tiers.t_1.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_2.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_3.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_4.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_5.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_6.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_7.OnUpdatedRemotely.AddListener(OnColorChanged);
-            Settings.inst.c_Coloring.c_Tiers.t_8.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_1.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_2.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_3.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_4.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_5.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_6.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_7.OnUpdatedRemotely.AddListener(OnColorChanged);
+            //Settings.inst.c_Coloring.c_Tiers.t_8.OnUpdatedRemotely.AddListener(OnColorChanged);
 
             // Camera Controls
             Settings.inst.c_CameraControls.s_shiftSpeed.OnUpdatedRemotely.AddListener(UpdateSlider);
@@ -490,6 +506,7 @@ namespace Elevation
 
             ColorManager.Update();
         }
+
 
         private static void OnColorChanged(SettingsEntry entry)
         {

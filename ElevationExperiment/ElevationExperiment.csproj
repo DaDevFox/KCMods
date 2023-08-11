@@ -86,15 +86,25 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Export\Content\Buildings\HappinessBonuses.cs" />
     <Compile Include="Export\Content\Buildings\Scaffolding.cs" />
+    <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Crater.cs" />
     <Compile Include="Export\Core\Patches\Buildings\Bonuses\RadiusBonusPatch.cs" />
     <Compile Include="Export\Core\Patches\Buildings\YCorrection\FieldPatch.cs" />
     <Compile Include="Export\Core\Patches\Buildings\YCorrection\TransportCartPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\FirePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\ResourceYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\VillagerYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\GridIntersectionPatch.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinderModified.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\PrebakedPathfinder%282%29.cs" />

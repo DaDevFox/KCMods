@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Elevation.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Harmony;
 using System.Reflection;
 using System.Diagnostics;
 using System;
+using Assets.Code;
 
 namespace Elevation
 {
@@ -43,8 +45,17 @@ namespace Elevation
 
         public static float animationTime { get; } = 0.3f;
 
+        // hacky
+        private static float downButtonDesiredFill = 0f;
+        private static float upButtonDesiredFill = 0f;
+
         internal void AnimateButtonActive(GameObject button)
         {
+            if (button.name == "DownButton")
+                downButtonDesiredFill = 1f;
+            else if (button.name == "UpButton")
+                upButtonDesiredFill = 1f;
+
             TweeningManager.Instance.TweenValue(
                 button.transform.Find("BG").GetComponent<Image>().fillAmount,
                 (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
@@ -53,10 +64,15 @@ namespace Elevation
 
         internal void AnimateButtonInactive(GameObject button)
         {
-            TweeningManager.Instance.TweenValue(
-                button.transform.Find("BG").GetComponent<Image>().fillAmount,
-                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
-                animationTime);
+            if(button.name == "DownButton")
+                downButtonDesiredFill = 0f;
+            else if(button.name == "UpButton")
+                upButtonDesiredFill = 0f;
+
+            //TweeningManager.Instance.TweenValue(
+            //    button.transform.Find("BG").GetComponent<Image>().fillAmount,
+            //    (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+            //    animationTime);
         }
 
         void Start()
@@ -69,6 +85,11 @@ namespace Elevation
 
         #region Functionality
 
+        void Update()
+        {
+            downButton.transform.Find("BG").GetComponent<Image>().fillAmount = Mathf.Lerp(downButton.transform.Find("BG").GetComponent<Image>().fillAmount, downButtonDesiredFill, 1f / animationTime * Time.unscaledDeltaTime);
+            upButton.transform.Find("BG").GetComponent<Image>().fillAmount = Mathf.Lerp(upButton.transform.Find("BG").GetComponent<Image>().fillAmount, upButtonDesiredFill, 1f / animationTime * Time.unscaledDeltaTime);
+        }
 
 
         void Awake()
@@ -271,7 +292,7 @@ namespace Elevation
                 clickThisFrame &= InputManager.Primary();
                 unclickThisFrame = InputManager.PrimaryUp();
 
-                if (unclickThisFrame)
+                if (unclickThisFrame && mode != Mode.None && !GameUI.inst.PointerOverUI())
                 {
                     Mod.dLog("unclick");
                     //indicators.displaying.Clear();

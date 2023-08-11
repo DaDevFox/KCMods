@@ -180,7 +180,6 @@ namespace Elevation
             bool allowIntergridTravel);
     }
 
-	// test patch
 
 	[HarmonyPatch(typeof(Pathfinder), "AddToOpenSet")]
 	static class NodeAddingPatch
@@ -190,172 +189,208 @@ namespace Elevation
 			CellMeta result = Grid.Cells.Get(node.cell.x, node.cell.z);
 			CellMeta origin = Grid.Cells.Get(parent.cell.x, parent.cell.z);
 
-            if (result != null && origin != null)
-				if (Math.Abs(result.elevationTier - origin.elevationTier) > 1)
+			if (result != null && origin != null)
+			{
+				int resultTier = result.elevationTier;
+				int originTier = origin.elevationTier;
+				if (Math.Abs(resultTier - originTier) > 1)
 					return false;
+
+				if (resultTier > 0 && originTier > 0 && Pathing.IsDiagonalXZ(origin.cell, result.cell))
+					return false;
+			}
 			
 			return true;
 		}
 	}
 
-   // [HarmonyPatch(typeof(World), "FindFootPath")]
-   // static class TestPatch
-   // {
-   //     static void Prefix(Vector3 start, Vector3 end, ArrayExt<Vector3> path, Pathfinder.blocksPathTest blockTest, Pathfinder.blocksPathTest stringPullBlockTest, Pathfinder.applyExtraCost costFunc, int teamId, ref bool doDiagonal)
-   //     {
-			//doDiagonal = false; 
-   //     }
-   // }
+  //  [HarmonyPatch(typeof(World), "FindFootPath")]
+  //  static class TestPatch
+  //  {
+		//static MethodBase TargetMethod()
+		//{
+		//	return AccessTools.Method(
+		//		typeof(World),
+		//		"FindFootPath",
+		//		new Type[]
+		//		{
+		//			typeof(Vector3),
+		//			typeof(Vector3),
+		//			typeof(ArrayExt<Vector3>).MakeByRefType(),
+		//			typeof(Pathfinder.blocksPathTest),
+		//			typeof(Pathfinder.blocksPathTest),
+		//			typeof(Pathfinder.applyExtraCost),
+		//			typeof(int),
+		//			typeof(bool)
+		//		});
+		//}
+
+  //      static void Prefix(
+		//	Vector3 start, 
+		//	Vector3 end, 
+			
+		//	ref ArrayExt<Vector3> path, 
+
+		//	Pathfinder.blocksPathTest blockTest, 
+		//	Pathfinder.blocksPathTest stringPullBlockTest, 
+		//	Pathfinder.applyExtraCost costFunc, 
+			
+		//	int teamId, 
+		//	ref bool doDiagonal)
+  //      {
+		//	doDiagonal = false;
+  //      }
+  //  }
 
 
     // Base pathfinding inits before any terrain is generated; this is not possible with Elevation due to the fact that the shape of the terrain affects how the pathfinding needs to be setup
 
 
-    [HarmonyPatch(typeof(ThreadedPathing), "CalculatePaths")]
-    static class RecalculatePatch
-    {
-		static bool Prefix()
-        {
-			return true;
-			//return false;
-        }
+  //  [HarmonyPatch(typeof(ThreadedPathing), "CalculatePaths")]
+  //  static class RecalculatePatch
+  //  {
+		//static bool Prefix()
+  //      {
+		//	return true;
+		//	//return false;
+  //      }
 
-        static void Postfix(ThreadedPathing __instance, object data)
-        {
-			//bool shutdown = __instance.GetPFieldValue<bool>("shutdown");
-			//AutoResetEvent[] workerWaitHandle = __instance.GetPFieldValue<AutoResetEvent[]>("workerWaitHandle");
-			//ArrayExt<GamePath>[] pathsToCalculate = __instance.GetPFieldValue<ArrayExt<GamePath>[]>("pathsToCalculate");
-			//Pathfinder[] pather = __instance.GetPFieldValue<Pathfinder[]>("pather");
-			//Countdown mainWaitHandle = __instance.GetPFieldValue<Countdown>("mainWaitHandle");
-			//ArrayExt<GamePath> requestedPaths = __instance.GetPFieldValue<ArrayExt<GamePath>>("requestedPaths");
+  //      static void Postfix(ThreadedPathing __instance, object data)
+  //      {
+		//	//bool shutdown = __instance.GetPFieldValue<bool>("shutdown");
+		//	//AutoResetEvent[] workerWaitHandle = __instance.GetPFieldValue<AutoResetEvent[]>("workerWaitHandle");
+		//	//ArrayExt<GamePath>[] pathsToCalculate = __instance.GetPFieldValue<ArrayExt<GamePath>[]>("pathsToCalculate");
+		//	//Pathfinder[] pather = __instance.GetPFieldValue<Pathfinder[]>("pather");
+		//	//Countdown mainWaitHandle = __instance.GetPFieldValue<Countdown>("mainWaitHandle");
+		//	//ArrayExt<GamePath> requestedPaths = __instance.GetPFieldValue<ArrayExt<GamePath>>("requestedPaths");
 
-			//int num = (int)data;
-			//workerWaitHandle[num].Set();
-			//while (!shutdown)
-			//{
-			//	workerWaitHandle[num].WaitOne();
-			//	for (int i = 0; i < pathsToCalculate[num].Count; i++)
-			//	{
-			//		try
-			//		{
-			//			GamePath gamePath = pathsToCalculate[num].data[i];
-			//			Vector3 start = gamePath.start;
-			//			Vector3 end = gamePath.end;
-			//			//gamePath.debug = 1;
-			//			do
-			//			{
-			//				start = gamePath.start;
-			//				end = gamePath.end;
-			//				switch (gamePath.pathType)
-			//				{
-			//					case GamePath.PathType.VillagerPath:
-			//						{
-			//							Pathfinder pathfinder = pather[num];
-			//							Vector3 startPos = start;
-			//							bool startUseUpperGrid = false;
-			//							Vector3 endPos = end;
-			//							bool endUseUpperGrid = false;
-			//							GamePath gamePath2 = gamePath;
-			//							Pathfinder.blocksPathTest bt = new Pathfinder.blocksPathTest(World.GetBlocksFootPath);
-			//							Pathfinder.blocksPathTest pullBlock = new Pathfinder.blocksPathTest(World.GetBlocksFootPath);
-			//							pathfinder.FindPath(startPos, startUseUpperGrid, endPos, endUseUpperGrid, ref gamePath2.result, bt, pullBlock, new Pathfinder.applyExtraCost(World.GetFootPathCost), gamePath.teamId, true, false, false);
-			//							//gamePath.debug = 2;
-			//							break;
-			//						}
-			//					case GamePath.PathType.MilitaryPathPostBlock:
-			//						{
-			//							bool flag = false;
-			//							Cell cellDataClamped = World.inst.GetCellDataClamped(start);
-			//							if (!cellDataClamped.isUpperGridBlocked && start.y > 0.1f && World.GetCellHeightPos(cellDataClamped).y > 0f)
-			//							{
-			//								flag = true;
-			//							}
-			//							bool flag2 = false;
-			//							Cell cellDataClamped2 = World.inst.GetCellDataClamped(end);
-			//							if (!cellDataClamped2.isUpperGridBlocked && end.y > 0.1f && World.GetCellHeightPos(cellDataClamped2).y > 0f)
-			//							{
-			//								flag2 = true;
-			//							}
-			//							Pathfinder pathfinder2 = pather[num];
-			//							Vector3 startPos2 = start;
-			//							bool startUseUpperGrid2 = flag;
-			//							Vector3 endPos2 = end;
-			//							bool endUseUpperGrid2 = flag2;
-			//							GamePath gamePath3 = gamePath;
-			//							Pathfinder.blocksPathTest bt2 = new Pathfinder.blocksPathTest(World.NoBlock);
-			//							Pathfinder.blocksPathTest pullBlock2 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForArmies);
-			//							pathfinder2.FindPath(startPos2, startUseUpperGrid2, endPos2, endUseUpperGrid2, ref gamePath3.result, bt2, pullBlock2, new Pathfinder.applyExtraCost(World.GetMilitaryFootPathCost), gamePath.teamId, false, true, true);
-			//							if (gamePath.result.Count <= 0)
-			//							{
-			//								Pathfinder pathfinder3 = pather[num];
-			//								Vector3 startPos3 = start;
-			//								bool startUseUpperGrid3 = flag;
-			//								Vector3 endPos3 = end;
-			//								bool endUseUpperGrid3 = !flag2;
-			//								GamePath gamePath4 = gamePath;
-			//								Pathfinder.blocksPathTest bt3 = new Pathfinder.blocksPathTest(World.NoBlock);
-			//								Pathfinder.blocksPathTest pullBlock3 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForArmies);
-			//								pathfinder3.FindPath(startPos3, startUseUpperGrid3, endPos3, endUseUpperGrid3, ref gamePath4.result, bt3, pullBlock3, new Pathfinder.applyExtraCost(World.GetMilitaryFootPathCost), gamePath.teamId, false, true, true);
-			//							}
-			//							break;
-			//						}
-			//					case GamePath.PathType.OgrePathPostBlock:
-			//						{
-			//							Pathfinder pathfinder4 = pather[num];
-			//							Vector3 startPos4 = start;
-			//							bool startUseUpperGrid4 = false;
-			//							Vector3 endPos4 = end;
-			//							bool endUseUpperGrid4 = false;
-			//							GamePath gamePath5 = gamePath;
-			//							Pathfinder.blocksPathTest bt4 = new Pathfinder.blocksPathTest(World.NoBlock);
-			//							Pathfinder.blocksPathTest pullBlock4 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForOgres);
-			//							pathfinder4.FindPath(startPos4, startUseUpperGrid4, endPos4, endUseUpperGrid4, ref gamePath5.result, bt4, pullBlock4, new Pathfinder.applyExtraCost(World.GetOgreFootPathCost), gamePath.teamId, false, true, false);
-			//							break;
-			//						}
-			//					case GamePath.PathType.BoatPathPostBlock:
-			//						{
-			//							Pathfinder pathfinder5 = pather[num];
-			//							Vector3 startPos5 = start;
-			//							bool startUseUpperGrid5 = false;
-			//							Vector3 endPos5 = end;
-			//							bool endUseUpperGrid5 = false;
-			//							GamePath gamePath6 = gamePath;
-			//							Pathfinder.blocksPathTest bt5 = new Pathfinder.blocksPathTest(World.NoBlock);
-			//							Pathfinder.blocksPathTest pullBlock5 = new Pathfinder.blocksPathTest(World.GetBlocksWaterPath);
-			//							pathfinder5.FindPath(startPos5, startUseUpperGrid5, endPos5, endUseUpperGrid5, ref gamePath6.result, bt5, pullBlock5, new Pathfinder.applyExtraCost(World.GetBoatPathCost), gamePath.teamId, false, true, false);
-			//							break;
-			//						}
-			//				}
-			//			}
-			//			while (start != gamePath.start || end != gamePath.end);
+		//	//int num = (int)data;
+		//	//workerWaitHandle[num].Set();
+		//	//while (!shutdown)
+		//	//{
+		//	//	workerWaitHandle[num].WaitOne();
+		//	//	for (int i = 0; i < pathsToCalculate[num].Count; i++)
+		//	//	{
+		//	//		try
+		//	//		{
+		//	//			GamePath gamePath = pathsToCalculate[num].data[i];
+		//	//			Vector3 start = gamePath.start;
+		//	//			Vector3 end = gamePath.end;
+		//	//			//gamePath.debug = 1;
+		//	//			do
+		//	//			{
+		//	//				start = gamePath.start;
+		//	//				end = gamePath.end;
+		//	//				switch (gamePath.pathType)
+		//	//				{
+		//	//					case GamePath.PathType.VillagerPath:
+		//	//						{
+		//	//							Pathfinder pathfinder = pather[num];
+		//	//							Vector3 startPos = start;
+		//	//							bool startUseUpperGrid = false;
+		//	//							Vector3 endPos = end;
+		//	//							bool endUseUpperGrid = false;
+		//	//							GamePath gamePath2 = gamePath;
+		//	//							Pathfinder.blocksPathTest bt = new Pathfinder.blocksPathTest(World.GetBlocksFootPath);
+		//	//							Pathfinder.blocksPathTest pullBlock = new Pathfinder.blocksPathTest(World.GetBlocksFootPath);
+		//	//							pathfinder.FindPath(startPos, startUseUpperGrid, endPos, endUseUpperGrid, ref gamePath2.result, bt, pullBlock, new Pathfinder.applyExtraCost(World.GetFootPathCost), gamePath.teamId, true, false, false);
+		//	//							//gamePath.debug = 2;
+		//	//							break;
+		//	//						}
+		//	//					case GamePath.PathType.MilitaryPathPostBlock:
+		//	//						{
+		//	//							bool flag = false;
+		//	//							Cell cellDataClamped = World.inst.GetCellDataClamped(start);
+		//	//							if (!cellDataClamped.isUpperGridBlocked && start.y > 0.1f && World.GetCellHeightPos(cellDataClamped).y > 0f)
+		//	//							{
+		//	//								flag = true;
+		//	//							}
+		//	//							bool flag2 = false;
+		//	//							Cell cellDataClamped2 = World.inst.GetCellDataClamped(end);
+		//	//							if (!cellDataClamped2.isUpperGridBlocked && end.y > 0.1f && World.GetCellHeightPos(cellDataClamped2).y > 0f)
+		//	//							{
+		//	//								flag2 = true;
+		//	//							}
+		//	//							Pathfinder pathfinder2 = pather[num];
+		//	//							Vector3 startPos2 = start;
+		//	//							bool startUseUpperGrid2 = flag;
+		//	//							Vector3 endPos2 = end;
+		//	//							bool endUseUpperGrid2 = flag2;
+		//	//							GamePath gamePath3 = gamePath;
+		//	//							Pathfinder.blocksPathTest bt2 = new Pathfinder.blocksPathTest(World.NoBlock);
+		//	//							Pathfinder.blocksPathTest pullBlock2 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForArmies);
+		//	//							pathfinder2.FindPath(startPos2, startUseUpperGrid2, endPos2, endUseUpperGrid2, ref gamePath3.result, bt2, pullBlock2, new Pathfinder.applyExtraCost(World.GetMilitaryFootPathCost), gamePath.teamId, false, true, true);
+		//	//							if (gamePath.result.Count <= 0)
+		//	//							{
+		//	//								Pathfinder pathfinder3 = pather[num];
+		//	//								Vector3 startPos3 = start;
+		//	//								bool startUseUpperGrid3 = flag;
+		//	//								Vector3 endPos3 = end;
+		//	//								bool endUseUpperGrid3 = !flag2;
+		//	//								GamePath gamePath4 = gamePath;
+		//	//								Pathfinder.blocksPathTest bt3 = new Pathfinder.blocksPathTest(World.NoBlock);
+		//	//								Pathfinder.blocksPathTest pullBlock3 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForArmies);
+		//	//								pathfinder3.FindPath(startPos3, startUseUpperGrid3, endPos3, endUseUpperGrid3, ref gamePath4.result, bt3, pullBlock3, new Pathfinder.applyExtraCost(World.GetMilitaryFootPathCost), gamePath.teamId, false, true, true);
+		//	//							}
+		//	//							break;
+		//	//						}
+		//	//					case GamePath.PathType.OgrePathPostBlock:
+		//	//						{
+		//	//							Pathfinder pathfinder4 = pather[num];
+		//	//							Vector3 startPos4 = start;
+		//	//							bool startUseUpperGrid4 = false;
+		//	//							Vector3 endPos4 = end;
+		//	//							bool endUseUpperGrid4 = false;
+		//	//							GamePath gamePath5 = gamePath;
+		//	//							Pathfinder.blocksPathTest bt4 = new Pathfinder.blocksPathTest(World.NoBlock);
+		//	//							Pathfinder.blocksPathTest pullBlock4 = new Pathfinder.blocksPathTest(World.GetBlocksFootPathForOgres);
+		//	//							pathfinder4.FindPath(startPos4, startUseUpperGrid4, endPos4, endUseUpperGrid4, ref gamePath5.result, bt4, pullBlock4, new Pathfinder.applyExtraCost(World.GetOgreFootPathCost), gamePath.teamId, false, true, false);
+		//	//							break;
+		//	//						}
+		//	//					case GamePath.PathType.BoatPathPostBlock:
+		//	//						{
+		//	//							Pathfinder pathfinder5 = pather[num];
+		//	//							Vector3 startPos5 = start;
+		//	//							bool startUseUpperGrid5 = false;
+		//	//							Vector3 endPos5 = end;
+		//	//							bool endUseUpperGrid5 = false;
+		//	//							GamePath gamePath6 = gamePath;
+		//	//							Pathfinder.blocksPathTest bt5 = new Pathfinder.blocksPathTest(World.NoBlock);
+		//	//							Pathfinder.blocksPathTest pullBlock5 = new Pathfinder.blocksPathTest(World.GetBlocksWaterPath);
+		//	//							pathfinder5.FindPath(startPos5, startUseUpperGrid5, endPos5, endUseUpperGrid5, ref gamePath6.result, bt5, pullBlock5, new Pathfinder.applyExtraCost(World.GetBoatPathCost), gamePath.teamId, false, true, false);
+		//	//							break;
+		//	//						}
+		//	//				}
+		//	//			}
+		//	//			while (start != gamePath.start || end != gamePath.end);
 
-			//			if (ElevationPathfinder.retryFailedPaths && gamePath.result.Count == 1 && gamePath.result[0] == ElevationPathfinder.failedPathSignal)
-			//			{
-			//				if (!ElevationPathfinder.gamePathRetries.ContainsKey(new ElevationPathfinder.PathData(gamePath)))
-			//					ElevationPathfinder.gamePathRetries.Add(new ElevationPathfinder.PathData(gamePath), 0);
+		//	//			if (ElevationPathfinder.retryFailedPaths && gamePath.result.Count == 1 && gamePath.result[0] == ElevationPathfinder.failedPathSignal)
+		//	//			{
+		//	//				if (!ElevationPathfinder.gamePathRetries.ContainsKey(new ElevationPathfinder.PathData(gamePath)))
+		//	//					ElevationPathfinder.gamePathRetries.Add(new ElevationPathfinder.PathData(gamePath), 0);
 
-			//				ElevationPathfinder.gamePathRetries[new ElevationPathfinder.PathData(gamePath)] += 1;
+		//	//				ElevationPathfinder.gamePathRetries[new ElevationPathfinder.PathData(gamePath)] += 1;
 
-			//				requestedPaths.Add(gamePath);
-			//				Mod.dLog("Retrying threaded path after initial failed attempt");
-			//			}
-			//			else
-			//			{
-			//				pathsToCalculate[num].data[i].status = GamePath.Status.Complete;
+		//	//				requestedPaths.Add(gamePath);
+		//	//				Mod.dLog("Retrying threaded path after initial failed attempt");
+		//	//			}
+		//	//			else
+		//	//			{
+		//	//				pathsToCalculate[num].data[i].status = GamePath.Status.Complete;
 
-			//				if (ElevationPathfinder.gamePathRetries.ContainsKey(new ElevationPathfinder.PathData(gamePath)))
-			//					ElevationPathfinder.gamePathRetries.Remove(new ElevationPathfinder.PathData(gamePath));
-			//			}
-			//			//gamePath.debug = 3;
-			//		}
-			//		catch (Exception)
-			//		{
-			//		}
-			//	}
-			//	mainWaitHandle.Signal();
-			//}
-        }
-    }
+		//	//				if (ElevationPathfinder.gamePathRetries.ContainsKey(new ElevationPathfinder.PathData(gamePath)))
+		//	//					ElevationPathfinder.gamePathRetries.Remove(new ElevationPathfinder.PathData(gamePath));
+		//	//			}
+		//	//			//gamePath.debug = 3;
+		//	//		}
+		//	//		catch (Exception)
+		//	//		{
+		//	//		}
+		//	//	}
+		//	//	mainWaitHandle.Signal();
+		//	//}
+  //      }
+  //  }
 
 
 

@@ -52,86 +52,86 @@ namespace Elevation.Patches
         {
             //NOTE: Road Visuals disabled
 
-            //Guid guid = __instance.GetComponent<Building>().guid;
+        //    Guid guid = __instance.GetComponent<Building>().guid;
 
-            //if (!_data.ContainsKey(guid))
-            //{
-            //    RoadData rData = CreateRoadDataFor(__instance);
-            //    if (rData.valid)
-            //        _data.Add(guid, rData);
-            //    else
-            //        return;
-            //}
+        //    if (!_data.ContainsKey(guid))
+        //    {
+        //        RoadData rData = CreateRoadDataFor(__instance);
+        //        if (rData.valid)
+        //            _data.Add(guid, rData);
+        //        else
+        //            return;
+        //    }
 
-            //RoadData data = _data[guid];
+        //    RoadData data = _data[guid];
 
-            //if (!data.valid)
-            //    return;
+        //    if (!data.valid)
+        //        return;
 
 
-            //List<Cell> elevated = GetElevatedNeighbors(data.cell);
+        //    List<Cell> elevated = GetElevatedNeighbors(data.cell);
 
-            //// Add stairs 
-            //foreach (Cell cell in elevated)
-            //{
-            //    if (cell == null)
-            //        continue;
+        //    // Add stairs 
+        //    foreach (Cell cell in elevated)
+        //    {
+        //        if (cell == null)
+        //            continue;
 
-            //    DebugExt.dLog($"Connected: {cell.x}_{cell.z}");
+        //        DebugExt.dLog($"Connected: {cell.x}_{cell.z}");
 
-            //    string id = CellMetadata.GetPositionalID(cell);
+        //        string id = CellMetadata.GetPositionalID(cell);
 
-            //    if (data.stairs.ContainsKey(id))
-            //        continue;
-                    
-            //    Vector3 dir = (data.cell.Center - cell.Center).xz();
-                
-            //    GameObject stair = CreateStairInstanceFor(data, dir, id);
-            //    DebugExt.dLog($"[{dir}] stair instance at {data.cell.Center} : {stair.transform.position}", false, stair.transform.position);
-                
-            //}
+        //        if (data.stairs.ContainsKey(id))
+        //            continue;
 
-            //// Remove redundancies
-            //List<string> redundancies = new List<string>();
+        //        Vector3 dir = (data.cell.Center - cell.Center).xz();
 
-            //foreach (string id in data.stairs.Keys)
-            //{
-            //    if (elevated.Any((c) => c != null && CellMetadata.GetPositionalID(c) == id))
-            //        continue;
+        //        GameObject stair = CreateStairInstanceFor(data, dir, id);
+        //        DebugExt.dLog($"[{dir}] stair instance at {data.cell.Center} : {stair.transform.position}", false, stair.transform.position);
 
-            //    redundancies.Add(id);
-            //}
+        //    }
 
-            //foreach (string id in redundancies)
-            //{
-            //    GameObject.Destroy(data.stairs[id].gameObject);
-            //    data.stairs.Remove(id);
-            //}
-        }
+        //    // Remove redundancies
+        //    List<string> redundancies = new List<string>();
 
-        private static List<Cell> GetElevatedNeighbors(Cell cell)
-        {
-            Cell[] cells = new Cell[4];
-            World.inst.GetNeighborCells(cell, ref cells);
-            List<Cell> found = new List<Cell>();
+        //    foreach (string id in data.stairs.Keys)
+        //    {
+        //        if (elevated.Any((c) => c != null && CellMetadata.GetPositionalID(c) == id))
+        //            continue;
 
-            if (!Grid.Cells.Get(cell))
-                return found;
+        //        redundancies.Add(id);
+        //    }
 
-            found.AddRange(
-                cells.Where(
-                    (c) =>
-                    {
-                        if(c != null)
-                            if(Road.ShouldConnect(c))
-                                if (Grid.Cells.Get(c))
-                                    if (Grid.Cells.Get(c).elevationTier - Grid.Cells.Get(cell).elevationTier == 1)
-                                        return true;
+        //    foreach (string id in redundancies)
+        //    {
+        //        GameObject.Destroy(data.stairs[id].gameObject);
+        //        data.stairs.Remove(id);
+        //    }
+        //}
 
-                        return false;
-                    }));
+        //private static List<Cell> GetElevatedNeighbors(Cell cell)
+        //{
+        //    Cell[] cells = new Cell[4];
+        //    World.inst.GetNeighborCells(cell, ref cells);
+        //    List<Cell> found = new List<Cell>();
 
-            return found;
+        //    if (!Grid.Cells.Get(cell))
+        //        return found;
+
+        //    found.AddRange(
+        //        cells.Where(
+        //            (c) =>
+        //            {
+        //                if(c != null)
+        //                    if(Road.ShouldConnect(c))
+        //                        if (Grid.Cells.Get(c))
+        //                            if (Grid.Cells.Get(c).elevationTier - Grid.Cells.Get(cell).elevationTier == 1)
+        //                                return true;
+
+        //                return false;
+        //            }));
+
+        //    return found;
         }
 
 

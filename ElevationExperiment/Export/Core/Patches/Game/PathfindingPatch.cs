@@ -990,9 +990,9 @@ namespace Elevation.Patches
 		static bool Prefix(
 			Pathfinder __instance,
 
-			Vector3 startPos,
+			ref Vector3 startPos,
 			bool startUseUpperGrid,
-			Vector3 endPos,
+			ref Vector3 endPos,
 			bool endUseUpperGrid,
 
 			ref List<Vector3> path,
@@ -1007,6 +1007,20 @@ namespace Elevation.Patches
 			bool doTrimming,
 			bool allowUpperGrid)
 		{
+			Cell endCell = World.inst.GetCellData(endPos);
+			if (WorldRegions.Unreachable.Contains(endCell))
+			{
+				Cell newCell = Pathing.FindClosestUnblocked(endCell, 2);
+				endPos = newCell.Center;
+			}
+
+			Cell startCell = World.inst.GetCellData(startPos);
+			if (WorldRegions.Unreachable.Contains(startCell))
+			{
+				Cell newCell = Pathing.FindClosestUnblocked(startCell, 2);
+				startPos = newCell.Center;
+			}
+
 			//if (Settings.debug)
 			//	timer.Start();
 
@@ -1035,9 +1049,9 @@ namespace Elevation.Patches
 
 			//	}
 			//	catch(Exception ex)
-   //             {
+			//             {
 			//		DebugExt.HandleException(ex);
-   //             }
+			//             }
 
 			//	if (path.Count == 0)
 			//		Mod.dLog($"Failed to path from {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")} in {timer.ElapsedMilliseconds} ms");
@@ -1053,7 +1067,7 @@ namespace Elevation.Patches
 			//	return false;
 			//}
 			//else
-				return true;
+			return true;
 		}
 
 		static void Postfix(
@@ -1064,12 +1078,12 @@ namespace Elevation.Patches
 
 			ref List<Vector3> path)
         {
-			if (Settings.debug && ElevationPathfinder.main == null)
-			{
-				timer.Stop();
-				if (timer.ElapsedMilliseconds > msThreshold)
-					Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
-			}
+			//if (Settings.debug && ElevationPathfinder.main == null)
+			//{
+			//	timer.Stop();
+			//	if (timer.ElapsedMilliseconds > msThreshold)
+			//		Mod.dLog($"p {startPos}{(startUseUpperGrid ? "u" : "l")} to {endPos}{(endUseUpperGrid ? "u" : "l")}: {path.Count} node path created in {timer.ElapsedMilliseconds} ms");
+			//}
 		}
 	}
 
@@ -1077,32 +1091,54 @@ namespace Elevation.Patches
 	public class PathfindingFindPathRawRedirect
 	{
 		static bool Prefix(
-			Vector3 startPos, Vector3 endPos,
+			ref Vector3 startPos, 
+			ref Vector3 endPos,
+			
 			ref List<Vector3> path,
-			Pathfinder.blocksPathTest bt, Pathfinder.applyExtraCost ec,
+			
+			Pathfinder.blocksPathTest bt, 
+			Pathfinder.applyExtraCost ec,
 			int teamId)
 		{
-			//if (ElevationPathfinder.main != null)
-			//{
-			//	ElevationPathfinder.main.Path(
-			//		startPos, false,
-			//		endPos, false,
+            Cell endCell = World.inst.GetCellData(endPos);
+            if (WorldRegions.Unreachable.Contains(endCell))
+            {
+                Cell newCell = Pathing.FindClosestUnblocked(endCell, 2);
+                endPos = newCell.Center;
 
-			//		ref path,
+                Mod.dLog($"redirected; {endCell.x}_{endCell.z} changed to {newCell.x}_{newCell.z}");
+            }
 
-			//		bt,
-			//		bt,
-			//		ec,
+            Cell startCell = World.inst.GetCellData(startPos);
+            if (WorldRegions.Unreachable.Contains(startCell))
+            {
+                Cell newCell = Pathing.FindClosestUnblocked(startCell, 2);
+                startPos = newCell.Center;
 
-			//		teamId,
+                Mod.dLog($"redirected; {startCell.x}_{startCell.z} changed to {newCell.x}_{newCell.z}");
+            }
 
-			//		false, false, false);
+            //if (ElevationPathfinder.main != null)
+            //{
+            //	ElevationPathfinder.main.Path(
+            //		startPos, false,
+            //		endPos, false,
+
+            //		ref path,
+
+            //		bt,
+            //		bt,
+            //		ec,
+
+            //		teamId,
+
+            //		false, false, false);
 
 
-			//	return false;
-			//}
-			//else
-				return true;
+            //	return false;
+            //}
+            //else
+            return true;
 		}
 	}
 

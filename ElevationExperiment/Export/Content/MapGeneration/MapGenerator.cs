@@ -82,6 +82,8 @@ namespace Elevation
 
             // TEMP: WIP
             TryPlaceTerrainFeatures();
+
+            WorldRegions.Marked = false;
         }
 
         public static void Reset()

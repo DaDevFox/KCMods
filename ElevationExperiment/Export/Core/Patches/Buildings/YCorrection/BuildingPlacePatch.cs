@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Harmony;
+using Newtonsoft.Json.Serialization;
 using UnityEngine;
 
 namespace Elevation
@@ -24,7 +25,7 @@ namespace Elevation
             { "cemeteryDiamond", 0.01f }
         };
 
-        public static float defaultOffset = 0.005f;
+        public static float defaultOffset = 0f;
 
         public static bool UnevenTerrain(this Building building)
         {
@@ -201,18 +202,18 @@ namespace Elevation
                 return 0;
         }
 
-        public static void UpdateBuilding(Building buidling)
+        public static void UpdateBuilding(Building building)
         {
-            Vector3 pos = buidling.transform.localPosition;
-            Cell cell = buidling.GetCell();
+            Vector3 pos = building.transform.localPosition;
+            Cell cell = building.GetCell();
             CellMeta meta = Grid.Cells.Get(cell);
 
             float stackHeight = 0;
-            if (buidling.Stackable)
+            if (building.Stackable)
             {
-                stackHeight = GetRelativeHeightOfBuildingAtIndex(cell, cell.OccupyingStructure.IndexOf(buidling));
+                stackHeight = GetRelativeHeightOfBuildingAtIndex(cell, cell.OccupyingStructure.IndexOf(building));
             }
-            if (buidling.CategoryName == "projectiletopper")
+            if (building.CategoryName == "projectiletopper")
             {
                 stackHeight = GetRelativeHeightTotal(cell);
             }
@@ -220,12 +221,16 @@ namespace Elevation
             if (meta != null)
             {
                 // Better solution for [Experimental Elevation] required in this case; different buildings will be on different levels; perhaps need a building meta?
-                float offset = offsets.ContainsKey(buidling.UniqueName) ? offsets[buidling.UniqueName] : 0f;
+                float offset = offsets.ContainsKey(building.UniqueName) ? offsets[building.UniqueName] : defaultOffset;
                 
-                buidling.transform.localPosition = new Vector3(pos.x, meta.Elevation + stackHeight + offset, pos.z);
-                buidling.UpdateShaderHeight();
+                building.transform.localPosition = new Vector3(pos.x, meta.Elevation + stackHeight + offset, pos.z);
+                building.UpdateShaderHeight();
+
+                HappinessBonuses.Update(building);
             }
         }
+
+        public static float GetBuildingVisualOffset(string buildingUniqueName) => offsets.ContainsKey(buildingUniqueName) ? offsets[buildingUniqueName] : defaultOffset;
 
         public static void UpdateBuildingsOnCell(Cell cell)
         {
@@ -260,28 +265,47 @@ namespace Elevation.Patches
         
     }
 
-    [HarmonyPatch(typeof(Building), "OnPlacement")]
-    public class BuildingOnPlacementPatch
-    {
-        static void Postfix(Building __instance)
-        {
-            List<OneOffEffect> buildFX = 
-                typeof(Building)
-                .GetField("buildEffects", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .GetValue(__instance) as List<OneOffEffect>;
-            foreach(OneOffEffect effect in buildFX)
-            {
-                Cell cell = World.inst.GetCellDataClamped(__instance.transform.position);
-                if (cell == null)
-                    continue;
+    //[HarmonyPatch(typeof(Building), "OnPlacementPuff")]
+    //public class BuildFXPatch
+    //{
+    //    static bool Prefix(Building __instance, List<OneOffEffect> ___buildEffects)
+    //    {
+    //        CellMeta meta = Grid.Cells.Get(__instance.GetCell());
+    //        if (!meta)
+    //            return true;
 
-                CellMeta meta = Grid.Cells.Get(cell);
-                if (meta == null)
-                    continue;
+    //        if (__instance.IsVisibleForFog())
+    //        {
+    //            __instance.ForEachTileInBounds(delegate (int x, int z, Cell cell)
+    //            {
+    //                OneOffEffect oneOffEffect = EffectsMan.inst.BuildEffect.CreateAndPlay(new Vector3((float)x, 0f, (float)z));
+    //                oneOffEffect.AllowRelease = true;
+    //                ___buildEffects.Add(oneOffEffect);
+    //            });
 
-                // Better solution for [Experimental Elevation] required in this case; different buildings will be on different levels; perhaps need a building meta?
-                effect.transform.position -= new Vector3(0f, meta.Elevation, 0f);
-            }
-        }
-    }
+    //            return false;
+    //        }
+
+    //        return true;
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(Building), "UpdateConstruction")]
+    //public class BuildFXConstructionPatch
+    //{
+    //    static void Postfix(Building __instance, List<OneOffEffect> ___buildEffects)
+    //    {
+    //        CellMeta meta = Grid.Cells.Get(__instance.GetCell());
+    //        if (!meta)
+    //            return;
+
+    //        if (__instance.constructionProgress >= 1f)
+    //        {
+    //            foreach (OneOffEffect effect in ___buildEffects)
+    //            {
+    //                effect.transform.position = new Vector3(effect.transform.position.x, meta.Elevation, effect.transform.position.z);
+    //            }
+    //        }
+    //    }
+    //}
 }

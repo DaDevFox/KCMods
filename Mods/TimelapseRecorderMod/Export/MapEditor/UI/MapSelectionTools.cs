@@ -1,4 +1,4 @@
-﻿#define ALPHA
+﻿//#define ALPHA
 
 using System;
 using System.Collections.Generic;
@@ -31,11 +31,11 @@ namespace Fox.Maps
 
         public static Action held { get; private set; } = null;
 
-#if ALPHA
+//#if ALPHA
         public static bool EditModeActive = false;
-#else
-        public static bool EditModeActive = true;
-#endif
+//#else
+//        public static bool EditModeActive = true;
+//#endif
 
         #region Utils
 
@@ -68,7 +68,7 @@ namespace Fox.Maps
 
 #endregion
 
-#if ALPHA
+//#if ALPHA
 
         [HarmonyPatch(typeof(NewMapUI), "OnEdit")]
         class OnEditPatch
@@ -88,7 +88,7 @@ namespace Fox.Maps
             }
         }
 
-#endif
+//#endif
 
         [HarmonyPatch(typeof(MapEdit), "Update")]
         public class SelectionPatch

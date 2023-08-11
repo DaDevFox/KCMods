@@ -150,7 +150,7 @@ namespace Elevation
                     //        SelectiveProfiler.instance.Deactivate();
                     //}
                 }
-                if (Input.GetKeyDown(Settings.inst.c_CameraControls.s_activateKey.Key))
+                if (GameState.inst.AlphaNumericHotkeysEnabled && Input.GetKeyDown(Settings.inst.c_CameraControls.s_activateKey.Key))
                 {
                     TopDownModeCamera.ToggleTopDownView();
                 }

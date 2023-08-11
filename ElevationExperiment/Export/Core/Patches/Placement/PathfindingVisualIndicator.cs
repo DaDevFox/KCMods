@@ -15,7 +15,7 @@ namespace Elevation.Patches
     public class PathfindingVisualIndicator
     {
 
-        //[HarmonyPatch(typeof(PlacementMode), "Update")]
+        [HarmonyPatch(typeof(PlacementMode), "Update")]
         class PlacementModeUpdatePatch
         {
             private static LineRenderer renderer;
@@ -34,6 +34,16 @@ namespace Elevation.Patches
 
             static void Postfix(PlacementMode __instance)
             {
+                if (__instance.IsPlacing())
+                {
+                    foreach (Cell cell in WorldRegions.Unreachable)
+                    {
+                        TerrainGen.inst.SetOverlayPixelColor(cell.x, cell.z, Color.black);
+                    }
+
+                    TerrainGen.inst.UpdateOverlayTextures();
+                }
+
                 //if (renderer == null)
                 //{
                 //    GameObject GO = GameObject.Instantiate(new GameObject(), World.inst.transform);

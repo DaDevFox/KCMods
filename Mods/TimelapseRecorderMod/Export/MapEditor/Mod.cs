@@ -1,4 +1,4 @@
-﻿#define ALPHA
+﻿//#define ALPHA
 
 using System;
 using System.Collections.Generic;
@@ -60,6 +60,7 @@ namespace Fox.Maps
             public string name;
             public World.WorldSaveData terrainData;
             public FishSystem.FishSystemSaveData fishData;
+            public SerializableDictionary<string, string> customData = new SerializableDictionary<string, string>();
         }
 
         public static bool unpackExtraData = false;
@@ -95,13 +96,14 @@ namespace Fox.Maps
         {
             Compile();
 
-            // Overrite if same name
+            // Overwrite if same name
             for (int i = 0; i < registry.Count; i++)
             {
                 if (registry[i].name == editing.name)
                 {
                     registry[i].terrainData = editing.terrainData;
                     registry[i].fishData = editing.fishData;
+                    registry[i].customData = editing.customData;
                     SaveRegistry();
                     return registry[i];
                 }
@@ -118,7 +120,7 @@ namespace Fox.Maps
         public static void LoadRegistry()
         {
             unpacking = true;
-            typeof(LoadSave).GetMethod("LoadAtPath", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { saveLocation, "world" });
+            LoadSave.LoadAtPath(saveLocation, "world");
             unpacking = false;
         }
 
@@ -130,6 +132,11 @@ namespace Fox.Maps
 
             data.terrainData.Unpack(World.inst);
             data.fishData.Unpack(FishSystem.inst);
+
+
+            LoadSave.CustomSaveData_DontAccessDirectly = data.customData;
+            Broadcast.OnLoadedEvent.Broadcast(new OnLoadedEvent());
+
             GameState.inst.mainMenuMode.TransitionTo(MainMenuMode.State.NewMap);
 
             editing = data;
@@ -146,6 +153,15 @@ namespace Fox.Maps
             data.name = Mod.EditingMapName;
             data.terrainData = new World.WorldSaveData().Pack(World.inst);
             data.fishData = new FishSystem.FishSystemSaveData().Pack(FishSystem.inst);
+
+            Broadcast.OnSaveEvent.Broadcast(new OnSaveEvent());
+
+            SerializableDictionary<string, string> customData = new SerializableDictionary<string, string>();
+            foreach (KeyValuePair<string, string> entry in LoadSave.CustomSaveData_DontAccessDirectly)
+                if (entry.Key != "localmaps")
+                    customData.Add(entry);
+            
+            data.customData = customData;
 
             editing = data;
         }
@@ -169,8 +185,6 @@ namespace Fox.Maps
             };
 
             container.CustomSaveData["localmaps"] = JsonConvert.SerializeObject(registry);
-
-            Mod.Log(container.CustomSaveData["localmaps"]);
 
             return container;
         }
@@ -200,11 +214,11 @@ namespace Fox.Maps
             {
                 JToken cell = cells.ElementAt(i);
 
-#if ALPHA
+//#if ALPHA
                 Cell.CellSaveData cellData = new Cell.CellSaveData();
-#else
-                Cell.CellSaveData cellData = new Cell.CellSaveData(dummy);
-#endif
+//#else
+//                Cell.CellSaveData cellData = new Cell.CellSaveData(dummy);
+//#endif
 
                 cellData.type = (ResourceType)(int)cell["type"];
                 cellData.amount = (int)cell["amount"];
@@ -272,7 +286,27 @@ namespace Fox.Maps
 
             data.fishData = fishData;
 
-#endregion
+            #endregion
+
+            #region Custom Data
+
+            //Mod.Log(token.ToString());
+
+            SerializableDictionary<string, string> customDataSerializable = new SerializableDictionary<string, string>();
+
+            if (((JObject)token).TryGetValue("customData", StringComparison.Ordinal, out JToken dictionary))
+                customDataSerializable = JsonConvert.DeserializeObject<SerializableDictionary<string, string>>(dictionary.ToString());
+
+            //customDataSerializable = JsonConvert.DeserializeObject<SerializableDictionary<string, string>>((string)token["customData"]);
+            //Dictionary<string, string> customData = new Dictionary<string, string>();
+            //foreach (KeyValuePair<string, string> entry in customDataSerializable)
+            //    customData.Add(entry.Key, entry.Value);
+
+            //data.customData = customDataSerializable;
+
+            Mod.Log($"Custom data entries: {customDataSerializable.Count}");
+
+            #endregion 
 
             return data;
         }
@@ -303,6 +337,8 @@ namespace Fox.Maps
                         registry.Clear();
                         foreach (JToken token in read.ToList())
                             registry.Add(CreateFromJson(token));
+
+                        Mod.Log($"Registry loaded; {registry.Count} maps");
                     }
                 }
 

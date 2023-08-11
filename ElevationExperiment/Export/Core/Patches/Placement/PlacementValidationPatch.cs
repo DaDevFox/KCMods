@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Harmony;
+using UnityEngine;
 
 namespace Elevation.Patches
 {
@@ -21,6 +22,12 @@ namespace Elevation.Patches
 
         static void Postfix(Building PendingObj, ref PlacementValidationResult __result)
         {
+            //foreach (Cell cell in WorldRegions.Unreachable)
+            //{
+            //    TerrainGen.inst.SetOverlayPixelColor(cell.x, cell.z, Color.grey);
+            //    TerrainGen.inst.UpdateOverlayTextures(2f);
+            //}
+
             Cell cell = World.inst.GetCellDataClamped(PendingObj.transform.position);
             if (cell == null)
                 return;
@@ -33,7 +40,9 @@ namespace Elevation.Patches
                 __result = PlacementValidationResult.MustBeOnFlatLand;
             }
 
-            if (Pathing.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)) && !(PendingObj.UniqueName == "destructioncrew" && (cell.Type == ResourceType.UnusableStone || cell.Type == ResourceType.Stone || cell.Type == ResourceType.IronDeposit)))
+            if (Pathing.BlockedCompletely(World.inst.GetCellData(PendingObj.transform.position)) && 
+                !((PendingObj.UniqueName == "destructioncrew" || PendingObj.UniqueName == "largequarry" || PendingObj.UniqueName == "largeironmine") 
+                && (cell.Type == ResourceType.UnusableStone || cell.Type == ResourceType.Stone || cell.Type == ResourceType.IronDeposit || cell.Type == ResourceType.EmptyCave)))
             {
                 __result = PlacementValidationResult.OutsideOfTerritory;
                 CurrentPlacementOnBlockedCell = true;

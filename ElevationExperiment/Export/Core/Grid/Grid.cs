@@ -144,6 +144,8 @@ namespace Elevation
 
 
         public CellMeta Get(int x, int z) => lookup.ContainsKey(GetPositionalID(x, z)) ? lookup[GetPositionalID(x, z)] : null;
+        
+        public CellMeta Get(Vector3 position) => Get((int)position.x, (int)position.z);
 
         public static string GetPositionalID(Cell cell)
         {
@@ -248,8 +250,8 @@ namespace Elevation
 
                         Vector3 pos = new Vector3(float.Parse(split[0]), 0f, float.Parse(split[1]));
                         Cell cell = World.inst.GetCellData(pos);
-
-                        if (cell == null || cell.Type == ResourceType.Water)
+                        
+                        if (cell == null || cell.deepWater)
                             continue;
 
                         CellMeta meta = new CellMeta(cell);

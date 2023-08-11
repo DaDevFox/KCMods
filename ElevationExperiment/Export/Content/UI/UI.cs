@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Elevation.Utils;
 
 namespace Elevation
 {
@@ -36,8 +37,10 @@ namespace Elevation
 
             raiseLowerUIPrefab = ModAssets.DB.GetByName<GameObject>("ElevationRaiseLowerControls");
             loadingDialogPrefab = ModAssets.DB.GetByName<GameObject>("GeneratingOverlay");
+            
             terrainVisualIndicatorPrefab = ModAssets.DB.GetByName<GameObject>("TerrainIndicator");
 
+            
             loaded = true;
             Mod.dLog("UI Assets Preloaded");
         }
@@ -57,6 +60,8 @@ namespace Elevation
             loadingDialog = loadingDialogObj.AddComponent<LoadingDialog>();
 
             Mod.dLog(GameState.inst.mainMenuMode.mainMenuUI.transform.GetChild(0).name);
+
+            //GameState.inst.mainMenuMode.newMapUI.GetComponent<NewMapUI>().doneButton.onClick.AddListener(() => { GameObject.FindObjectOfType<Mod>().Invoke("PrunePathfindingDeferred", 1f); });
 
             created = true;
             Mod.dLog("UI Created");

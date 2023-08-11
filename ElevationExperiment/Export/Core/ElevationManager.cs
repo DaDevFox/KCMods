@@ -22,6 +22,8 @@ namespace Elevation
         public static int maxElevation { get; } = 8;
         public static int minElevation { get; } = 0;
 
+        public static float slopingRadius { get; } = 0.1f;
+
         public static float elevationPathfindingCost { get; } = 10f;
 
         /// <summary>
@@ -49,7 +51,6 @@ namespace Elevation
                 foreach (Cell neighbor in neighbors)
                 {
                     RefreshTile(neighbor);
-                    WorldRegions.MarkDirty(neighbor);
                 }
 
                 WorldRegions.UpdateDirty();
@@ -129,7 +130,7 @@ namespace Elevation
             Patches.TreeSystemPatch.UpdateCell(cell);
             Patches.RockPatch.UpdateCell(cell);
             Patches.WitchHutPatch.UpdateCell(cell);
-            Patches.WoflDenPatch.UpdateCell(cell);
+            Patches.WolfDenPatch.UpdateCell(cell);
             Patches.EmptyCavePatch.UpdateCell(cell);
 
 
@@ -144,7 +145,7 @@ namespace Elevation
             Patches.TreeSystemPatch.UpdateTrees();
             Patches.RockPatch.UpdateStones();
             Patches.WitchHutPatch.UpdateWitchHuts();
-            Patches.WoflDenPatch.UpdateWolfDens();
+            Patches.WolfDenPatch.UpdateWolfDens();
             Patches.EmptyCavePatch.UpdateEmptyCaves();
 
             //foreach (BuildingMeta buildingMeta in Grid.Buildings.GetAll())
