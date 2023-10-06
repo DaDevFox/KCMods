@@ -11,22 +11,21 @@ namespace Elevation.Patches
     [HarmonyPatch(typeof(World), "PlaceInternal")]
     public class BuildingPlaceUpdatePatch
     {
-        static void Prefix(Building PendingObj, bool undo)
-        {
-            if (!undo)
-                HappinessBonuses.Update(PendingObj);
-        }
+        //static void Prefix(Building PendingObj)
+        //{
+        //    if (PendingObj.GetComponent<RadiusBonus>())
+        //        HappinessBonuses.Update(PendingObj);
+        //}
 
         static void Postfix(Building PendingObj, bool undo)
         {
             if (!undo)
+            {
                 Grid.Buildings.Add(PendingObj);
+                BuildingFormatter.UpdateBuilding(PendingObj);
+            }
             else
                 Grid.Buildings.Remove(PendingObj);
-
-            
-            BuildingFormatter.UpdateBuilding(PendingObj);
-            
         }
 
         

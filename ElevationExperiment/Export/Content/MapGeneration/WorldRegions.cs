@@ -63,6 +63,8 @@ namespace Elevation
         {
             if (Marked)
             {
+                //UI.loadingDialog.desiredProgress = Mathf.Clamp01(Dirty.Count / 10f);
+
                 if (elapsed > updateInterval)
                 {
                     if (Dirty.Count > 0)
@@ -290,8 +292,6 @@ namespace Elevation
 
         public static IEnumerator RegionSearchAsync()
         {
-            
-
             UI.loadingDialog.Activate();
             UI.loadingDialog.title = "pruning_title";
 

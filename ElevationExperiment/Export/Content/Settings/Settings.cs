@@ -364,7 +364,7 @@ namespace Elevation
 
         #region Debug
 
-        public static bool debug = true;
+        public static bool debug = false;
 
 
         public static KeyCode keycode_refreshTerrain { get; } = KeyCode.Minus;

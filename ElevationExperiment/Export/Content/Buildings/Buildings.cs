@@ -74,6 +74,9 @@ namespace Elevation
             placeable_scaffoldingBuilding.placementSounds = new string[] { "castleplacement" };
             placeable_scaffoldingBuilding.SelectionSounds = new string[] { "Building_Select_Road_1" };
 
+            placeable_scaffoldingBuilding.ignoreRoadCoverageForPlacement = true;
+            placeable_scaffoldingBuilding.dragPlacementMode = Building.DragPlacementMode.Rectangle;
+
             // Resource Cost
             ResourceAmount cost = new ResourceAmount();
             cost.Set(FreeResourceType.Tree, 150);
@@ -115,6 +118,9 @@ namespace Elevation
 
             placeable_dugoutBuilding.placementSounds = new string[] { "castleplacement" };
             placeable_dugoutBuilding.SelectionSounds = new string[] { "Building_Select_Road_1" };
+
+            placeable_dugoutBuilding.ignoreRoadCoverageForPlacement = true;
+            placeable_dugoutBuilding.dragPlacementMode = Building.DragPlacementMode.Rectangle;
 
             // Resource Cost
             ResourceAmount dugoutCost = new ResourceAmount();

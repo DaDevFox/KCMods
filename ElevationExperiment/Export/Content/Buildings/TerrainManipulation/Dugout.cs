@@ -23,11 +23,11 @@ namespace Elevation
         // Token: 0x06000A7B RID: 2683 RVA: 0x000092E0 File Offset: 0x000074E0
         public void OnBuilt()
         {
-            this.RaiseTerrain();
+            this.ReduceTerrain();
         }
 
         // Token: 0x06000A7C RID: 2684 RVA: 0x0006A080 File Offset: 0x00068280
-        private void RaiseTerrain()
+        private void ReduceTerrain()
         {
             Cell cell = this.b.GetCell();
             if (ElevationManager.TryProcessElevationChange(cell, -1))

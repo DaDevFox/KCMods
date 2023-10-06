@@ -249,10 +249,9 @@ namespace Elevation
                     if (i < building.jobs.Count && building.jobs[i].HasEmployee())
                         building.jobs[i].Employee.MoveToDeferred(building.GetPositionForPerson(building.jobs[i].Employee));
                 
-                //building.RefreshCachedValues();
+                building.RefreshCachedValues();
             }
 
-            DebugExt.dLog("Updating happiness bonus");
             HappinessBonuses.Update(building);
         }
 

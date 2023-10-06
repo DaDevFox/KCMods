@@ -145,7 +145,7 @@ namespace Elevation
 
             Vector3 pos = new Vector3(Cam.inst.DesiredTrackingPos.x, TopDownModeCamera.camHeight, Cam.inst.DesiredTrackingPos.z);
 
-            if (TopDownModeCamera.snap > 0f)
+            if (TopDownModeCamera.snap > 0f && !TopDownModeCamera.dragging)
             {
                 pos.x = Utils.Util.RoundToFactor(pos.x, TopDownModeCamera.snap);
                 pos.z = Utils.Util.RoundToFactor(pos.z, TopDownModeCamera.snap);
@@ -251,8 +251,11 @@ namespace Elevation
 
             if (input)
             {
-                TopDownModeCamera.dragging = true;
-                TopDownModeCamera.dragStartPos = GetHit();
+                if (!TopDownModeCamera.dragging)
+                {
+                    TopDownModeCamera.dragging = true;
+                    TopDownModeCamera.dragStartPos = GetHit();
+                }
             }
             else
             {
@@ -265,13 +268,13 @@ namespace Elevation
             if (!TopDownModeCamera.dragging)
                 return;
 
-            DebugExt.dLog("dragging", false, TopDownModeCamera.dragStartPos);
-            DebugExt.dLog("dragging2", false, TopDownModeCamera.dragCurrentPos);
+            DebugExt.dLog("dragging", true, TopDownModeCamera.dragStartPos);
+            DebugExt.dLog("dragging2", true, TopDownModeCamera.dragCurrentPos);
             
             TopDownModeCamera.dragCurrentPos = GetHit();
             Cam.inst.SetDesiredTrackingPos(Cam.inst.DesiredTrackingPos - (TopDownModeCamera.dragCurrentPos - TopDownModeCamera.dragStartPos));
             
-            DebugExt.dLog("dragging3", false, Cam.inst.DesiredTrackingPos);
+            DebugExt.dLog("dragging3", true, Cam.inst.DesiredTrackingPos);
         }
 
 

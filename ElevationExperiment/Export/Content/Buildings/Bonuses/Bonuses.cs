@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Elevation
 {
@@ -72,6 +73,31 @@ namespace Elevation
                 bonus.radiusMax = original_radiusMax;
                 bonus.radiusMin = original_radiusMin;
             }
+
+            if (building.GetComponent<RadiusBonus>())
+            {
+                RadiusBonus component2 = building.GetComponent<RadiusBonus>();
+                float radiusMax = component2.radiusMax;
+                Vector3 vector2 = building.transform.position + building.LocalCenter();
+                int num = (int)Mathff.Clamp(vector2.x - (radiusMax + 1f), 0f, (float)(World.inst.GridWidth - 1));
+                int num2 = (int)Mathff.Clamp(vector2.x + (radiusMax + 1f), 0f, (float)(World.inst.GridWidth - 1));
+                int num3 = (int)Mathff.Clamp(vector2.z - (radiusMax + 1f), 0f, (float)(World.inst.GridHeight - 1));
+                int num4 = (int)Mathff.Clamp(vector2.z + (radiusMax + 1f), 0f, (float)(World.inst.GridHeight - 1));
+                for (int j = num; j <= num2; j++)
+                {
+                    for (int k = num3; k < num4; k++)
+                    {
+                        if (Mathff.DistXZ(vector2, new Vector3((float)j + 0.5f, 0f, (float)k + 0.5f)) <= radiusMax)
+                        {
+                            CellInfluence cellInfluenceDataClamped = World.inst.GetCellInfluenceDataClamped(j, k);
+                            
+                            cellInfluenceDataClamped.radiusBonuses.Add(component2);
+                        }
+                    }
+                }
+            }
+
+            DebugExt.dLog($"{building.FriendlyName} bonus adjusted: {bonus.radiusMin}-{bonus.radiusMax} from {original_radiusMin}-{original_radiusMax}", true, building.GetPos());
         }
 
 

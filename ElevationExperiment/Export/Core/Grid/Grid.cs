@@ -13,61 +13,61 @@ namespace Elevation
 {
     
     /// <summary>
-    /// Stores metadata about a type T in a type M
+    /// Stores metadata about a type TSource in a type TMetadata
     /// </summary>
-    /// <typeparam name="T">The type to keep metadata on</typeparam>
-    /// <typeparam name="M">The type that will store metaddata</typeparam>
-    public abstract class Metadata<T, M>
+    /// <typeparam name="TSource">The type to keep metadata on</typeparam>
+    /// <typeparam name="TMetadata">The type that will store metaddata</typeparam>
+    public abstract class Metadata<TSource, TMetadata>
         : IEnumerable
-        where M : Meta<T>
+        where TMetadata : Meta<TSource>
 
     {
-        protected static Dictionary<object, M> lookup;
+        protected static Dictionary<object, TMetadata> lookup;
 
         public int Count => lookup.Count;
 
         public Metadata()
         {
-            lookup = new Dictionary<object, M>();
+            lookup = new Dictionary<object, TMetadata>();
         }
 
         public Metadata(int capacity)
         {
-            lookup = new Dictionary<object, M>(capacity);
+            lookup = new Dictionary<object, TMetadata>(capacity);
         }
 
         /// <summary>
-        /// Gets a <typeparamref name="M"/> by a <typeparamref name="T"/> object
+        /// Gets a <typeparamref name="TMetadata"/> by a <typeparamref name="TSource"/> object
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public M Get(T obj) => lookup.ContainsKey(GetKey(obj)) ? lookup[GetKey(obj)] : default(M);
+        public TMetadata Get(TSource obj) => lookup.ContainsKey(GetKey(obj)) ? lookup[GetKey(obj)] : default(TMetadata);
 
         /// <summary>
-        /// Gets a <typeparamref name="M"/> by key, make sure you know how keys are stored in this metadata to reference one by key. 
+        /// Gets a <typeparamref name="TMetadata"/> by key. Make sure you know how keys are stored in this metadata to reference one by key. 
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public M Get(object key) => lookup.ContainsKey(key) ? lookup[key] : default(M);
+        public TMetadata Get(object key) => lookup.ContainsKey(key) ? lookup[key] : default(TMetadata);
 
         /// <summary>
-        /// Adds a <typeparamref name="T"/>, <typeparamref name="M"/> pair
+        /// Adds a <typeparamref name="TSource"/>, <typeparamref name="TMetadata"/> pair
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="meta"></param>
-        public void Add(T obj, M meta)
+        public void Add(TSource obj, TMetadata meta)
         {
             lookup.Add(GetKey(obj), meta);
         }
 
-        public M Add(T obj) => Activator.CreateInstance(typeof(M), obj) as M;
+        public TMetadata Add(TSource obj) => Activator.CreateInstance(typeof(TMetadata), obj) as TMetadata;
 
         /// <summary>
-        /// Removes a <typeparamref name="M"/> by a <typeparamref name="T"/> object
+        /// Removes a <typeparamref name="TMetadata"/> by a <typeparamref name="TSource"/> object
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public void Remove(T obj)
+        public void Remove(TSource obj)
         {
             if (lookup.ContainsKey(GetKey(obj)))
                 lookup.Remove(GetKey(obj));
@@ -75,7 +75,7 @@ namespace Elevation
 
 
         /// <summary>
-        /// Removes a <typeparamref name="M"/> by key, make sure you know how keys are stored in this metadata to reference one by key. 
+        /// Removes a <typeparamref name="TMetadata"/> by key, make sure you know how keys are stored in this metadata to reference one by key. 
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -84,7 +84,7 @@ namespace Elevation
             if (lookup.ContainsKey(key))
                 lookup.Remove(key);
         }
-        public List<M> GetAll()
+        public List<TMetadata> GetAll()
         {
             return lookup.Values.ToList();
         }
@@ -102,7 +102,7 @@ namespace Elevation
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public virtual object GetKey(T obj)
+        public virtual object GetKey(TSource obj)
         {
             return obj.GetHashCode();
         }

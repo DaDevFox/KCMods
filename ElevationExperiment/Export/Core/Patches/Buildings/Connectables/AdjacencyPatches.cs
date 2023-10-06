@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Weather;
 
 namespace Elevation.Patches
 {
@@ -170,13 +171,34 @@ namespace Elevation.Patches
                         southWest &= mSouthWest.elevationTier == origin.elevationTier && mSouth.elevationTier == origin.elevationTier && mWest.elevationTier == origin.elevationTier;
 
                     if (mNorth != null)
-                        north &= Math.Abs(origin.elevationTier - mNorth.elevationTier) <= 1;
+                    {
+                        if (mNorth.cell.TopStructure && (mNorth.cell.TopStructure.uniqueNameHash == World.gardenHash || Cemetery.IsCemetery(mNorth.cell.x, mNorth.cell.z)))
+                            north &= Math.Abs(origin.elevationTier - mNorth.elevationTier) == 0;
+                        else
+                            north &= Math.Abs(origin.elevationTier - mNorth.elevationTier) <= 1;
+                    }
                     if (mSouth != null)
-                        south &= Math.Abs(origin.elevationTier - mSouth.elevationTier) <= 1;
+                    {
+                        if (mSouth.cell.TopStructure && (mSouth.cell.TopStructure.uniqueNameHash == World.gardenHash || Cemetery.IsCemetery(mSouth.cell.x, mSouth.cell.z)))
+                            south &= Math.Abs(origin.elevationTier - mSouth.elevationTier) == 0;
+                        else
+                            south &= Math.Abs(origin.elevationTier - mSouth.elevationTier) <= 1;
+                    }
                     if (mEast != null)
-                        east &= Math.Abs(origin.elevationTier - mEast.elevationTier) <= 1;
+                    {
+                        if (mEast.cell.TopStructure && (mEast.cell.TopStructure.uniqueNameHash == World.gardenHash || Cemetery.IsCemetery(mEast.cell.x, mEast.cell.z)))
+                            east &= Math.Abs(origin.elevationTier - mEast.elevationTier) == 0;
+                        else
+                            east &= Math.Abs(origin.elevationTier - mEast.elevationTier) <= 1;
+                    }
                     if (mWest != null)
-                        west &= Math.Abs(origin.elevationTier - mWest.elevationTier) <= 1;
+                    {
+                        if (mWest.cell.TopStructure && (mWest.cell.TopStructure.uniqueNameHash == World.gardenHash || Cemetery.IsCemetery(mWest.cell.x, mWest.cell.z)))
+                            west &= Math.Abs(origin.elevationTier - mWest.elevationTier) == 0;
+                        else
+                            west &= Math.Abs(origin.elevationTier - mWest.elevationTier) <= 1;
+                    }
+
                 }
 
                 if (north)
