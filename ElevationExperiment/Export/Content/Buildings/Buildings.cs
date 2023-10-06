@@ -10,6 +10,7 @@ using Elevation.AssetManagement;
 using System.Reflection;
 using I2.Loc;
 using Fox.Localization;
+using Elevation.Patches;
 
 namespace Elevation
 {
@@ -27,6 +28,9 @@ namespace Elevation
 
     public class Buildings
     {
+
+        public static Dictionary<int, Vector3[]> PrefabPersonPositions { get; private set; } = new Dictionary<int, Vector3[]>();
+
         public static GameObject ScaffoldingPrefab { get; private set; }
         public static Building placeable_scaffoldingBuilding { get; private set; }
 
@@ -35,6 +39,12 @@ namespace Elevation
 
         public static void Init()
         {
+            //Broadcast.BuildingBuilt.ListenAny(
+            //    (sender, data) =>
+            //    {
+            //        Mod.dLog($"Sender: {sender}");
+            //        BuildFXPatch.Correct(data.targetBuilding);
+            //    });
             Register();
         }
 
@@ -127,7 +137,7 @@ namespace Elevation
 
         public static void Setup()
         {
-            HappinessBonuses.Setup();
+            RoadStairs.Reset();
         }
 
 
@@ -142,6 +152,8 @@ namespace Elevation
         {
             __instance.internalPrefabs.Add(Buildings.placeable_scaffoldingBuilding);
             __instance.internalPrefabs.Add(Buildings.placeable_dugoutBuilding);
+
+            HappinessBonuses.Init();
         }
     }
 
@@ -157,6 +169,28 @@ namespace Elevation
                 "scaffolding", "blacksmith", Vector3.one);
             __instance.AddBuilding(__instance.IndustryTab, __instance.IndustryTabVR, __instance.IndustryTabConsole,
                 "dugout", "blacksmith", Vector3.one);
+
+            ReadPersonPositions();
+        }
+
+        static void ReadPersonPositions()
+        {
+            foreach(Building building in GameState.inst.internalPrefabs)
+            {
+                if (building.personPositions == null)
+                    continue;
+
+                Vector3[] array = new Vector3[building.personPositions.Length];
+                for(int i = 0; i < array.Length; i++)
+                {
+                    array[i] = building.personPositions[i] != null ? building.personPositions[i].localPosition : Vector3.zero;
+                }
+
+                if (!Buildings.PrefabPersonPositions.ContainsKey(building.uniqueNameHash))
+                    Buildings.PrefabPersonPositions.Add(building.uniqueNameHash, array);
+                else
+                    Buildings.PrefabPersonPositions[building.uniqueNameHash] = array; // throw an exception???
+            }
         }
     }
 

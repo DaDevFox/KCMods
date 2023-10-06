@@ -1010,14 +1010,14 @@ namespace Elevation.Patches
 			Cell endCell = World.inst.GetCellData(endPos);
 			if (WorldRegions.Unreachable.Contains(endCell))
 			{
-				Cell newCell = Pathing.FindClosestUnblocked(endCell, 2);
+				Cell newCell = Pathing.FindNearUnblockedFast(endCell, 2);
 				endPos = newCell.Center;
 			}
 
 			Cell startCell = World.inst.GetCellData(startPos);
 			if (WorldRegions.Unreachable.Contains(startCell))
 			{
-				Cell newCell = Pathing.FindClosestUnblocked(startCell, 2);
+				Cell newCell = Pathing.FindNearUnblockedFast(startCell, 2);
 				startPos = newCell.Center;
 			}
 
@@ -1103,7 +1103,7 @@ namespace Elevation.Patches
             Cell endCell = World.inst.GetCellData(endPos);
             if (WorldRegions.Unreachable.Contains(endCell))
             {
-                Cell newCell = Pathing.FindClosestUnblocked(endCell, 2);
+                Cell newCell = Pathing.FindNearUnblockedFast(endCell, 2);
                 endPos = newCell.Center;
 
                 Mod.dLog($"redirected; {endCell.x}_{endCell.z} changed to {newCell.x}_{newCell.z}");
@@ -1112,7 +1112,7 @@ namespace Elevation.Patches
             Cell startCell = World.inst.GetCellData(startPos);
             if (WorldRegions.Unreachable.Contains(startCell))
             {
-                Cell newCell = Pathing.FindClosestUnblocked(startCell, 2);
+                Cell newCell = Pathing.FindNearUnblockedFast(startCell, 2);
                 startPos = newCell.Center;
 
                 Mod.dLog($"redirected; {startCell.x}_{startCell.z} changed to {newCell.x}_{newCell.z}");

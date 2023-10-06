@@ -16,12 +16,13 @@ namespace Elevation
         public struct CellData
         {
             public bool valid;
-            public float yValue;
+            public float y;
             public Cell cell;
         }
 
         public static List<TerrainFeature> TerrainFeatures = new List<TerrainFeature>()
         {
+            //new Pillar()
         };
 
         public static int featurePlaceTriesPerLandmass = 5;
@@ -115,7 +116,7 @@ namespace Elevation
                             float weightage = GetFertilityDistanceWeightage(cell);
                             yValue = noiseValue * weightage * (ElevationManager.maxElevation - ElevationManager.minElevation) + ElevationManager.minElevation;
 
-                            data.yValue = yValue;
+                            data.y = yValue;
 
                             int y = Clamp(yValue);
 
@@ -172,11 +173,11 @@ namespace Elevation
                                 list.Add(f);
                             }
                         }
-                        list.Add(data.yValue);
+                        list.Add(data.y);
 
                         newData.Add(cell, new CellData { 
                             valid = true,
-                            yValue = Average(list),
+                            y = Average(list),
                             cell = cell
                         }) ;
                     }
@@ -195,7 +196,7 @@ namespace Elevation
             {
                 if (data.valid)
                 {
-                    ElevationManager.SetElevation(data.cell, Clamp(data.yValue));
+                    ElevationManager.SetElevation(data.cell, Clamp(data.y));
                 }
             }
         }
@@ -267,10 +268,10 @@ namespace Elevation
             CellData data3 = GetCellData(cell3);
             CellData data4 = GetCellData(cell4);
 
-            values[0] = data1.valid ? data1.yValue : -1f;
-            values[1] = data2.valid ? data2.yValue : -1f;
-            values[2] = data3.valid ? data1.yValue : -1f;
-            values[3] = data4.valid ? data4.yValue : -1f;
+            values[0] = data1.valid ? data1.y : -1f;
+            values[1] = data2.valid ? data2.y : -1f;
+            values[2] = data3.valid ? data1.y : -1f;
+            values[3] = data4.valid ? data4.y : -1f;
 
             return values;
         }

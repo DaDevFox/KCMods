@@ -215,7 +215,7 @@ namespace Elevation
         public static void HandleBuildingAddRemove(object sender, OnBuildingAddRemove @event)
         {
             // Handle roads
-            RoadVisualPatch.HandleRoadChange(@event);
+            Roads.HandleBuildingChange(@event);
         }
 
         #region Save/Load
@@ -309,7 +309,7 @@ namespace Elevation
 
     public static class GridUtils 
     {
-        public static CellMeta GetMeta(this Cell cell) => Grid.Cells.Get(cell);
+        public static CellMeta GetMeta(this Cell cell) => cell != null ? Grid.Cells.Get(cell) : null;
 
         public static BuildingMeta GetMeta(this Building building) => Grid.Buildings.Get(building);
     }

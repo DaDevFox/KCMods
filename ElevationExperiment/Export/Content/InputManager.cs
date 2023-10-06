@@ -43,12 +43,18 @@ namespace Elevation
                     if (Input.GetKeyDown(Settings.keycode_raise))
                     {
                         if (ElevationManager.TryProcessElevationChange(selected, 1))
+                        {
+                            ElevationManager.RefreshTile(selected);
                             DebugExt.dLog("Elevation raise succesful");
+                        }
                     }
                     else if (Input.GetKeyDown(Settings.keycode_lower))
                     {
                         if (ElevationManager.TryProcessElevationChange(selected, -1))
+                        {
+                            ElevationManager.RefreshTile(selected);
                             DebugExt.dLog("Elevation lower succesful");
+                        }
                     }
                         
                     
@@ -74,7 +80,10 @@ namespace Elevation
                         text += (Grid.Cells.Get(selected) != null) ? GetConnectedForCell(selected) : "";
                         text += WorldRegions.GetTileRegion(selected) != -1 ? WorldRegions.GetTileRegion(selected).ToString() +
                             Environment.NewLine : "";
-                        text += WorldRegions.Unreachable.Contains(selected) ? "<color=red> - Pruned from pathfinding; unreachable</color>" : "";
+                        text += WorldRegions.Unreachable.Contains(selected) ? "<color=red> - Pruned from pathfinding; unreachable</color>" : "" + Environment.NewLine;
+
+                        if (meta.cell.GetTopMostCastlePiece() != null)
+                            text += $"Stack height total: {meta.cell.CurrentStackHeight()}";
 
                         DebugExt.dLog(text);
                     }
@@ -84,6 +93,9 @@ namespace Elevation
                         WorldRegions.Search();
                     if (Input.GetKeyDown(Settings.keycode_directionReference))
                     {
+                        if (selected.TopStructure)
+                            Mod.dLog(selected.TopStructure.UniqueName + ":\n" + selected.TopStructure.transform.LabelForEachChildRecursive((child) => $"{child.position}; {child.localPosition}"));
+
                         DebugExt.dLog("-Z");
                         DebugExt.dLog(selected.Center, false, selected.Center);
                         Cell cell = World.inst.GetCellData(selected.Center + new Vector3(0f, 0f, -1f));

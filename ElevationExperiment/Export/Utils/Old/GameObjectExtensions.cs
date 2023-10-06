@@ -35,5 +35,26 @@ namespace Elevation
                 GameObject.Destroy(child.gameObject);
         }
 
+        public static void ForEachChildRecursive(this Transform obj, Action<Transform> action)
+        {
+            action(obj);
+            for(int i = 0; i < obj.childCount; i++)
+                ForEachChildRecursive(obj.GetChild(i), action);
+        }
+
+        public static string LabelForEachChildRecursive(this Transform obj, Func<Transform, string> printFunc)
+        {
+            return LabelForEachChildInternal(obj, printFunc, "");
+        }
+
+        private static string LabelForEachChildInternal(Transform obj, Func<Transform, string> printFunc, string baseString)
+        {
+            baseString += "--";
+            string result = baseString + $" {obj.name}: \t{printFunc(obj)}{Environment.NewLine}";
+            for (int i = 0; i < obj.childCount; i++)
+                result += LabelForEachChildInternal(obj.GetChild(i), printFunc, baseString);
+            return result;
+        }
+
     }
 }

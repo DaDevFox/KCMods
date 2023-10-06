@@ -8,6 +8,7 @@ namespace ReskinEngine.API
 {
     public class DockSkin : GenericBuildingSkin
     {
+        internal override string FriendlyName => "Dock";
         internal override string UniqueName => "dock";
     }
 }

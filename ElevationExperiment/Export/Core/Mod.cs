@@ -9,6 +9,7 @@ using UnityEngine;
 using Fox.Profiling;
 using Fox.Localization;
 using Fox.Debugging;
+using Elevation.Patches;
 
 namespace Elevation
 {
@@ -135,6 +136,9 @@ namespace Elevation
             ColorManager.Tick();
             // Debug Lines
             WorldRegions.Tick();
+            // Road Stairs
+            RoadStairs.Tick();
+
             //DebugLines.Tick();
         }
 
@@ -239,6 +243,7 @@ namespace Elevation
 
             }
 
+            ElevationManager.UpdateBuildings(true);
             WorldRegions.Marked = false;
         }
 
@@ -252,7 +257,9 @@ namespace Elevation
     {
         static void Postfix()
         {
-            if (GameState.inst.CurrMode == GameState.inst.playingMode && !WorldRegions.Marked)
+            if (GameState.inst.CurrMode == GameState.inst.playingMode && !WorldRegions.Marked 
+                //&& !WorldRegions.Busy
+                )
             {
                 WorldRegions.Search();
             }

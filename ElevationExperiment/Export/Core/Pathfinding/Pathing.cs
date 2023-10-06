@@ -19,6 +19,8 @@ namespace Elevation
 	public static class Pathing
     {
         public static int tierPathingCost = 50;
+		public static int unitPathingCostBase = 50;
+		public static int unitPathingAnticost = 1;
 
 		public static bool IsDiagonalXZ(Cell from, Cell to)
 		{
@@ -179,7 +181,7 @@ namespace Elevation
 			return false;
         }
 
-		public static Cell FindClosestUnblocked(Cell origin, int radius)
+		public static Cell FindNearUnblockedFast(Cell origin, int radius)
 		{
 			if (origin == null || !WorldRegions.Unreachable.Contains(origin))
 				return origin;
@@ -197,5 +199,24 @@ namespace Elevation
 			return selected;
 		}
 
-	}
+        public static Cell FindNearestUnblocked(Cell origin, int radius)
+        {
+            if (origin == null || !WorldRegions.Unreachable.Contains(origin))
+                return origin;
+
+            Cell selected = null;
+			float minDistance = float.MaxValue;
+			World.inst.ForEachTileInRadius(origin.x, origin.z, radius, (x, z, cell) =>
+            {
+				float distanceSquared = Mathff.DistSqrdXZ(origin.Center, cell.Center);
+                if (!WorldRegions.Unreachable.Contains(cell) && distanceSquared < minDistance)
+                {
+                    selected = cell;
+					minDistance = distanceSquared;
+                }
+            });
+            return selected;
+        }
+
+    }
 }

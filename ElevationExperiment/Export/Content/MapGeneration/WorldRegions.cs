@@ -23,7 +23,7 @@ namespace Elevation
         public static bool async { get; set; } = true;
         public static bool secondsDistribution { get; set; } = false;
 
-        public static float updateInterval { get; set; } = 3f;
+        public static float updateInterval { get; set; } = 0.5f;
         public static float timePerFrame { get; set; } = 0.0666667f;
 
         public static float minProcessingTime = 0.2f;
@@ -95,37 +95,88 @@ namespace Elevation
             foreach (Cell neighbor in neighbors)
             {
                 CellMeta neighborMeta = Grid.Cells.Get(neighbor);
-                if (neighborMeta && Unreachable.Contains(neighbor))
+                if (neighborMeta && (Unreachable.Contains(neighbor) 
+                    //|| !PathableNeighbor(neighborMeta)
+                    ))
                     Dirty.Add(neighbor);
             }
         }
 
+        // TODO: critical elevation change tracking; do not allow dugouts to undo critical elevation pieces
+
+        private static bool PathableNeighbor(CellMeta meta) 
+        {
+            if (meta == null)
+                return false;
+
+            bool result = false;
+            Cell[] neighbors = new Cell[4];
+            World.inst.GetNeighborCells(meta.cell, ref neighbors);
+
+            foreach (Cell neighbor in neighbors)
+            {
+                if (neighbor == null || Unreachable.Contains(neighbor))
+                    continue;
+
+                CellMeta neighborMeta = Grid.Cells.Get(neighbor);
+                if (neighborMeta && Mathf.Abs(neighborMeta.elevationTier - meta.elevationTier) <= 1)
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
         public static void UpdateDirty()
         {
-            for(int i = 0; i < Dirty.Count; i++) 
+            Cell[] scratchDirty = new Cell[Dirty.Count];
+            Dirty.CopyTo(scratchDirty);
+
+            for (int i = 0; i < scratchDirty.Length; i++) 
             {
                 // if, after some change, cell now has a pathable (not in unreachable list) neighbor within 1 elevation tier, cell is no longer unreachable.
-                Cell cell = Dirty[i];
+                Cell cell = scratchDirty[i];
                 CellMeta meta = Grid.Cells.Get(cell);
-                if (meta != null && cell != null) {
-                    Cell[] neighbors = new Cell[4];
-                    World.inst.GetNeighborCells(cell, ref neighbors);
-                    foreach (Cell neighbor in neighbors)
+                if (meta != null && cell != null)
+                {
+                    if (PathableNeighbor(meta))
                     {
-                        if (Unreachable.Contains(neighbor))
-                            continue;
-
-                        CellMeta neighborMeta = Grid.Cells.Get(neighbor);
-                        if (neighborMeta && Mathf.Abs(neighborMeta.elevationTier - meta.elevationTier) <= 1)
+                        if (Unreachable.Contains(cell))
                         {
                             Unreachable.Remove(cell);
-                            AddNeighbors(meta);
-                            break;
+                            ClearBlockedCellColor(cell, true); 
                         }
                     }
+                    else if (!Unreachable.Contains(cell))
+                    {
+                        Unreachable.Add(cell);
+                        SetBlockedCellColor(cell, true);
+                    }
+
+                    AddNeighbors(meta);
                     Dirty.Remove(cell);
                 }
             }
+        }
+
+        public static void ClearBlockedCellColor(Cell cell, bool update = false)
+        {
+            ColorManager.GetTileColor(cell.fertile, cell.IrrigationCoverage > 0, out Color normalColor, out Color winterColor);
+            TerrainGen.inst.SetTerrainPixelColor(cell.x, cell.z, normalColor, winterColor);
+            if (update)
+                TerrainGen.inst.UpdateTextures();
+        }
+
+        public static void SetBlockedCellColor(Cell cell, bool update = false)
+        {
+            float bias = ColorManager.coloringBias;
+            Color unreachableColor = ColorManager.unreachableColor;
+
+            ColorManager.GetTileColor(cell.fertile, cell.IrrigationCoverage > 0, out Color basegameNormalColor, out Color basegameWinterColor);
+            TerrainGen.inst.SetTerrainPixelColor(cell.x, cell.z, Color.Lerp(basegameNormalColor, unreachableColor, bias), Color.Lerp(basegameWinterColor, unreachableColor, bias));
+            if (update)
+                TerrainGen.inst.UpdateTextures();
         }
 
         public static void Search()
@@ -481,7 +532,11 @@ namespace Elevation
         private static void MarkComplete()
         {
             WorldRegions.Marked = true;
+            //HACKY
+            ElevationManager.RefreshTerrain();
+
             onMarked?.Invoke();
+
         }
 
         public class CellData

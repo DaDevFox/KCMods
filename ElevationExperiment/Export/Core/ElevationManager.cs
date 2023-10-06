@@ -23,6 +23,7 @@ namespace Elevation
         public static int minElevation { get; } = 0;
 
         public static float slopingRadius { get; } = 0.1f;
+        public static float roadSlopingRadius { get; } = 0.3f;
 
         public static float elevationPathfindingCost { get; } = 10f;
 
@@ -118,6 +119,9 @@ namespace Elevation
             UpdateCellMetas(forced);
             UpdatePatches();
 
+            if (World.inst.NumLandMasses > 1 && GameState.inst.IsPlayMode() && Player.inst.keep != null)
+                Player.inst.RefreshVisibility(true);
+            TerrainGen.inst.ClearOverlay(true);
             DebugExt.dLog("terrain refreshed");
         }
 
@@ -133,7 +137,7 @@ namespace Elevation
             Patches.WolfDenPatch.UpdateCell(cell);
             Patches.EmptyCavePatch.UpdateCell(cell);
 
-
+            Patches.RoadStairs.Update(cell);
             BuildingFormatter.UpdateBuildingsOnCell(cell);
         }
 
@@ -148,6 +152,7 @@ namespace Elevation
             Patches.WolfDenPatch.UpdateWolfDens();
             Patches.EmptyCavePatch.UpdateEmptyCaves();
 
+            Patches.RoadStairs.UpdateAll();
             //foreach (BuildingMeta buildingMeta in Grid.Buildings.GetAll())
             //    BuildingFormatter.UpdateBuilding(buildingMeta.building);
         }
@@ -180,16 +185,49 @@ namespace Elevation
             {
                 meta.UpdatePathing();
                 BuildingFormatter.UpdateBuildingsOnCell(meta.cell);
+
+                // TEMP; colors experiment
+                if (meta.elevationTier == 0)
+                    continue;
+
+                if (WorldRegions.Unreachable.Contains(meta.cell))
+                {
+                    float bias = ColorManager.coloringBias;
+                    Color unreachableColor = ColorManager.unreachableColor;
+                    
+                    ColorManager.GetTileColor(meta.cell.fertile, meta.cell.IrrigationCoverage > 0, out Color basegameNormalColor, out Color basegameWinterColor);
+                    TerrainGen.inst.SetTerrainPixelColor(meta.cell.x, meta.cell.z, Color.Lerp(basegameNormalColor, unreachableColor, bias), Color.Lerp(basegameWinterColor, unreachableColor, bias));
+                }
+                TerrainGen.inst.UpdateTextures();
             }
         }
 
         /// <summary>
         /// Updates the positioning of all buildings in the world
         /// </summary>
-        public static void UpdateBuildings()
+        public static void UpdateBuildings(bool force = false)
         {
             foreach(BuildingMeta meta in Grid.Buildings)
                 BuildingFormatter.UpdateBuilding(meta.building);
+
+            if (force)
+            {
+                foreach(Cell cell in World.inst.GetCellsData())
+                {
+                    Building building = cell.BottomStructure;
+                    if (building == null)
+                        continue;
+
+                    if (building.GetComponent<Road>())
+                        building.GetComponent<Road>().UpdateRotation();
+                    if(building.GetComponent<Cemetery>())
+                        building.GetComponent<Cemetery>().UpdateRotation();
+                    if(building.GetComponent<Garden>())
+                        building.GetComponent<Garden>().UpdateRotation();
+                    if (building.GetComponent<CastleBlock>())
+                        CastleBlock.UpdateBlockStack(cell);
+                }
+            }
         }
 
         /// <summary>

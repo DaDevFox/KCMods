@@ -26,8 +26,34 @@ namespace Elevation
         public static Material terrainMat { get; set; }
         public static float tilingConstant;
 
+        public static float coloringBias { get; set; } = 0.3f;
+        public static Color unreachableColor { get; set; } = new Color(0.3f, 0.3f, 0.3f);
+
         public static Color GetColor(int elevationTier)
         {
+            //TEMP
+            //if (elevationTier < 0 || elevationTier > ElevationManager.maxElevation)
+            //    return Color.black;
+            //if(Settings.inst == null || Settings.inst.c_Coloring == null)
+            //    return tierColoring[elevationTier];
+
+
+            //switch (elevationTier)
+            //{
+            //    case 1: return Settings.inst.c_Coloring.c_Tiers.t_1.Color.ToUnityColor(); 
+            //    case 2: return Settings.inst.c_Coloring.c_Tiers.t_2.Color.ToUnityColor();
+            //    case 3: return Settings.inst.c_Coloring.c_Tiers.t_3.Color.ToUnityColor();
+            //    case 4: return Settings.inst.c_Coloring.c_Tiers.t_4.Color.ToUnityColor();
+            //    case 5: return Settings.inst.c_Coloring.c_Tiers.t_5.Color.ToUnityColor();
+            //    case 6: return Settings.inst.c_Coloring.c_Tiers.t_6.Color.ToUnityColor();
+            //    case 7: return Settings.inst.c_Coloring.c_Tiers.t_7.Color.ToUnityColor();
+            //    case 8: return Settings.inst.c_Coloring.c_Tiers.t_8.Color.ToUnityColor();
+            //}
+
+            //return Color.black;
+
+            //SetTierColoring();
+            
             return tierColoring.ContainsKey(elevationTier) ? tierColoring[elevationTier] : Color.black;
         }
 
@@ -43,6 +69,69 @@ namespace Elevation
             else
                 tierColoring.Add(elevationTier, color);
         }
+
+        public static void GetTileColor(int fertility, bool irrigated, out Color normalColor, out Color winterColor)
+        {
+            normalColor = Color.white;
+            winterColor = Color.white;
+
+            if (fertility > 3 || fertility < 0)
+                return;
+
+            if (irrigated)
+            {
+                if (fertility == 0)
+                {
+                    normalColor = TerrainGen.inst.irrigatedBarrenColor;
+                    winterColor = TerrainGen.inst.winterIrrigatedBarrenColor;
+                }
+                if (fertility == 1)
+                {
+                    normalColor = TerrainGen.inst.irrigatedTileColor;
+                    winterColor = TerrainGen.inst.winterIrrigatedTileColor;
+                }
+                if (fertility == 2)
+                {
+                    normalColor = TerrainGen.inst.irrigatedFertileColor;
+                    winterColor = TerrainGen.inst.winterIrrigatedFertileColor;
+                }
+            }
+            else
+            {
+                if (fertility == 0)
+                {
+                    normalColor = TerrainGen.inst.barrenColor;
+                    winterColor = TerrainGen.inst.winterBarrenColor;
+                }
+                if (fertility == 1)
+                {
+                    normalColor = TerrainGen.inst.tileColor;
+                    winterColor = TerrainGen.inst.winterTileColor;
+                }
+                if (fertility == 2)
+                {
+                    normalColor = TerrainGen.inst.fertileColor;
+                    winterColor = TerrainGen.inst.winterFertileColor;
+                }
+            }
+        }
+
+        //public static void SetTierColoring()
+        //{
+        //    if (Settings.inst == null || Settings.inst.c_Coloring == null)
+        //        return;
+        //    for(int i = 1; i < ElevationManager.maxElevation + 1; i++) 
+        //        if (!tierColoring.ContainsKey(i))
+        //            tierColoring.Add(i, Color.white);
+        //    tierColoring[1] = Settings.inst.c_Coloring.c_Tiers.t_1.Color.ToUnityColor();
+        //    tierColoring[2] = Settings.inst.c_Coloring.c_Tiers.t_2.Color.ToUnityColor();
+        //    tierColoring[3] = Settings.inst.c_Coloring.c_Tiers.t_3.Color.ToUnityColor();
+        //    tierColoring[4] = Settings.inst.c_Coloring.c_Tiers.t_4.Color.ToUnityColor();
+        //    tierColoring[5] = Settings.inst.c_Coloring.c_Tiers.t_5.Color.ToUnityColor();
+        //    tierColoring[6] = Settings.inst.c_Coloring.c_Tiers.t_6.Color.ToUnityColor();
+        //    tierColoring[7] = Settings.inst.c_Coloring.c_Tiers.t_7.Color.ToUnityColor();
+        //    tierColoring[8] = Settings.inst.c_Coloring.c_Tiers.t_8.Color.ToUnityColor();
+        //}
 
         public static void Update()
         {

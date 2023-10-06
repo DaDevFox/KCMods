@@ -196,7 +196,7 @@ namespace Elevation
 				if (Math.Abs(resultTier - originTier) > 1)
 					return false;
 
-				if (resultTier > 0 && originTier > 0 && Pathing.IsDiagonalXZ(origin.cell, result.cell))
+				if (resultTier > 0 && Pathing.IsDiagonalXZ(origin.cell, result.cell))
 					return false;
 			}
 			

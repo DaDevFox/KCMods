@@ -16,7 +16,7 @@ namespace Elevation.Patches
      *  GameUI.UpdateCellSelector
      *  GameUI.WillSelectPerson
     **/
-    internal class GridIntersectionPatch
+    public class GridIntersectionPatch
     {
     }
 }

@@ -111,53 +111,52 @@ namespace Fox.Maps
 
                 
 
-                    if (__instance.brushMode == MapEdit.BrushMode.None)
+                if (__instance.brushMode == MapEdit.BrushMode.None)
+                {
+                    Cam.inst.disableDrag = true;
+
+                    if (PointingSystem.GetPointer().GetPrimaryDown())
                     {
-                        Cam.inst.disableDrag = true;
+                        Cell current = MapSelectionTools.current;
 
-                        if (PointingSystem.GetPointer().GetPrimaryDown())
-                        {
-                            Cell current = MapSelectionTools.current;
+                        if (mouseDown == null)
+                            mouseDown = current;
+                    }
 
-                            if (mouseDown == null)
-                                mouseDown = current;
-                        }
-
-                        if (mouseDown != null)
-                        {
-                            FillCursor(current);
+                    if (mouseDown != null)
+                    {
+                        FillCursor(current);
                             
-                            if (PointingSystem.GetPointer().GetPrimaryUp() || !EditModeActive)
-                            {
-                                Select();
-                                mouseDown = null;
+                        if (PointingSystem.GetPointer().GetPrimaryUp() || !EditModeActive)
+                        {
+                            Select();
+                            mouseDown = null;
 
-                                if(!EditModeActive)
-                                {
-                                    if (selection.Length > 0)
-                                        selection = new CellMeta[0];
-                                }
+                            if(!EditModeActive)
+                            {
+                                if (selection.Length > 0)
+                                    selection = new CellMeta[0];
                             }
                         }
-                        else if (selection.Length > 0)
-                        {
-                            FillSelected();
-
-
-                            if (PointingSystem.GetPointer().GetSecondaryUp() || !EditModeActive)
-                                selection = new CellMeta[0];
-                        }
                     }
-                    else
+                    else if (selection.Length > 0)
                     {
-                        mouseDown = null;
-                        if (selection.Length > 0)
+                        FillSelected();
+
+
+                        if (PointingSystem.GetPointer().GetSecondaryUp() || !EditModeActive)
                             selection = new CellMeta[0];
                     }
+                }
+                else
+                {
+                    mouseDown = null;
+                    if (selection.Length > 0)
+                        selection = new CellMeta[0];
+                }
 
 
-                    UpdateActions();
-                
+                UpdateActions();
             }
 
             

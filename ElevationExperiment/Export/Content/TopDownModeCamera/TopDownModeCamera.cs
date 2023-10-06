@@ -105,6 +105,27 @@ namespace Elevation
 
     #endregion
 
+    #region Correction Patches
+
+    [HarmonyPatch(typeof(Cam), "ClampToWorldBounds")]
+    public class CameraTrackTargetYCorrectionPatch
+    {
+        static void Postfix(Vector3 p, ref Vector3 __result)
+        {
+            Cell cell = World.inst.GetCellDataClamped(__result);
+            if (cell == null)
+                return;
+
+            CellMeta meta = Grid.Cells.Get(cell);
+            if (meta == null)
+                return;
+
+            if (__result.y < meta.Elevation)
+                __result.y = meta.Elevation;
+        }
+    }
+
+    #endregion
 
     [HarmonyPatch(typeof(Cam), "Update")]
     public static class MainCamMovementPatch
@@ -225,9 +246,8 @@ namespace Elevation
                 }
             }
             if (Input.GetMouseButton(1) && !Assets.Settings.inst.LegacyMouseControls && !GameUI.AltHeld())
-            {
                 input = true;
-            }
+            
 
             if (input)
             {
@@ -289,16 +309,21 @@ namespace Elevation
             }
             else
             {
-                Vector3 clampedPos = Cam.inst.DesiredTrackingPos;
+                if (Cam.inst.OverrideTrack == null)
+                {
+                    Vector3 clampedPos = Cam.inst.DesiredTrackingPos;
 
-                Cell cell = World.inst.GetCellDataClamped(clampedPos);
-                if (cell != null && Grid.Cells.Get(cell))
-                    clampedPos.y = Grid.Cells.Get(cell).Elevation;
+                    Cell cell = World.inst.GetCellDataClamped(clampedPos);
+                    if (cell != null && Grid.Cells.Get(cell))
+                        clampedPos.y = Grid.Cells.Get(cell).Elevation;
 
-                Cam.inst.SetDesiredTrackingPos(clampedPos);
+                    Cam.inst.DesiredTrackingPos = clampedPos;
+                }
             }
             return !TopDownModeCamera.active;
         }
+
+        
     }
 
 }

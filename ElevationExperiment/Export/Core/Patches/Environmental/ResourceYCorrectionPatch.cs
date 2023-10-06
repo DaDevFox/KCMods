@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Assets.Code;
 using Assets;
+using System.Reflection;
 
 namespace Elevation.Patches
 {
@@ -26,6 +27,5 @@ namespace Elevation.Patches
 
             pos.y += meta.Elevation;
         }
-
     }
 }

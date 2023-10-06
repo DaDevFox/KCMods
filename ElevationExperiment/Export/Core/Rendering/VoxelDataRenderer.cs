@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fox.Rendering.VoxelRendering;
 using Elevation;
+using Elevation.Utils;
 using System.Reflection;
-using Language.Lua;
-using Elevation.Patches;
-using static PixelCrushers.InstantiatePrefabs;
 
 namespace Elevation
 {
@@ -30,8 +26,6 @@ namespace Elevation
             ColorManager.terrainMat.enableInstancing = true;
             ColorManager.terrainMat.color = Color.white;
             ColorManager.terrainMat.mainTexture = ColorManager.elevationMap;
-            
-
         }
 
         public override void Setup()
@@ -62,23 +56,23 @@ namespace Elevation
                 {
                     TerrainChunk chunk = TerrainGen.inst.terrainChunks[i];
                     Voxel[,,] chunkData = new Voxel[chunk.SizeX, ElevationManager.maxElevation + 1, chunk.SizeZ];
+                    
+                    //Texture2D tex = (Texture2D) typeof(TerrainChunk).GetField("terrainTexture", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(chunk);
+                    //World.inst.SaveTexture(Mod.helper.modPath + $"/chunk{i}.png", tex);
 
                     for (int z = 0; z < chunk.SizeZ; z++)
                     {
                         for (int x = 0; x < chunk.SizeX; x++)
                         {
+                            CellMeta meta = Grid.Cells.Get(chunk.x/2 + x, chunk.z/2 + z);
                             for (int y = 0; y <= ElevationManager.maxElevation; y++)
                             {
                                 try
                                 {
-                                    CellMeta meta = Grid.Cells.Get(chunk.x/2 + x, chunk.z/2 + z);
 
                                     chunkData[x, y, z] = new Voxel();
 
-                                    if (meta != null && y
-                                        < meta.elevationTier
-                                        //< 8 - i
-                                        )
+                                    if (meta != null && y < meta.elevationTier)
                                     {
                                         chunkData[x, y, z].opacity = 1f;
                                         chunkData[x, y, z].uvOffset = new Vector2(y, 0f);
@@ -127,28 +121,33 @@ namespace Elevation
             if (cell == null)
                 return;
 
-            int x = cell.x;
-            int z = cell.z;
+            int globalX = cell.x;
+            int globalZ = cell.z;
 
-            int chunkX = x / TerrainGen.inst.chunkSize;
-            int chunkZ = z / TerrainGen.inst.chunkSize;
+            int chunkIndexX = globalX / TerrainGen.inst.chunkSize;
+            int chunkIndexZ = globalZ / TerrainGen.inst.chunkSize;
 
-            int index = chunkX + chunkZ * Mathf.CeilToInt((float)World.inst.GridWidth / (float)TerrainGen.inst.chunkSize);
+            int index = chunkIndexX + chunkIndexZ * Mathf.CeilToInt((float)World.inst.GridWidth / (float)TerrainGen.inst.chunkSize);
 
-            VoxelDataRenderer chunk =
-                //((VoxelRenderingMode)RenderingMode.current).chunks[index];
-                ((VoxelRenderingMode)RenderingMode.current).GetAt(x, z);
+            VoxelDataRenderer chunk = ((VoxelRenderingMode)RenderingMode.current).chunks[index];
+
 
             CellMeta meta = Grid.Cells.Get(cell);
             try
             {
-                if (meta && chunk != null)
-                    for (int i = ElevationManager.minElevation; i < ElevationManager.maxElevation; i++)
-                        if (chunk.GetAt(x, i, z))
-                            chunk[x, i, z].opacity = i <= meta.elevationTier ? 1f : 0f;
+                int vertsBefore = chunk.mesh.vertexCount;
 
-                // Partially broken
-                chunk.Rebuild();
+                int chunkX = globalX - chunk.position.x;
+                int chunkZ = globalZ - chunk.position.z;
+
+                if (meta && chunk != null)
+                    for (int y = ElevationManager.minElevation; y < ElevationManager.maxElevation; y++)
+                        if (chunk.GetAt(chunkX, y, chunkZ))
+                            chunk.data[chunkX, y, chunkZ].opacity = y < meta.elevationTier ? 1f : 0f;
+
+                meshes[index] = chunk.Rebuild();
+
+                Mod.dLog($"chunk with index {index} modified; {vertsBefore} vertices before, {chunk.mesh.vertexCount} vertices after");
             }
             catch(Exception ex)
             {
@@ -488,7 +487,7 @@ namespace Fox.Rendering.VoxelRendering
                             return adjacent.data[adjacentIndex.x, adjacentIndex.y, adjacentIndex.z];
                     }
 
-                    //Mod.dLog($"{Mathf.Abs(index.x % TerrainGen.inst.chunkSize)}, {index.y}, {index.z % TerrainGen.inst.chunkSize}");
+                    //Mod.dLog($"{Mathf.Abs(index.globalX % TerrainGen.inst.chunkSize)}, {index.y}, {index.globalZ % TerrainGen.inst.chunkSize}");
                 }
                 //if(!InDimensions(index) && ((VoxelRenderingMode)RenderingMode.current) != null)
                 //    return ((VoxelRenderingMode)RenderingMode.current).GetVoxelAt(position + index);
@@ -533,7 +532,7 @@ namespace Fox.Rendering.VoxelRendering
         #region Utils
 
         /// <summary>
-        /// Loops through the chunk in the order x, y, z and calls a function (passing in the x, y, and z integer coordinates of that voxel)
+        /// Loops through the chunk in the order globalX, y, globalZ and calls a function (passing in the globalX, y, and globalZ integer coordinates of that voxel)
         /// </summary>
         /// <param name="action"></param>
         public void Loop(Action<int, int, int> action)
@@ -551,7 +550,7 @@ namespace Fox.Rendering.VoxelRendering
         }
 
         /// <summary>
-        /// Loops through the chunk in the order x, y, z and calls a function (passing in the voxel)
+        /// Loops through the chunk in the order globalX, y, globalZ and calls a function (passing in the voxel)
         /// </summary>
         /// <param name="action"></param>
         public void Loop(Action<Voxel> action)

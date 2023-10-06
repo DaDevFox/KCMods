@@ -29,7 +29,77 @@ namespace ReskinEngine.API
         }
     }
 
+    [Category("environment")]
+    [NotSupported]
+    public class UnusableRockSkin : Skin
+    {
+        public override string Name => "Unusable Rock";
+        internal override string TypeIdentifier => "unusablerock";
+
+        [Model(ModelAttribute.Type.Modular, description = "Model of the rock")]
+        public GameObject baseModel;
+
+        [Material("Material the rock model will use")]
+        public Material material;
+
+        protected override void PackageInternal(Transform target, GameObject _base)
+        {
+            base.PackageInternal(target, _base);
+
+            AppendModel(_base, baseModel, "baseModel");
+            AppendMaterial(_base, material, "material");
+
+        }
+    }
+
+    [Category("environment")]
+    [NotSupported]
+    public class StoneSkin : Skin
+    {
+        public override string Name => "Stone";
+        internal override string TypeIdentifier => "stone";
+
+        [Model(ModelAttribute.Type.Modular, description = "Model of the stone")]
+        public GameObject baseModel;
+
+        [Material("Material the stone model will use")]
+        public Material material;
+
+        protected override void PackageInternal(Transform target, GameObject _base)
+        {
+            base.PackageInternal(target, _base);
+
+            AppendModel(_base, baseModel, "baseModel");
+            AppendMaterial(_base, material, "material");
+
+        }
+    }
+
+    [Category("environment")]
+    [NotSupported]
+    public class IronSkin : Skin
+    {
+        public override string Name => "Iron";
+        internal override string TypeIdentifier => "iron";
+
+        [Model(ModelAttribute.Type.Modular, description = "Model of the iron")]
+        public GameObject baseModel;
+
+        [Material("Material the iron model will use")]
+        public Material material;
+
+        protected override void PackageInternal(Transform target, GameObject _base)
+        {
+            base.PackageInternal(target, _base);
+
+            AppendModel(_base, baseModel, "baseModel");
+            AppendMaterial(_base, material, "material");
+
+        }
+    }
+
     [Category("maritime")]
+    [NotSupported]
     public class FishingShipSkin : Skin
     {
         public override string Name => "Fishing Ship";
@@ -52,6 +122,7 @@ namespace ReskinEngine.API
     }
 
     [Category("environment")]
+    [NotSupported]
     [Version(VersionAttribute.GameVersion.STABLE)]
     public class PeasantSkin : Skin
     {
@@ -82,7 +153,7 @@ namespace ReskinEngine.API
         public Vector3 legsPosition = new Vector3(0, 0.02899987f, 0);
         public Vector3 legsScale = new Vector3(0.05853106f, 0.05853106f, 0.05853106f);
 
-        public override string Name => "peasant";
+        public override string Name => "Peasant";
         internal override string TypeIdentifier => "peasant";
 
         protected override void PackageInternal(Transform dropoff, GameObject _base)
@@ -103,7 +174,6 @@ namespace ReskinEngine.API
     /// ALPHA only skin
     /// </summary>
     [Category("special")]
-    [Version(VersionAttribute.GameVersion.ALPHA)]
     public class LiverySkin
     {
         public Texture[] banners;
