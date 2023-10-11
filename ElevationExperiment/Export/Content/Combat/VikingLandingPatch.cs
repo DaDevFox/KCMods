@@ -9,14 +9,12 @@ using System.Reflection;
 
 namespace Elevation.Patches
 {
+    /// <summary>
+    /// Replaces the GetLandings method of <see cref="RaiderSystem"/> to avoid cells with an elevation tier > 0
+    /// </summary>
     [HarmonyPatch(typeof(RaiderSystem), "GetLandings")]
     public class VikingLandingPatch
     {
-        //static MethodBase TargetMethod()
-        //{
-
-        //}
-
         static bool Prefix(int targetLandmass, int minVillagers, ref List<Cell> __result)
         {
             List<Cell> list = new List<Cell>();

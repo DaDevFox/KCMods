@@ -192,9 +192,12 @@ namespace Elevation.Patches
                 //    __result.y = GetYSloped(__result, __result, __instance.travelPath.data[0]);
                 //else
 
-                //if(__instance.job)
-
-                __result.y = Mathf.Max(YInterpolation.GetSlantSlopedY(__result), __instance.Pos.y);
+                if (__instance.job != null
+                    && __instance.job.employer != null
+                    && (__result.xz() - __instance.job.employer.GetPositionForPerson(__instance).xz()).sqrMagnitude <= 1f)
+                    __result.y = Mathf.Max(YInterpolation.GetSlantSlopedY(__result), __instance.Pos.y);
+                else
+                    __result.y = YInterpolation.GetSlantSlopedY(__result);
             }
         }
 

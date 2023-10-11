@@ -207,7 +207,7 @@ namespace Elevation
 
         private void UpdatePathfinderCost()
         {
-            World.inst.GetPathCell(cell).ogreFootPathCost = Pathing.tierPathingCost;
+            World.inst.GetPathCell(cell).ogreFootPathCost = elevationTier;
             
             if(Combat.smartUnitPathing)
                 World.inst.GetPathCell(cell).unitBlockCost = Pathing.unitPathingCostBase - Pathing.unitPathingAnticost * elevationTier;

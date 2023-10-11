@@ -18,7 +18,6 @@ namespace Elevation
 
 	public static class Pathing
     {
-        public static int tierPathingCost = 50;
 		public static int unitPathingCostBase = 50;
 		public static int unitPathingAnticost = 1;
 
