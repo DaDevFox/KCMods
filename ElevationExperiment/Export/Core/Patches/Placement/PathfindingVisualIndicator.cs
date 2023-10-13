@@ -14,26 +14,50 @@ namespace Elevation.Patches
 {
     public class PathfindingVisualIndicator
     {
+        //[HarmonyPatch(typeof(DefaultPlacementMode), "AcceptPlacement")]
+        //class PlacementModeAcceptPlacemnetPatch
+        //{
+        //    static void Postfix()
+        //    {
+        //        foreach (Cell cell in WorldRegions.Unreachable)
+        //        {
+        //            TerrainGen.inst.SetOverlayPixelColor(cell.x, cell.z, Color.clear);
+        //        }
 
-        //[HarmonyPatch(typeof(PlacementMode), "Update")]
-        class PlacementModeUpdatePatch
+        //        TerrainGen.inst.UpdateOverlayTextures();
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(DefaultPlacementMode), "AbortPlacement")]
+        //class PlacementModeAbortPlacemnetPatch
+        //{
+        //    static void Postfix()
+        //    {
+        //        foreach (Cell cell in WorldRegions.Unreachable)
+        //        {
+        //            TerrainGen.inst.SetOverlayPixelColor(cell.x, cell.z, Color.clear);
+        //        }
+
+        //        TerrainGen.inst.UpdateOverlayTextures();
+        //    }
+        //}
+
+
+        [HarmonyPatch(typeof(PlacementMode), "SetCursorObject")]
+        class PlacementModeStartPlacementPatch
         {
-            private static LineRenderer renderer;
-
-            public static Vector3 offset { get; } = new Vector3(0f,0.1f,0f);
-
-            public static Dictionary<Direction, Vector3> DirectionAnchorPoints { get; } = new Dictionary<Direction, Vector3>() 
+            static void Postfix(Building buildingPrefab, bool notFirstPlacement)
             {
-                { Direction.East, new Vector3(-0.5f, 0f, 0f) },
-                { Direction.West, new Vector3(0.5f, 0f, 0f) },
+                if (!notFirstPlacement)
+                {
+                    foreach (Cell cell in WorldRegions.Unreachable)
+                    {
+                        TerrainGen.inst.SetOverlayPixelColor(cell.x, cell.z, Color.black);
+                    }
 
-                { Direction.South, new Vector3(0f, 0f, -0.5f) } ,
-                { Direction.North, new Vector3(0f, 0f, 0.5f) } 
-            };
+                    TerrainGen.inst.UpdateOverlayTextures();
+                }
 
-
-            static void Postfix(PlacementMode __instance)
-            {
                 //if (renderer == null)
                 //{
                 //    GameObject GO = GameObject.Instantiate(new GameObject(), World.inst.transform);
@@ -53,7 +77,7 @@ namespace Elevation.Patches
                 
                 //if (__instance.IsPlacing() && Settings.inst.c_Visual.s_VisualPathfindingIndicatorEnabled.Value)
                 //{
-                //    bool onElevation = BuildingPlacementPatch.GetLevellingForBuilding(__instance.GetHoverBuilding()) >= 0.5f;
+                //    bool onElevation = BuildingPlacementPositionPatch.GetLevellingForBuilding(__instance.GetHoverBuilding()) >= 0.5f;
                 //    bool dragging = (bool)typeof(PlacementMode)
                 //        .GetField("attemptedDrag", BindingFlags.NonPublic | BindingFlags.Instance)
                 //        .GetValue(__instance);
@@ -121,7 +145,6 @@ namespace Elevation.Patches
             }
 
             
-
             static void FindBestPath(Cell c, ref ArrayExt<Vector3> positions, int maxRadius = 15, int teamID = 0)
             {
                 SimplePriorityQueue<Cell> queue = new SimplePriorityQueue<Cell>();
@@ -146,7 +169,6 @@ namespace Elevation.Patches
 
                 World.inst.FindFootPath(c.Center.xz(), chosen.Center.xz(), ref positions);
             }
-
         }
 
     }

@@ -29,29 +29,29 @@ namespace Elevation.Patches
     {
         static void Postfix(CastleBlock __instance)
         {
-            Cell c = __instance.GetComponent<Building>().GetCell();
-            CellMeta meta = Grid.Cells.Get(c);
+            Cell current = __instance.GetComponent<Building>().GetCell();
+            CellMeta meta = Grid.Cells.Get(current);
             if (meta != null && meta.elevationTier > 0)
             {
                 Cell[] neighborCells = new Cell[4];
 
-                Building b = __instance.GetComponent<Building>();
-                World.inst.GetNeighborCells(c, ref neighborCells);
+                Building building = __instance.GetComponent<Building>();
+                World.inst.GetNeighborCells(current, ref neighborCells);
 
 
                 int idx = -1;
-                for (int n = 0; n < c.OccupyingStructure.Count; n++)
+                for (int n = 0; n < current.OccupyingStructure.Count; n++)
                 {
-                    if (c.OccupyingStructure[n] == b)
+                    if (current.OccupyingStructure[n] == building)
                     {
                         idx = n;
                         break;
                     }
                 }
 
-                float selfHeight = BuildingFormatter.GetAbsoluteHeightOfBuildingAtIndex(c, idx);
-                DebugExt.dLog(" -- " + idx.ToString() + " -- ");
-                DebugExt.dLog(selfHeight.ToString());
+                float selfHeight = BuildingFormatter.GetAbsoluteHeightOfBuildingAtIndex(current, idx);
+                DebugExt.dLog(" -- " + idx.ToString() + " -- ", true);
+                DebugExt.dLog(selfHeight.ToString(), true);
 
                 typeof(CastleBlock).GetMethod("ClearDoors", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[] { });
                 for (int m = 0; m < neighborCells.Length; m++)
@@ -59,28 +59,37 @@ namespace Elevation.Patches
                     float otherHeight = neighborCells[m].GetAbsoluteHeightTotal();
 
                     if (otherHeight > 0f)
-                        DebugExt.dLog(otherHeight.ToString());
+                        DebugExt.dLog(otherHeight.ToString(), true);
+                    else
+                        continue;
 
-                    Cell cell = neighborCells[m];
-                    if (cell != null)
+                    Cell neighbor = neighborCells[m];
+                    if (neighbor != null)
                     {
                         if (((selfHeight - 0.5f >= otherHeight && idx == 0) || (Mathf.Approximately(selfHeight - 0.5f, otherHeight)))  && otherHeight > 0)
                         {
-                            DebugExt.dLog("Connection!");
-                            typeof(CastleBlock)
-                                .GetMethod("VisibleDoors", BindingFlags.Instance | BindingFlags.NonPublic)
-                                .Invoke(__instance, new object[] { true });
+                            DebugExt.dLog("Connection!", true);
 
-                            Vector3 doorPos = c.Center - ((c.Center - cell.Center) / 2);
+                            Vector3 doorPos = current.Center - ((current.Center - neighbor.Center) / 2);
                             doorPos.y = otherHeight;
 
-                            Vector3 direction = (c.Center - cell.Center).normalized.xz();
+                            Vector3 direction = (current.Center - neighbor.Center).normalized.xz();
 
-                            DebugExt.dLog(doorPos, false, doorPos);
+                            DebugExt.dLog(doorPos, true, doorPos);
 
                             typeof(CastleBlock)
                                 .GetMethod("PlaceDoor", BindingFlags.Instance | BindingFlags.NonPublic)
                                 .Invoke(__instance, new object[] { doorPos, direction });
+                            
+                            typeof(CastleBlock)
+                                .GetMethod("VisibleDoors", BindingFlags.Instance | BindingFlags.NonPublic)
+                                .Invoke(__instance, new object[] { true });
+                        }
+                        if (neighbor.TopStructureCategoryIs(World.projectileTopperHash))
+                        {
+                            Building tower = neighbor.StructureFindByCategory(World.projectileTopperHash);
+                            
+                            BuildingFormatter.UpdateBuilding(tower);
                         }
                     }
                 }

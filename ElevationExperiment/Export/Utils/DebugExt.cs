@@ -14,6 +14,7 @@ namespace Elevation
 
         private static List<int> IDs = new List<int>();
         private static int ID = 0;
+        private static int loop = 1024;
         //private static List<LineRenderer> drawnLines = new List<LineRenderer>();
         //private static List<float> drawnLineDurations = new List<float>();
 
@@ -22,7 +23,7 @@ namespace Elevation
             if (Settings.debug)
             {
                 KingdomLog.TryLog(Mod.ModID + "_debugmsg-" + (repeatable ? (ID++).ToString() : ""), message.ToString(), KingdomLog.LogStatus.Neutral, (repeatable ? 0.1f : 2f), GameObjectOrVector3);
-                
+                //ID %= loop; // safety: Int.MaxValue???
                 //IDs.Add(1);
             }
         }

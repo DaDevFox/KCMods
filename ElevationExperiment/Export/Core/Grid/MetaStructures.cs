@@ -31,7 +31,6 @@ namespace Elevation
 
         private void OnCreate()
         {
-            
             BuildingFormatter.UpdateBuilding(building);
         }
 
@@ -208,10 +207,13 @@ namespace Elevation
 
         private void UpdatePathfinderCost()
         {
-            World.inst.GetPathCell(cell).ogreFootPathCost = Pathing.tierPathingCost;
+            World.inst.GetPathCell(cell).ogreFootPathCost = elevationTier;
+            
+            if(Combat.smartUnitPathing)
+                World.inst.GetPathCell(cell).unitBlockCost = Pathing.unitPathingCostBase - Pathing.unitPathingAnticost * elevationTier;
 
-            for(int i = 0; i < World.inst.GetPathCell(cell).villagerFootPathCost.Length; i++)
-                World.inst.GetPathCell(cell).villagerFootPathCost[i] = Pathing.tierPathingCost;
+            //for(int i = 0; i < World.inst.GetPathCell(cell).villagerFootPathCost.Length; i++)
+            //    World.inst.GetPathCell(cell).villagerFootPathCost[i] = Pathing.tierPathingCost;
         }
 
         public bool PathableTo(Cell cell)

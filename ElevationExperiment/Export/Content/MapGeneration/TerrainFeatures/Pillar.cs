@@ -50,10 +50,9 @@ namespace Elevation
             [SRand.Range(0, 3)];
 
             Cell startCell = Pathing.GetCardinal(origin, dir);
-            if (Grid.Cells.Get(startCell))
+            CellMeta start = Grid.Cells.Get(startCell);
+            if (start)
             {
-                CellMeta start = Grid.Cells.Get(startCell);
-
                 int tier = ElevationManager.maxElevation;
 
                 World.inst.ForEachTileInRadius(start.cell.x, start.cell.z, (int)radius.Rand(), (x, z, cell) =>

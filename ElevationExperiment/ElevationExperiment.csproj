@@ -86,15 +86,36 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\Content\Buildings\Scaffolding.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\Bonuses\RadiusBonusPatch.cs" />
+    <Compile Include="Export\Content\Buildings\Bonuses\Bonuses.cs" />
+    <Compile Include="Export\Content\Combat\VikingLandingPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Connectables\AdjacencyPatches.cs" />
+    <Compile Include="Export\Content\Buildings\TerrainManipulation\Scaffolding.cs" />
+    <Compile Include="Export\Content\Combat\Combat.cs" />
+    <Compile Include="Export\Content\Combat\DamagePatches.cs" />
+    <Compile Include="Export\Content\Combat\SpecialUnitYCorrectionPatches.cs" />
+    <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Crater.cs" />
+    <Compile Include="Export\Content\ModAssets.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Connectables\RoadSizePatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\BuildingFormatter.cs" />
     <Compile Include="Export\Core\Patches\Buildings\YCorrection\FieldPatch.cs" />
     <Compile Include="Export\Core\Patches\Buildings\YCorrection\TransportCartPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\FirePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\FOWCubePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\ResourceYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\VillagerYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\CreativeModeResourcePatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\GridIntersectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\TreeChopPatch.cs" />
+    <Compile Include="Export\Content\Combat\ArmyUnitYCorrectionPatch.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinderModified.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\PrebakedPathfinder%282%29.cs" />
@@ -105,7 +126,7 @@
     <Compile Include="Export\External\Submods\Submods.cs" />
     <Compile Include="Export\Libraries\BuildingFramework\BuildingHelper.cs" />
     <Compile Include="Export\Libraries\BuildingFramework\BuildingInfo.cs" />
-    <Compile Include="Export\Content\Buildings\Dugout.cs" />
+    <Compile Include="Export\Content\Buildings\TerrainManipulation\Dugout.cs" />
     <Compile Include="Export\Core\Grid\MetaStructures.cs" />
     <Compile Include="Export\Libraries\CHusse\Modified\IPathFinder.cs" />
     <Compile Include="Export\Libraries\CHusse\Modified\PathFinder.cs" />
@@ -130,7 +151,7 @@
     <Compile Include="Export\Content\MapGeneration\WorldRegions.cs" />
     <Compile Include="Export\Core\Patches\Environmental\WolfPatch.cs" />
     <Compile Include="Export\Core\Patches\Game\WorldGridPatch.cs" />
-    <Compile Include="Export\Core\Patches\Placement\DragSelectPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\DragSelectPatch.cs" />
     <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinders\RuntimePathfinder.cs" />
@@ -138,7 +159,7 @@
     <Compile Include="Export\Content\UI\Generic\LoadingDialog.cs" />
     <Compile Include="Export\Content\UI\MapEdit\RaiseLowerUI.cs" />
     <Compile Include="Export\Content\UI\UI.cs" />
-    <Compile Include="Export\Utils\ArrayExtensions.cs" />
+    <Compile Include="Export\Utils\EnumerableExtensions.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />
     <Compile Include="Export\Core\ElevationManager.cs" />
     <Compile Include="Export\Core\Rendering\ColorManager.cs" />
@@ -148,10 +169,10 @@
     <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Pillar.cs" />
     <Compile Include="Export\Content\MapGeneration\TerrainFeatures\TerrainFeature.cs" />
     <Compile Include="Export\Core\Mod.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\YCorrection\BuildingPlacePatch.cs" />
-    <Compile Include="Export\Core\Patches\Placement\BuildingPlacementModePatch.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadAssets.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadVisualPatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\BuildingPlaceUpdatePatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\BuildingPlacementPositionPatch.cs" />
+    <Compile Include="Export\Content\Buildings\Roads\RoadAssets.cs" />
+    <Compile Include="Export\Content\Buildings\Roads\RoadStairs.cs" />
     <Compile Include="Export\Content\TopDownModeCamera\TopDownModeCamera.cs" />
     <Compile Include="Export\Core\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
     <Compile Include="Export\Core\Patches\Game\CellPatch.cs" />
@@ -213,6 +234,8 @@
     <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest.meta" />
     <None Include="Export\Content\Assets\assetbundle\win64\win64.meta" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Export\Core\Patches\Units\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

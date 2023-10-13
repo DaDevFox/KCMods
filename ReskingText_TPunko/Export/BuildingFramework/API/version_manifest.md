@@ -15,3 +15,6 @@ minor bugfixing
 
 ### g
 - Fix for rebuilding and load creating invisible buildings (place variation behavior modified)
+
+### h
+- Updated for new buildings from game updates

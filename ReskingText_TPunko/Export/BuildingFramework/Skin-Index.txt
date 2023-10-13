@@ -1,7 +1,45 @@
  -- Environment -- 
 -------------------
 
--- tree --
+-- Tree --
+Name: Tree
+Skin ID: tree
+Models:
+	baseModel:             Modular | Model of the tree
+Materials:
+	material:      Material the tree model will use
+
+[Not Supported]
+-- Unusable Rock --
+Name: Unusable Rock
+Skin ID: unusablerock
+Models:
+	baseModel:             Modular | Model of the rock
+Materials:
+	material:      Material the rock model will use
+
+[Not Supported]
+-- Stone --
+Name: Stone
+Skin ID: stone
+Models:
+	baseModel:             Modular | Model of the stone
+Materials:
+	material:      Material the stone model will use
+
+[Not Supported]
+-- Iron --
+Name: Iron
+Skin ID: iron
+Models:
+	baseModel:             Modular | Model of the iron
+Materials:
+	material:      Material the iron model will use
+
+[Not Supported]
+-- Peasant --
+Name: Peasant
+Skin ID: peasant
 
  -- Castle -- 
 --------------
@@ -17,8 +55,8 @@ Models:
 	keepUpgrade3:         Instance | The third upgrade for the keep
 	keepUpgrade4:         Instance | The fourth upgrade for the keep
 Notes:
-	All children of the keep with cloth component will update to player/ai banner material
-	Mesh of root object of each respective upgrade will be used for collider of that upgrade (for player cursor selection)
+	All children of keep with cloth component will update to player/ai banner material
+	Mesh of root object of each respective upgrade will be used for collider of that upgrade (player cursor selection)
 
 -- Wooden Castle Block --
 Name: Wooden Castle Block
@@ -228,12 +266,21 @@ Models:
 -- Cathedral --
 Name: Cathedral
 UniqueName: cathedral
-Jobs: 4
+Jobs: 20
 Models:
 	baseModel:            Instance | The base model that will replace the building
 
  -- Maritime -- 
 ----------------
+
+[Not Supported]
+-- Fishing Ship --
+Name: Fishing Ship
+Skin ID: fishingship
+Models:
+	baseModel:             Modular | Modular model all fishing ships will use
+Materials:
+	material:      Material the ship model will use
 
 -- Bridge --
 Name: Bridge
@@ -252,6 +299,19 @@ Models:
 	elbow:                 Modular | The elbow segment
 	intersection3:         Modular | The three way intersection segment
 	intersection4:         Modular | The four way intersection segment
+
+-- Windmill --
+Name: Windmill
+UniqueName: windmill
+Models:
+	blades:               Instance | Rotating blades of the windmill
+	baseModel:            Instance | The base model that will replace the building
+
+-- Dock --
+Name: Dock
+UniqueName: dock
+Models:
+	baseModel:            Instance | The base model that will replace the building
 
  -- Unsupported -- 
 -------------------
@@ -312,6 +372,11 @@ Name: Cemetery Caretaker
 UniqueName: cemeterykeeper
 
 [Not Supported]
+-- Chapel --
+Name: Chapel
+UniqueName: chapel
+
+[Not Supported]
 -- Charcoal Maker --
 Name: Charcoal Maker
 UniqueName: charcoalmaker
@@ -325,11 +390,6 @@ UniqueName: clinic
 -- Rock Removal --
 Name: Rock Removal
 UniqueName: destructioncrew
-
-[Not Supported]
--- Dock --
-Name: Dock
-UniqueName: dock
 
 [Not Supported]
 -- Drawbridge --
@@ -377,6 +437,16 @@ Name: Great Library
 UniqueName: greatlibrary
 
 [Not Supported]
+-- Greek Fire Emplacement --
+Name: Greek Fire Emplacement
+UniqueName: greekfire
+
+[Not Supported]
+-- Hall of Diplomacy --
+Name: Hall of Diplomacy
+UniqueName: hallofdiplomacy
+
+[Not Supported]
 -- Hospital --
 Name: Hospital
 UniqueName: hospital
@@ -387,9 +457,49 @@ Name: Iron Mine
 UniqueName: ironmine
 
 [Not Supported]
+-- Jousting Arena --
+Name: Jousting Arena
+UniqueName: joustingarena
+
+[Not Supported]
+-- Large Charcoal Maker --
+Name: Large Charcoal Maker
+UniqueName: largecharcoalmaker
+
+[Not Supported]
 -- Large Fountain --
 Name: Large Fountain
 UniqueName: largefountain
+
+[Not Supported]
+-- Large Iron Mine --
+Name: Large Iron Mine
+UniqueName: largeironmine
+
+[Not Supported]
+-- Large Produce Storage --
+Name: Large Produce Storage
+UniqueName: largeproducestand
+
+[Not Supported]
+-- Large Quarry --
+Name: Large Quarry
+UniqueName: largequarry
+
+[Not Supported]
+-- Large Reservoir --
+Name: Large Reservoir
+UniqueName: largereservoir
+
+[Not Supported]
+-- Large Tavern --
+Name: Large Tavern
+UniqueName: largetavern
+
+[Not Supported]
+-- Large Treasure Room --
+Name: Large Treasure Room
+UniqueName: largethroneroom
 
 [Not Supported]
 -- Library --
@@ -427,9 +537,19 @@ Name: Outpost
 UniqueName: outpost
 
 [Not Supported]
+-- Parks --
+Name: Parks
+UniqueName: parkdummy
+
+[Not Supported]
 -- Pier --
 Name: Pier
 UniqueName: pier
+
+[Not Supported]
+-- Merchant Ship --
+Name: Merchant Ship
+UniqueName: playermerchant
 
 [Not Supported]
 -- Produce Storage --
@@ -450,6 +570,21 @@ UniqueName: reservoir
 -- Rubble --
 Name: Rubble
 UniqueName: rubble
+
+[Not Supported]
+-- Sea Gate --
+Name: Sea Gate
+UniqueName: seagate
+
+[Not Supported]
+-- Exploration Ship --
+Name: Exploration Ship
+UniqueName: seedship
+
+[Not Supported]
+-- Siege Workshop --
+Name: Siege Workshop
+UniqueName: siegeworkshop
 
 [Not Supported]
 -- Small Granary --
@@ -482,6 +617,16 @@ Name: Lord Nextraztus
 UniqueName: statue_sam
 
 [Not Supported]
+-- Victory Valkyrie --
+Name: Victory Valkyrie
+UniqueName: statue_valkyrie
+
+[Not Supported]
+-- Statues --
+Name: Statues
+UniqueName: statuedummy
+
+[Not Supported]
 -- Stockpile --
 Name: Stockpile
 UniqueName: largestockpile
@@ -492,17 +637,21 @@ Name: Swineherd
 UniqueName: swineherd
 
 [Not Supported]
--- Transport Ship --
-Name: Transport Ship
+-- Theater --
+Name: Theater
+UniqueName: theater
+
+[Not Supported]
+-- Transport Cart --
+Name: Transport Cart
+UniqueName: transportcart
+
+[Not Supported]
+-- Cargo Ship --
+Name: Cargo Ship
 UniqueName: transportship
 
 [Not Supported]
--- Troop Transport Ship --
-Name: Troop Transport Ship
+-- Transport Ship --
+Name: Transport Ship
 UniqueName: trooptransportship
-
-[Not Supported]
--- Windmill --
-Name: Windmill
-UniqueName: windmill
-

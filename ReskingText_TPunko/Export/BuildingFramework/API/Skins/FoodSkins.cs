@@ -9,8 +9,10 @@ namespace ReskinEngine.API
 {
     public class WindmillSkin : GenericBuildingSkin
     {
+        internal override string FriendlyName => "Windmill";
         internal override string UniqueName => "windmill";
 
+        [Model(ModelAttribute.Type.Instance, description = "Rotating blades of the windmill")]
         public GameObject blades;
 
         protected override void PackageInternal(Transform dropoff, GameObject _base)

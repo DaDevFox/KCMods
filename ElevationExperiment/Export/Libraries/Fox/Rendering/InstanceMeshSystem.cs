@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Elevation;
 using Fox.Utils;
-using System.Runtime.CompilerServices;
 
 namespace Fox.Rendering
 {
@@ -63,7 +62,11 @@ namespace Fox.Rendering
         private Dictionary<int, Dictionary<int, Matrix4x4>> _matrices = new Dictionary<int, Dictionary<int, Matrix4x4>>();
 
         private List<Tuple<int, int>> toRemoveDeferred = new List<Tuple<int, int>>();
-        
+
+        private Dictionary<string, Tuple<int, int>> _taggedItems = new Dictionary<string, Tuple<int, int>>();
+
+        public int MatrixCount => _matrices.Count;
+
         public InstanceMeshSystem(Mesh mesh, Material mat)
         {
             this.mesh = mesh;
@@ -79,10 +82,14 @@ namespace Fox.Rendering
                 for (int idx = 0; idx < _matrices[matrix].Count; idx++)
                     RemoveAt(matrix, idx);
 
+            _taggedItems.Clear();
+            _items.Clear();
             _matrices.Clear();
 
-            mesh = null;
-            material = null;
+            toRemoveDeferred.Clear();
+
+            _items.Add(0, new Dictionary<int, ItemData>());
+            _matrices.Add(0, new Dictionary<int, Matrix4x4>());
         }
 
         public System.Tuple<int,int> GetFreeId()
@@ -251,6 +258,7 @@ namespace Fox.Rendering
                 data.position = position;
                 data.rotation = rotation;
                 data.scale = scale;
+                _items[matrix][idx] = data;
             }
 
             UpdateMatrix(matrix, idx);
@@ -266,6 +274,7 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
@@ -280,6 +289,7 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position, rotation);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
@@ -293,24 +303,14 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position, rotation, scale);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
 
         public bool Has(int matrix, int idx) => Valid(matrix, idx);
 
-        public bool Has(string tag)
-        {
-            bool flag = false;
-
-            foreach (Dictionary<int, ItemData> dict in _items.Values)
-                foreach (ItemData item in dict.Values)
-                    if (item.tag == tag)
-                        flag = true;
-
-            return flag;
-        }
-
+        public bool Has(string tag) => _taggedItems.ContainsKey(tag);
 
         public bool Get(int matrix, int idx, out ItemData result)
         {
@@ -325,22 +325,13 @@ namespace Fox.Rendering
 
         public bool Get(string tag, out ItemData result)
         {
-            int matrix = -1;
-            int idx = -1;
-
-            foreach (Dictionary<int, ItemData> dict in _items.Values) 
-            { 
-                foreach (ItemData item in dict.Values)  
-                {
-                    if (item.tag == tag)
-                    {
-                        matrix = item.matrix;
-                        idx = item.id;
-                    }
-                }
+            if (_taggedItems.ContainsKey(tag))
+                return Get(_taggedItems[tag].Item1, _taggedItems[tag].Item2, out result);
+            else
+            {
+                result = new ItemData();
+                return false;
             }
-
-            return Get(matrix, idx, out result);
         }
 
         //NOTE: Potential inefficiency; not shifting down when removing and therefore requiring a loop to search for the next free id (see also GetFreeId)
@@ -350,6 +341,18 @@ namespace Fox.Rendering
                 return;
 
             _matrices[matrix].Remove(idx);
+        }
+        
+        public bool Remove(string tag)
+        {
+            if (Get(tag, out ItemData data))
+            {
+                RemoveAt(data.matrix, data.id);
+                _taggedItems.Remove(tag);
+                return true;
+            }
+            else
+                return false;
         }
 
         public void RemoveAtDeferred(int matrix, int idx)

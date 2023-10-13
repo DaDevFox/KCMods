@@ -1,4 +1,4 @@
-﻿#define ALPHA
+﻿//#define ALPHA
 
 using System;
 using System.Collections.Generic;
@@ -31,11 +31,11 @@ namespace Fox.Maps
 
         public static Action held { get; private set; } = null;
 
-#if ALPHA
+//#if ALPHA
         public static bool EditModeActive = false;
-#else
-        public static bool EditModeActive = true;
-#endif
+//#else
+//        public static bool EditModeActive = true;
+//#endif
 
         #region Utils
 
@@ -68,7 +68,7 @@ namespace Fox.Maps
 
 #endregion
 
-#if ALPHA
+//#if ALPHA
 
         [HarmonyPatch(typeof(NewMapUI), "OnEdit")]
         class OnEditPatch
@@ -88,7 +88,7 @@ namespace Fox.Maps
             }
         }
 
-#endif
+//#endif
 
         [HarmonyPatch(typeof(MapEdit), "Update")]
         public class SelectionPatch
@@ -111,53 +111,52 @@ namespace Fox.Maps
 
                 
 
-                    if (__instance.brushMode == MapEdit.BrushMode.None)
+                if (__instance.brushMode == MapEdit.BrushMode.None)
+                {
+                    Cam.inst.disableDrag = true;
+
+                    if (PointingSystem.GetPointer().GetPrimaryDown())
                     {
-                        Cam.inst.disableDrag = true;
+                        Cell current = MapSelectionTools.current;
 
-                        if (PointingSystem.GetPointer().GetPrimaryDown())
-                        {
-                            Cell current = MapSelectionTools.current;
+                        if (mouseDown == null)
+                            mouseDown = current;
+                    }
 
-                            if (mouseDown == null)
-                                mouseDown = current;
-                        }
-
-                        if (mouseDown != null)
-                        {
-                            FillCursor(current);
+                    if (mouseDown != null)
+                    {
+                        FillCursor(current);
                             
-                            if (PointingSystem.GetPointer().GetPrimaryUp() || !EditModeActive)
-                            {
-                                Select();
-                                mouseDown = null;
+                        if (PointingSystem.GetPointer().GetPrimaryUp() || !EditModeActive)
+                        {
+                            Select();
+                            mouseDown = null;
 
-                                if(!EditModeActive)
-                                {
-                                    if (selection.Length > 0)
-                                        selection = new CellMeta[0];
-                                }
+                            if(!EditModeActive)
+                            {
+                                if (selection.Length > 0)
+                                    selection = new CellMeta[0];
                             }
                         }
-                        else if (selection.Length > 0)
-                        {
-                            FillSelected();
-
-
-                            if (PointingSystem.GetPointer().GetSecondaryUp() || !EditModeActive)
-                                selection = new CellMeta[0];
-                        }
                     }
-                    else
+                    else if (selection.Length > 0)
                     {
-                        mouseDown = null;
-                        if (selection.Length > 0)
+                        FillSelected();
+
+
+                        if (PointingSystem.GetPointer().GetSecondaryUp() || !EditModeActive)
                             selection = new CellMeta[0];
                     }
+                }
+                else
+                {
+                    mouseDown = null;
+                    if (selection.Length > 0)
+                        selection = new CellMeta[0];
+                }
 
 
-                    UpdateActions();
-                
+                UpdateActions();
             }
 
             

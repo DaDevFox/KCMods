@@ -15,10 +15,10 @@ namespace Elevation.Patches
     {
         static void Postfix(Cell __instance, ref int __result)
         {
-            if (__instance != null && __instance.TopStructure != null)
+            if (__instance != null && __instance.GetTopMostCastlePiece() != null)
             {
-                if (__instance.TopStructure.Stackable)
-                {
+                //if (__instance.TopStructure.Stackable)
+                //{
                     CellMeta meta = Grid.Cells.Get(__instance);
                     if (meta != null)
                     {
@@ -26,7 +26,7 @@ namespace Elevation.Patches
                         // In this case, [Experimental Elevation] will need meta.elevationTier to be the tier of the highest elevation level on the cell
                         __result += meta.elevationTier * (int)(ElevationManager.elevationInterval / 0.25f);
                     }
-                }
+                //}
             }
         }
     }

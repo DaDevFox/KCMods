@@ -9,6 +9,8 @@ using UnityEngine;
 using Elevation.AssetManagement;
 using System.Reflection;
 using I2.Loc;
+using Fox.Localization;
+using Elevation.Patches;
 
 namespace Elevation
 {
@@ -26,6 +28,9 @@ namespace Elevation
 
     public class Buildings
     {
+
+        public static Dictionary<int, Vector3[]> PrefabPersonPositions { get; private set; } = new Dictionary<int, Vector3[]>();
+
         public static GameObject ScaffoldingPrefab { get; private set; }
         public static Building placeable_scaffoldingBuilding { get; private set; }
 
@@ -34,6 +39,12 @@ namespace Elevation
 
         public static void Init()
         {
+            //Broadcast.BuildingBuilt.ListenAny(
+            //    (sender, data) =>
+            //    {
+            //        Mod.dLog($"Sender: {sender}");
+            //        BuildFXPatch.Correct(data.targetBuilding);
+            //    });
             Register();
         }
 
@@ -62,6 +73,9 @@ namespace Elevation
 
             placeable_scaffoldingBuilding.placementSounds = new string[] { "castleplacement" };
             placeable_scaffoldingBuilding.SelectionSounds = new string[] { "Building_Select_Road_1" };
+
+            placeable_scaffoldingBuilding.ignoreRoadCoverageForPlacement = true;
+            placeable_scaffoldingBuilding.dragPlacementMode = Building.DragPlacementMode.Rectangle;
 
             // Resource Cost
             ResourceAmount cost = new ResourceAmount();
@@ -105,6 +119,9 @@ namespace Elevation
             placeable_dugoutBuilding.placementSounds = new string[] { "castleplacement" };
             placeable_dugoutBuilding.SelectionSounds = new string[] { "Building_Select_Road_1" };
 
+            placeable_dugoutBuilding.ignoreRoadCoverageForPlacement = true;
+            placeable_dugoutBuilding.dragPlacementMode = Building.DragPlacementMode.Rectangle;
+
             // Resource Cost
             ResourceAmount dugoutCost = new ResourceAmount();
             dugoutCost.Set(FreeResourceType.Tree, 75);
@@ -124,7 +141,10 @@ namespace Elevation
             #endregion
         }
 
-
+        public static void Setup()
+        {
+            RoadStairs.Reset();
+        }
 
 
 
@@ -138,6 +158,8 @@ namespace Elevation
         {
             __instance.internalPrefabs.Add(Buildings.placeable_scaffoldingBuilding);
             __instance.internalPrefabs.Add(Buildings.placeable_dugoutBuilding);
+
+            HappinessBonuses.Init();
         }
     }
 
@@ -153,6 +175,28 @@ namespace Elevation
                 "scaffolding", "blacksmith", Vector3.one);
             __instance.AddBuilding(__instance.IndustryTab, __instance.IndustryTabVR, __instance.IndustryTabConsole,
                 "dugout", "blacksmith", Vector3.one);
+
+            ReadPersonPositions();
+        }
+
+        static void ReadPersonPositions()
+        {
+            foreach(Building building in GameState.inst.internalPrefabs)
+            {
+                if (building.personPositions == null)
+                    continue;
+
+                Vector3[] array = new Vector3[building.personPositions.Length];
+                for(int i = 0; i < array.Length; i++)
+                {
+                    array[i] = building.personPositions[i] != null ? building.personPositions[i].localPosition : Vector3.zero;
+                }
+
+                if (!Buildings.PrefabPersonPositions.ContainsKey(building.uniqueNameHash))
+                    Buildings.PrefabPersonPositions.Add(building.uniqueNameHash, array);
+                else
+                    Buildings.PrefabPersonPositions[building.uniqueNameHash] = array; // throw an exception???
+            }
         }
     }
 
@@ -165,19 +209,19 @@ namespace Elevation
         {
             // Scaffolding
             if (Term == "Building scaffolding FriendlyName")
-                __result = "Scaffolding";
+                __result = Localization.Get("scaffolding_friendly_name");
             else if (Term == "Building scaffolding Description")
-                __result = "Adds 1 elevation tier to the tile once constructed. Can be used once on a tile without threatening the integrity of the ground.";
+                __result = Localization.Get("scaffolding_description");
             else if (Term == "Building scaffolding ThoughtOnBuilt")
-                __result = "Thinking reaching new heights is a fruitful endeavour.";
+                __result = Localization.Get("scaffolding_buildingthought");
 
             // Dugout
             if (Term == "Building dugout FriendlyName")
-                __result = "Dugout";
+                __result = Localization.Get("dugout_friendly_name");
             else if (Term == "Building dugout Description")
-                __result = "Reduces 1 elevation tier to the tile once constructed. Can be used once on a tile without threatening the integrity of the ground.";
+                __result = Localization.Get("dugout_description");
             else if (Term == "Building dugout ThoughtOnBuilt")
-                __result = "Wary of dwarves, trolls, and the dark of the mountain.";
+                __result = Localization.Get("dugout_buildingthought"); ;
         }
     }
 }

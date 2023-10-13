@@ -30,6 +30,19 @@ namespace Elevation.Patches
         }
     }
 
+
+    [HarmonyPatch(typeof(TileInfoUI), "UpdateForNewCell")]
+    public class TileInfoUIPatch
+    {
+        static void Postfix(TileInfoUI __instance, Cell cell)
+        {
+            if (WorldRegions.Unreachable.Contains(cell))
+            {
+                __instance.tipTextUI.text = "<color=yellow>Unreachable. May be made reachable by modifying surrounding terrain height. </color>";
+            }
+        }
+    }
+
     //[HarmonyPatch(typeof(PathCell), "Center", MethodType.Getter)]
     ////[HarmonyPatch("Center", PropertyMethod.Getter)]
     //public class PathCellCenterPatch
