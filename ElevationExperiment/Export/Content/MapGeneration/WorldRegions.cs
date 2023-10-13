@@ -9,6 +9,8 @@ using Elevation.Patches;
 using UnityEngine;
 using Harmony;
 using Fox.Profiling;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using JetBrains.Annotations;
 
 namespace Elevation
 {
@@ -21,14 +23,17 @@ namespace Elevation
         public static bool async { get; set; } = true;
         public static bool secondsDistribution { get; set; } = false;
 
-        public static float markingFPS = 15f;
+        public static float updateInterval { get; set; } = 0.5f;
         public static float timePerFrame { get; set; } = 0.0666667f;
 
         public static float minProcessingTime = 0.2f;
         public static float minMarkingTime = 0.2f;
         public static float minFinalizingTime = 0.2f;
 
+
+
         private static Stopwatch timer;
+        private static float elapsed = 0f;
 
         private static int cache = 0;
 
@@ -37,7 +42,7 @@ namespace Elevation
         /// <summary>
         /// Returns whether the world has had its regions marked already
         /// </summary>
-        public static bool Marked { get; private set; } = false;
+        public static bool Marked { get; set; } = false;
 
         /// <summary>
         /// Returns whether the region categorization algorithm is currently busy with an operation
@@ -46,13 +51,30 @@ namespace Elevation
 
         public static List<Cell> Dirty { get; private set; } = new List<Cell>();
 
-        public static List<Cell> Unreachable { get; private set; } = new List<Cell>();
+        public static HashSet<Cell> Unreachable { get; private set; } = new HashSet<Cell>();
         public static List<Cell> BeginSearchPositions { get; private set; } = new List<Cell>();
 
         private static Dictionary<string, CellData> cellsData = new Dictionary<string, CellData>();
         private static Dictionary<int, List<CellData>> regionData = new Dictionary<int, List<CellData>>();
 
-        private static List<CellData> openSet = new List<CellData>();
+        private static List<CellMeta> openSet = new List<CellMeta>();
+
+        public static void Tick()
+        {
+            if (Marked)
+            {
+                //UI.loadingDialog.desiredProgress = Mathf.Clamp01(Dirty.Count / 10f);
+
+                if (elapsed > updateInterval)
+                {
+                    if (Dirty.Count > 0)
+                        UpdateDirty();
+                    elapsed %= updateInterval;
+                }
+
+                elapsed += Time.unscaledDeltaTime;
+            }
+        }
 
         public static int GetTileRegion(Cell cell)
         {
@@ -68,21 +90,95 @@ namespace Elevation
             Dirty.Add(cell);
         }
 
-        public static void UpdateDirty()
+        public static void AddNeighbors(CellMeta meta)
         {
-            for(int i = 0; i < Dirty.Count; i++) 
+            Cell[] neighbors = new Cell[4];
+            World.inst.GetNeighborCells(meta.cell, ref neighbors);
+            foreach (Cell neighbor in neighbors)
             {
-                Cell c = Dirty[i];
+                CellMeta neighborMeta = Grid.Cells.Get(neighbor);
+                if (neighborMeta && (Unreachable.Contains(neighbor) 
+                    //|| !PathableNeighbor(neighborMeta)
+                    ))
+                    Dirty.Add(neighbor);
+            }
+        }
 
-                foreach(Cell startingPos in BeginSearchPositions)
+        // TODO: critical elevation change tracking; do not allow dugouts to undo critical elevation pieces
+
+        private static bool PathableNeighbor(CellMeta meta) 
+        {
+            if (meta == null)
+                return false;
+
+            bool result = false;
+            Cell[] neighbors = new Cell[4];
+            World.inst.GetNeighborCells(meta.cell, ref neighbors);
+
+            foreach (Cell neighbor in neighbors)
+            {
+                if (neighbor == null || Unreachable.Contains(neighbor))
+                    continue;
+
+                CellMeta neighborMeta = Grid.Cells.Get(neighbor);
+                if (neighborMeta && Mathf.Abs(neighborMeta.elevationTier - meta.elevationTier) <= 1)
                 {
-                    List<Vector3> path = new List<Vector3>();
-                    World.inst.FindFootPath(startingPos.Center, c.Center, ref path);
-                    if (path.Count <= 2)
-                        Unreachable.Add(c);
-                    Dirty.RemoveAt(i);
+                    result = true;
                 }
             }
+
+            return result;
+        }
+
+        public static void UpdateDirty()
+        {
+            Cell[] scratchDirty = new Cell[Dirty.Count];
+            Dirty.CopyTo(scratchDirty);
+
+            for (int i = 0; i < scratchDirty.Length; i++) 
+            {
+                // if, after some change, cell now has a pathable (not in unreachable list) neighbor within 1 elevation tier, cell is no longer unreachable.
+                Cell cell = scratchDirty[i];
+                CellMeta meta = Grid.Cells.Get(cell);
+                if (meta != null && cell != null)
+                {
+                    if (PathableNeighbor(meta))
+                    {
+                        if (Unreachable.Contains(cell))
+                        {
+                            Unreachable.Remove(cell);
+                            ClearBlockedCellColor(cell, true); 
+                        }
+                    }
+                    else if (!Unreachable.Contains(cell))
+                    {
+                        Unreachable.Add(cell);
+                        SetBlockedCellColor(cell, true);
+                    }
+
+                    AddNeighbors(meta);
+                    Dirty.Remove(cell);
+                }
+            }
+        }
+
+        public static void ClearBlockedCellColor(Cell cell, bool update = false)
+        {
+            ColorManager.GetTileColor(cell.fertile, cell.IrrigationCoverage > 0, out Color normalColor, out Color winterColor);
+            TerrainGen.inst.SetTerrainPixelColor(cell.x, cell.z, normalColor, winterColor);
+            if (update)
+                TerrainGen.inst.UpdateTextures();
+        }
+
+        public static void SetBlockedCellColor(Cell cell, bool update = false)
+        {
+            float bias = ColorManager.coloringBias;
+            Color unreachableColor = ColorManager.unreachableColor;
+
+            ColorManager.GetTileColor(cell.fertile, cell.IrrigationCoverage > 0, out Color basegameNormalColor, out Color basegameWinterColor);
+            TerrainGen.inst.SetTerrainPixelColor(cell.x, cell.z, Color.Lerp(basegameNormalColor, unreachableColor, bias), Color.Lerp(basegameWinterColor, unreachableColor, bias));
+            if (update)
+                TerrainGen.inst.UpdateTextures();
         }
 
         public static void Search()
@@ -125,14 +221,14 @@ namespace Elevation
 
             // Iterate on all nodes, each node will be given a region in which it resides. 
             // Any node can reach another node in the same region, but anywhere else is unreachable 
-            while(remaining.Count > 0)
-            {
-                CellData node = remaining[0];
+            //while(remaining.Count > 0)
+            //{
+            //    CellData node = remaining[0];
 
-                node.region = region;
-                IterateNode(node);
-                region++;
-            }
+            //    node.region = region;
+            //    //IterateNode(node);
+            //    region++;
+            //}
 
             ReformatRegions();
 
@@ -142,32 +238,57 @@ namespace Elevation
             Mod.Log("Blocked Regions Pruned");
         }
 
-        private static void IterateNode(CellData node)
+        private static void IterateNode(CellMeta meta)
         {
-            openSet.Remove(node);
+            if (meta == null)
+                return;
+            openSet.Remove(meta);
 
-            List<Direction> dirs = new List<Direction>() { Direction.East, Direction.North, Direction.West, Direction.South };
-            foreach (Direction dir in dirs)
+            if (meta.cell != null)
             {
+                Cell[] neighbors = new Cell[4];
+                World.inst.GetNeighborCells(meta.cell, ref neighbors);
 
-                CellData other = node.GetCardinal(dir);
-                if (openSet.Contains(node))
-                    continue;
-
-                if (CheckSameRegion(node, other))
-                    continue;
-
-                if (!Pathing.Connected(node.cell, other.cell) && !Pathing.BlocksForBuilding(other.cell))
+                foreach (Cell cell in neighbors)
                 {
-                    TagSameRegion(node, other);
-                    IterateNode(other);
+                    if (cell == null)
+                        continue;
+
+                    CellMeta other = Grid.Cells.Get(cell);
+                    if (other == null)
+                        continue;
+
+                    if (openSet.Contains(other) && Pathing.Connected(meta.cell, other.cell))
+                    {
+                        IterateNode(other);
+                    }
                 }
             }
+
+            //List<Direction> dirs = new List<Direction>() { Direction.East, Direction.North, Direction.West, Direction.South };
+            //foreach (Direction dir in dirs)
+            //{
+
+            //    CellData other = node.GetCardinal(dir);
+            //    if (openSet.Contains(node))
+            //        continue;
+
+            //    if (CheckSameRegion(node, other))
+            //        continue;
+
+            //    if (!Pathing.Connected(node.cell, other.cell) && !Pathing.BlocksForBuilding(other.cell))
+            //    {
+            //        TagSameRegion(node, other);
+            //        IterateNode(other);
+            //    }
+            //}
         }
 
         #endregion
 
         #region Async
+
+        private static int openSetCount = 0;
 
         public static IEnumerator RegionSearchAsync()
         {
@@ -184,45 +305,72 @@ namespace Elevation
 
             float totalElapsed = 0f;
 
-            float timeBreak = 0.1f;
+            float timeBreak = 5f;
             float elapsed = 0f;
             int count = 0;
-
-            timer = new Stopwatch();
 
             UI.loadingDialog.description = "pruning_preprocessing";
             UI.loadingDialog.UpdateText();
             UI.loadingDialog.desiredProgress = 0.5f;
 
-            // Preperation
-            // Mark all cells that support elevation as nodes
-            foreach (CellMeta meta in Grid.Cells)
+            Dictionary<int, List<CellMeta>> landmasses = new Dictionary<int, List<CellMeta>>();
+
+            for(int landmass = 0; landmass < World.inst.cellsToLandmass.Length; landmass++)
             {
-                timer.Restart();
-                
-                CellData nodeData = new CellData()
+                ArrayExt<Cell> cells = World.inst.cellsToLandmass[landmass];
+                for (int cellIdx = 0; cellIdx < World.inst.cellsToLandmass[landmass].Count; cellIdx++)
                 {
-                    cell = meta.cell,
-                    meta = meta,
-                    region = -1
-                };
+                    Cell cell = cells.data[cellIdx];
+                    if (cell.deepWater)
+                        continue;
 
-                cellsData.Add(CellMetadata.GetPositionalID(meta.cell), nodeData);
-                openSet.Add(nodeData);
+                    CellMeta meta = Grid.Cells.Get(cell);
+                    if (!meta)
+                        continue;
 
-                timer.Stop();
+                    if (!landmasses.ContainsKey(cell.landMassIdx))
+                        landmasses.Add(cell.landMassIdx, new List<CellMeta>());
 
-                elapsed += ((float)timer.Elapsed.Milliseconds) / 1000f;
-                totalElapsed += ((float)timer.Elapsed.Milliseconds) / 1000f;
-                count++;
+                    landmasses[cell.landMassIdx].Add(meta);
+                    openSet.Add(meta);
 
-                if(elapsed > timeBreak)
-                {
-                    elapsed = 0;
-                    //UI.loadingDialog.desiredProgress = ((float)count) / Grid.Cells.Count;
-                    yield return new WaitForEndOfFrame();
+                    elapsed += Time.unscaledDeltaTime;
+                    totalElapsed += Time.unscaledDeltaTime;
+                    count++;
+
+                    if (elapsed > timeBreak)
+                    {
+                        elapsed = 0;
+                        UI.loadingDialog.desiredProgress = ((float)count) / Grid.Cells.Count;
+                        yield return new WaitForEndOfFrame();
+                    }
                 }
             }
+
+            // Preperation
+            // Mark all cells that support elevation as nodes
+            //foreach (CellMeta meta in Grid.Cells)
+            //{
+            //    if (meta.cell.deepWater)
+            //        continue;
+
+            //    if (!landmasses.ContainsKey(meta.cell.landMassIdx))
+            //        landmasses.Add(meta.cell.landMassIdx, new List<CellMeta>());
+                
+            //    landmasses[meta.cell.landMassIdx].Add(meta);
+            //    openSet.Add(meta);
+
+            //    elapsed += Time.unscaledDeltaTime;
+            //    totalElapsed += Time.unscaledDeltaTime;
+            //    count++;
+
+            //    if(elapsed > timeBreak)
+            //    {
+            //        elapsed = 0;
+            //        UI.loadingDialog.desiredProgress = ((float)count) / Grid.Cells.Count;
+            //        yield return new WaitForEndOfFrame();
+            //    }
+            //}
 
             // wait for the min time to complete if not complete already 
             while (totalElapsed < minProcessingTime)
@@ -238,56 +386,40 @@ namespace Elevation
             totalElapsed = 0f;
             elapsed = 0f;
             yield return new WaitForEndOfFrame();
+            
+            DebugExt.dLog($"Pruning cells for {landmasses.Count} landmasses", true);
 
+            openSetCount = openSet.Count;
 
+            TerrainGen.inst.ClearOverlay(true);
 
-            int region = 1;
-            Stopwatch outerLoopTimer = new Stopwatch();
-            outerLoopTimer.Start();
-
-
-            // Iterate on all nodes, each node will be given a region in which it resides. 
-            // Any node can reach another node in the same region, but anywhere else is unreachable 
-            while (openSet.Count > 0)
+            foreach(KeyValuePair<int, List<CellMeta>> pair in landmasses)
             {
-                timer.Restart();
-
-                CellData node = openSet[0];
-                node.region = region;
-
-                if (node.cell == null || !node.hasCardinals)
+                foreach (CellMeta meta in pair.Value)
                 {
-                    openSet.Remove(node);
-                    timer.Stop();
+                    if (!meta.cell.deepWater && meta.elevationTier == 0)
+                    {
+                        if (Settings.showMapProcessing)
+                        {
+                            TerrainGen.inst.SetOverlayPixelColor(meta.cell.x, meta.cell.z, Color.black);
+                            TerrainGen.inst.UpdateOverlayTextures(8f, 0.65f, 0.9f);
+                        }
 
-                    Mod.dLog("skip");
-                    continue;
+                        Mod.dLog("Landmass Prune Started");
+                        yield return IterateNodeAsync(meta);
+                        totalElapsed += Time.unscaledDeltaTime;
+                        break;
+                    }
                 }
 
-                yield return IterateNodeAsync(node, 1);
-                region++;
-
-                timer.Stop();
-
-                Mod.dLog($"tick: {cache}");
-
-                elapsed += (float)timer.Elapsed.TotalSeconds;
-                UI.loadingDialog.desiredProgress = 1f - ((float)openSet.Count) / ((float)cellsData.Count);
-
-                //if (elapsed > timePerFrame)
-                //{
-                //    UI.loadingDialog.desiredProgress = ((float)openSet.Count) / ((float)cellsData.Count);
-                //    Mod.dLog(openSet.Count);
-                //    yield return new WaitForEndOfFrame();
-                //    elapsed = 0f;
-                //}
+                Mod.dLog("Landmass pruned");   
             }
 
+            for(int i = 0; i < openSet.Count; i++)
+                Unreachable.Add(openSet[i].cell);
 
-            timer.Stop();
-
-            outerLoopTimer.Stop();
-            totalElapsed = ((float)outerLoopTimer.Elapsed.Milliseconds) / 1000f;
+            DebugExt.dLog($"Pruned; {openSet.Count} unreachable cells flagged");
+            Mod.dLog($"Pruned; {openSet.Count} unreachable cells flagged");
 
             // wait for the min time to complete if not complete already 
             while (totalElapsed < minMarkingTime)
@@ -297,21 +429,11 @@ namespace Elevation
             }
 
             UI.loadingDialog.description = "pruning_reformat";
-            UI.loadingDialog.desiredProgress = 0f;
+            UI.loadingDialog.desiredProgress = 1f;
             UI.loadingDialog.UpdateText();
-            totalElapsed = 0f;
             yield return new WaitForEndOfFrame();
 
-            ReformatRegions();
-
-            UI.loadingDialog.desiredProgress = 1f;
-
-            // wait for the min time to complete if not complete already 
-            while (totalElapsed < minMarkingTime)
-            {
-                yield return new WaitForEndOfFrame();
-                totalElapsed += Time.unscaledDeltaTime;
-            }
+            TerrainGen.inst.ClearOverlay(true);
 
             UI.loadingDialog.Deactivate();
             Busy = false;
@@ -320,40 +442,51 @@ namespace Elevation
         }
 
 
-        private static IEnumerator IterateNodeAsync(CellData node, int stack = 0)
+        private static IEnumerator IterateNodeAsync(CellMeta meta, int stack = 0)
         {
-            cache = stack;
-            openSet.Remove(node);
+            int calculationsPerYield = 30;
+            int safetyBuffer = 20;
+            openSet.Remove(meta);
 
-            //Mod.dLog((float)timer.Elapsed.TotalSeconds);
+            if (meta.cell.deepWater)
+                yield return null;
 
-            if ((float)timer.Elapsed.TotalSeconds > timePerFrame)
+            if (openSet.Count < (calculationsPerYield + safetyBuffer) || stack >= calculationsPerYield)
             {
-                Mod.dLog("inner tick");
-                UI.loadingDialog.desiredProgress = 1f - ((float)openSet.Count) / ((float)cellsData.Count);
-                timer.Restart();
-
                 yield return new WaitForEndOfFrame();
+                stack = 0;
             }
 
-            if (node.cell != null)
+            UI.loadingDialog.desiredProgress = 1f - ((float)openSet.Count) / (openSetCount);
+
+            if (Settings.showMapProcessing)
             {
-                foreach (Direction dir in CellData.directions)
+                TerrainGen.inst.SetOverlayPixelColor(meta.cell.x, meta.cell.z, new Color(100f, 0, 0));
+                TerrainGen.inst.UpdateOverlayTextures(8f, 0.65f, 0.9f);
+                TerrainGen.inst.FadeOverlay(1f);
+            }
+
+            if (meta.cell != null)
+            {
+                Cell[] neighbors = new Cell[4];
+                World.inst.GetNeighborCells(meta.cell, ref neighbors);
+
+                foreach(Cell cell in neighbors)
                 {
-                    CellData other = node.GetCardinal(dir);
+                    if (cell == null)
+                        continue;
+
+                    CellMeta other = Grid.Cells.Get(cell);
                     if (other == null)
                         continue;
 
-                    if (CheckSameRegion(node, other))
-                        continue;
-
-
-                    if (Pathing.Connected(node.cell, other.cell) && !Pathing.BlocksForBuilding(other.cell))
+                    if (openSet.Contains(other) && Pathing.Connected(meta.cell, other.cell))
                     {
-                        TagSameRegion(node, other);
-                        IterateNodeAsync(other, stack + 1);
+                        yield return IterateNodeAsync(other, stack + 1);
                     }
+
                 }
+
             }
         }
 
@@ -399,7 +532,11 @@ namespace Elevation
         private static void MarkComplete()
         {
             WorldRegions.Marked = true;
+            //HACKY
+            ElevationManager.RefreshTerrain();
+
             onMarked?.Invoke();
+
         }
 
         public class CellData
@@ -418,7 +555,9 @@ namespace Elevation
                     foreach (Direction dir in directions)
                     {
                         Cell cardinal = Pathing.GetCardinal(cell, dir);
-                        if (Pathing.Connected(cell, cardinal) && !CheckSameRegion(this, cellsData[CellMetadata.GetPositionalID(cardinal)]) && !Pathing.BlocksForBuilding(cardinal))
+                        if (Pathing.Connected(cell, cardinal) 
+                            && !CheckSameRegion(this, cellsData[CellMetadata.GetPositionalID(cardinal)]) 
+                            && !Pathing.BlocksForBuilding(cardinal))
                             return true;
                     }
                     return false;
@@ -436,6 +575,8 @@ namespace Elevation
                 }
                 return cardinals.ToArray();
             }
+
+            
 
             public CellData GetCardinal(Direction direction)
             {

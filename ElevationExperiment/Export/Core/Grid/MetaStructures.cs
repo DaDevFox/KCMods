@@ -31,7 +31,6 @@ namespace Elevation
 
         private void OnCreate()
         {
-            
             BuildingFormatter.UpdateBuilding(building);
         }
 
@@ -51,7 +50,7 @@ namespace Elevation
         /// <summary>
         /// The unity-metric actual height of this cell
         /// </summary>
-        public float Elevation => elevationTier == 0 ? 0f : (float)elevationTier * ElevationManager.elevationInterval;
+        public float Elevation => (float)elevationTier * ElevationManager.elevationInterval;
             
         /// <summary>
         /// The integer tier height of this cell
@@ -87,7 +86,8 @@ namespace Elevation
         {
             get
             {
-                Cell[] neighborCells = World.inst.GetNeighborCells(cell);
+                Cell[] neighborCells = new Cell[4]; 
+                World.inst.GetNeighborCells(cell, ref neighborCells);
                 List<CellMeta> metas = new List<CellMeta>();
                 
                 foreach(Cell c in neighborCells)
@@ -191,6 +191,8 @@ namespace Elevation
         public void UpdateVisuals(bool forced = false)
         {           
             Rendering.Update(cell, forced);
+            // TEMP
+            BuildingFormatter.UpdateBuildingsOnCell(cell);
         }
 
         
@@ -198,16 +200,20 @@ namespace Elevation
         {
             if (!ElevationManager.ValidTileForElevation(cell))
                 return;
-            
+
+            World.inst.GetPathCell(cell).Center = cell.Center;
             UpdatePathfinderCost();
         }
 
         private void UpdatePathfinderCost()
         {
-            cell.ogreFootPathCost = Pathing.tierPathingCost;
+            World.inst.GetPathCell(cell).ogreFootPathCost = elevationTier;
+            
+            if(Combat.smartUnitPathing)
+                World.inst.GetPathCell(cell).unitBlockCost = Pathing.unitPathingCostBase - Pathing.unitPathingAnticost * elevationTier;
 
-            for(int i = 0; i < cell.villagerFootPathCost.Length; i++)
-                cell.villagerFootPathCost[i] = Pathing.tierPathingCost;
+            //for(int i = 0; i < World.inst.GetPathCell(cell).villagerFootPathCost.Length; i++)
+            //    World.inst.GetPathCell(cell).villagerFootPathCost[i] = Pathing.tierPathingCost;
         }
 
         public bool PathableTo(Cell cell)

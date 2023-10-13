@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace InsaneDifficultyMod
+namespace InsaneDifficultyMod.Events
 {
     public class RioterJob : Job
     {
@@ -20,28 +20,32 @@ namespace InsaneDifficultyMod
 
         public Status status;
 
-        public Cell rallyPoint = null;
-        public RiotSpawn riot;
+        //public Cell rallyPoint = null;
+        public Riot riot;
+        public Riot.RiotBuildingMeta rallyPoint;
+
+        public int index = 0;
 
         public RioterJob(IEmployer e) : base(e)
         {
             status = Status.idle;
             employer = e;
-            riot = (RiotSpawn)e;
+            riot = ((Riot.RiotBuildingMeta)e).riot;
+            ManualAssignment = true;
         }
 
 
-        public void SetRallyPoint(Cell cell)
-        {
-            rallyPoint = cell;
-            status = Status.rallying;
-            base.Employee.MoveToDeferred(rallyPoint.Center);
-        }
+        //public void SetRallyPoint(Cell cell)
+        //{
+        //    rallyPoint = cell;
+        //    status = Status.rallying;
+        //    base.Employee.MoveToDeferred(rallyPoint.Center);
+        //}
 
         public void ReportArrivalAtRallyPoint()
         {
-            KingdomLog.TryLog("arrival", "arrival", KingdomLog.LogStatus.Neutral);
-            riot.ReportArrivalAtRallyPoint(base.Employee);
+            DebugExt.Log("arrival", true, KingdomLog.LogStatus.Neutral, Employee.Pos);
+            
         }
 
         public override void OnEmployeeQuit()
@@ -53,15 +57,19 @@ namespace InsaneDifficultyMod
         public override void UpdateWithEmployee(float dt)
         {
             base.UpdateWithEmployee(dt);
-            Employee.textThought = "<color=red>Rioting!</color>";
+            //Employee.textThought = "<color=red>Rioting!</color>";
 
             float snapThresh = 1f;
             if (status == Status.rallying)
             {
-                if (Vector3.Distance(base.Employee.GetPosition(), rallyPoint.Center) <= snapThresh)
+                if (Vector3.Distance(base.Employee.GetPosition(), rallyPoint.target.Center()) <= snapThresh)
                 {
                     status = Status.waitingAtRally;
                     ReportArrivalAtRallyPoint();
+                }
+                else
+                {
+                    //Employee.MoveToDeferred(rallyPoint.Center);
                 }
             }
 

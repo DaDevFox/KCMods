@@ -15,7 +15,7 @@ namespace Elevation.Patches
         {
             try
             {
-                Cell cell = World.inst.GetCellData(__instance.transform.position);
+                Cell cell = World.inst.GetCellDataClamped(__instance.transform.position);
                 if (cell != null)
                 {
                     CellMeta meta = Grid.Cells.Get(cell);
@@ -29,6 +29,18 @@ namespace Elevation.Patches
             catch(Exception ex)
             {
                 DebugExt.HandleException(ex);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ProjectileDefense), "Update")]
+    class ProjectileDefenseDebugPatch
+    {
+        static void Postfix(ProjectileDefense __instance)
+        {
+            if(__instance.trackingTarget != null && !__instance.trackingTarget.Equals(null))
+            {
+                DebugExt.dLog($"Ballista has target {__instance.trackingTarget.GetType()}; attacking: {__instance.attackTarget != null}\n\nBallista rotate parent position: {__instance.GetComponent<Ballista>().RotateParent.position}, target position: {__instance.trackingTarget?.GetPredictedPosition(1f)}", false, __instance.trackingTarget);
             }
         }
     }

@@ -9,6 +9,7 @@ using UnityEngine;
 using Fox.Profiling;
 using Fox.Localization;
 using Fox.Debugging;
+using Elevation.Patches;
 
 namespace Elevation
 {
@@ -18,7 +19,7 @@ namespace Elevation
 
         #region Mod Info
 
-        public static string ModID { get; } = "elevationexperiment";
+        public static string ModID { get; } = "elevation";
         public static string AssetBundlePath => helper.modPath + AssetBundleRelativePath;
             
         public static string AssetBundleRelativePath { get; } = "/Content/Assets/assetbundle/";
@@ -29,15 +30,21 @@ namespace Elevation
 
         #region Localization
 
-        public static string localizationData { get; } = "en,de,fr,es\n" +
-            "generating_title,Generating...,,,\n" +
-            "generating_description,This may take a while,,,\n" +
-            "world_init_title, Initializing world...,,,\n" +
-            "world_init_description,This may take a while,,,\n" +
-            "pruning_title, Processing Map...,,,\n" +
-            "pruning_preprocessing,Preparing data,,,\n" +
-            "pruning_floodfill,Indexing data,,,\n" +
-            "pruning_reformat,Finalizing,,,";
+        public static string localizationData { get; } = "en,de,fr,es,zh\n"+
+            "generating_title,Generating,,,,\n"+
+            "generating_description,This may take a while,,,,\n"+
+            "pruning_title, Processing Map,,,,\n"+
+            "pruning_preprocessing,Preparing data,,,,\n" +
+            "pruning_floodfill, Indexing blocked cells,,,,\n"+
+            "pruning_reformat, Finalizing,,,,\n"+
+            "scaffolding_friendly_name,Scaffolding,,,,\n"+
+            "scaffolding_description,Adds 1 elevation tier to the tile once constructed.Can be used once on a tile without threatening the integrity of the ground.,,,,\n"+
+            "scaffolding_buildingthought,Thinks reaching new heights is a fruitful endeavour.,,,,\n"+
+            "dugout_friendly_name,Dugout,,,,\n"+
+            "dugout_description,Reduces 1 elevation tier to the tile once constructed.Can be used once on a tile without threatening the integrity of the ground.,,,,\n"+
+            "dugout_buildingthought,Wary of dwarves trolls and the dark of the mountain.,,,,";
+
+        
 
 
         #endregion
@@ -67,6 +74,8 @@ namespace Elevation
                 Application.logMessageReceived += onLogMessageReceived;
 
             // Harmony
+            if (Settings.debug)
+                HarmonyInstance.DEBUG = true;
             var harmony = HarmonyInstance.Create("harmony");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -88,6 +97,16 @@ namespace Elevation
             // Visuals
             Rendering.Init();
 
+            try
+            {
+                // Buildings
+                Buildings.Init();
+            }
+            catch(Exception ex)
+            {
+                Mod.Log(ex);
+            }
+
             // Other
             Init?.Invoke();
 
@@ -104,9 +123,6 @@ namespace Elevation
 
             // Settings
             Settings.Init();
-            
-            //// Buildings
-            //Buildings.Register();
         }
 
         [Profile]
@@ -119,10 +135,20 @@ namespace Elevation
             // Colors
             ColorManager.Tick();
             // Debug Lines
-            DebugLines.Tick();
+            WorldRegions.Tick();
+            // Road Stairs
+            RoadStairs.Tick();
+
+            //DebugLines.Tick();
         }
 
-        
+
+        public void PrunePathfindingDeferred()
+        {
+            WorldRegions.Search();
+        }
+
+
         private void onLogMessageReceived(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception)
@@ -157,6 +183,9 @@ namespace Elevation
             // Create Visuals
             Rendering.Setup();
 
+            // Setup Buildings and Building Bonuses
+            Buildings.Setup();
+
             Setup?.Invoke();
         }
 
@@ -182,7 +211,7 @@ namespace Elevation
                 MapGenerator.Generate();
 
                 // Pathfinding
-                ElevationPathfinder.current.Init(World.inst.GridWidth, World.inst.GridHeight);
+                //ElevationPathfinder.InitAll(World.inst.GridWidth, World.inst.GridHeight);
 
                 // Update Visuals
                 ElevationManager.RefreshTerrain();
@@ -198,15 +227,42 @@ namespace Elevation
 
         public static void OnSave(object sender, OnSaveEvent loadedEvent)
         {
-            LoadSave.SaveDataGeneric("elevation", "grid", Grid.Save());
+            LoadSave.SaveDataGeneric("elevation", "grid", Grid.SaveCells());
+            LoadSave.SaveDataGeneric("elevation", "buildings", Grid.SaveBuildings());
         }
 
         public static void OnLoad(object sender, OnLoadedEvent loadedEvent)
         {
-           Grid.Load(LoadSave.ReadDataGeneric("elevation", "grid"));
+            Grid.LoadCells(LoadSave.ReadDataGeneric("elevation", "grid"));
+            try
+            {
+                Grid.LoadBuildings(LoadSave.ReadDataGeneric("elevation", "buildings"));
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            ElevationManager.UpdateBuildings(true);
+            WorldRegions.Marked = false;
         }
 
         #endregion
 
+    }
+
+
+    [HarmonyPatch(typeof(GameState), "SetNewMode")]
+    static class PostDoneButtonClickPatch
+    {
+        static void Postfix()
+        {
+            if (GameState.inst.CurrMode == GameState.inst.playingMode && !WorldRegions.Marked 
+                //&& !WorldRegions.Busy
+                )
+            {
+                WorldRegions.Search();
+            }
+        }
     }
 }

@@ -5,11 +5,71 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using Assets.Code.UI;
 using TMPro;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Fox.Maps.Utils;
+
+namespace Fox.UI
+{
+    public class ConfirmationUI : MonoBehaviour
+    {
+        public virtual List<ToggledEffect> effects { get; } = new List<ToggledEffect>();
+
+
+        public Button yesButton;
+        public Button noButton;
+
+        public event Action onYes;
+        public event Action onNo;
+
+        public void ShowConfirmation(UnityAction onYes, UnityAction onNo)
+        {
+            yesButton.onClick.RemoveAllListeners();
+            noButton.onClick.RemoveAllListeners();
+            yesButton.onClick.AddListener(delegate ()
+            {
+                onYes();
+                this.onYes?.Invoke();
+                gameObject.SetActive(false);
+            });
+            noButton.onClick.AddListener(delegate ()
+            {
+                onNo();
+                this.onNo?.Invoke();
+                gameObject.SetActive(false);
+            });
+            gameObject.SetActive(true);
+        }
+    }
+
+    public abstract class UIEffect
+    {
+        public abstract void Trigger(GameObject target);
+    }
+
+    public abstract class ToggledEffect : UIEffect
+    {
+        public bool toggle = false;
+
+        public override void Trigger(GameObject target)
+        {
+            if (!toggle)
+                Activate(target);
+            else
+                Deactivate(target);
+
+            toggle = !toggle;
+        }
+
+        public abstract void Activate(GameObject target);
+
+        public abstract void Deactivate(GameObject target);
+
+    }
+}
 
 namespace Fox.Maps
 {
@@ -90,6 +150,8 @@ namespace Fox.Maps
                 saveButton.interactable = true;
             else
                 saveButton.interactable = false;
+
+
         }
 
         // reset name with map cycle

@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1224420916
+CRC: 226698828
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7471cb82212b5fa572a6d5fbacf75485
+    Hash: 896232da3686e7026c23bfedd929067f
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 22b6d2de03eb512fbdebaeab71829b1a
+    Hash: 456833cac4157b942133b82732971ab4
 HashAppended: 1
 ClassTypes:
 - Class: 1
@@ -25,22 +25,22 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
 - Class: 114
-  Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
 - Class: 114
-  Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
 - Class: 114
-  Script: {fileID: -405508275, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
 - Class: 114
-  Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-- Class: 114
-  Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-- Class: 114
-  Script: {fileID: 1297475563, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-- Class: 114
-  Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 058cba836c1846c3aa1c5fd2e28aea77, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
 - Class: 114
@@ -55,8 +55,13 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 224
   Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/Mod/Elevation/Models/fox_elevation_roadStair.fbx
+- Assets/Mod/Elevation/Models/roadStairs_normal.prefab
+- Assets/Mod/Elevation/Models/TerrainIndicator.prefab
+- Assets/Mod/Elevation/Buildings/Dugout.prefab
 - Assets/Mod/Elevation/UI/ElevationRaiseLowerControls.prefab
+- Assets/Mod/Elevation/Buildings/Scaffolding.prefab
+- Assets/Mod/Elevation/Models/roadStair_stone.prefab
 - Assets/Mod/Elevation/UI/GeneratingOverlay.prefab
 Dependencies: []

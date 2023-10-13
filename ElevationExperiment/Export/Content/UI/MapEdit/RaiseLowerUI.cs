@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Elevation.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Harmony;
-using DG.Tweening;
 using System.Reflection;
+using System.Diagnostics;
+using System;
+using Assets.Code;
 
 namespace Elevation
 {
@@ -21,6 +24,8 @@ namespace Elevation
 
         public Button downButton;
         public Button upButton;
+
+        private static TempTerrainIndicators indicators;
 
         /// <summary>
         /// BrushModes in which elevation will be deleted on target cells
@@ -40,20 +45,36 @@ namespace Elevation
 
         public static float animationTime { get; } = 0.3f;
 
+        // hacky
+        private static float downButtonDesiredFill = 0f;
+        private static float upButtonDesiredFill = 0f;
+
+        private static bool _updateMeshes = true;
+
         internal void AnimateButtonActive(GameObject button)
         {
-            DOTween.To(
-                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+            if (button.name == "DownButton")
+                downButtonDesiredFill = 1f;
+            else if (button.name == "UpButton")
+                upButtonDesiredFill = 1f;
+
+            TweeningManager.Instance.TweenValue(
                 button.transform.Find("BG").GetComponent<Image>().fillAmount,
-                1, animationTime);
+                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+                animationTime);
         }
 
         internal void AnimateButtonInactive(GameObject button)
         {
-            DOTween.To(
-                (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
-                button.transform.Find("BG").GetComponent<Image>().fillAmount,
-                0f, animationTime);
+            if(button.name == "DownButton")
+                downButtonDesiredFill = 0f;
+            else if(button.name == "UpButton")
+                upButtonDesiredFill = 0f;
+
+            //TweeningManager.Instance.TweenValue(
+            //    button.transform.Find("BG").GetComponent<Image>().fillAmount,
+            //    (value) => button.transform.Find("BG").GetComponent<Image>().fillAmount = value,
+            //    animationTime);
         }
 
         void Start()
@@ -66,6 +87,11 @@ namespace Elevation
 
         #region Functionality
 
+        void Update()
+        {
+            downButton.transform.Find("BG").GetComponent<Image>().fillAmount = Mathf.Lerp(downButton.transform.Find("BG").GetComponent<Image>().fillAmount, downButtonDesiredFill, 1f / animationTime * Time.unscaledDeltaTime);
+            upButton.transform.Find("BG").GetComponent<Image>().fillAmount = Mathf.Lerp(upButton.transform.Find("BG").GetComponent<Image>().fillAmount, upButtonDesiredFill, 1f / animationTime * Time.unscaledDeltaTime);
+        }
 
 
         void Awake()
@@ -80,6 +106,7 @@ namespace Elevation
             downButton.onClick.AddListener(OnDownButtonClick);
             upButton.onClick.AddListener(OnUpButtonClick);
 
+            //indicators = new TempTerrainIndicators();
 
             Mod.dLog("Setup Raise/Lower UI");
         }
@@ -104,14 +131,16 @@ namespace Elevation
                         meta.elevationTier += mode == Mode.Lower ? -1 : 1;
                         meta.elevationTier = Mathf.Clamp(meta.elevationTier, ElevationManager.minElevation, ElevationManager.maxElevation);
                     }
-                    ElevationManager.RefreshTile(c);
+                    if(_updateMeshes)
+                        ElevationManager.RefreshTile(c);
                 }
                 if (deletionModes.Contains(brush))
                 {
                     CellMeta meta = Grid.Cells.Get(c);
                     if (meta)
                         meta.elevationTier = 0;
-                    ElevationManager.RefreshTile(c);
+                    if(_updateMeshes)
+                        ElevationManager.RefreshTile(c);
                 }
                 if(stoneCell)
                     World.inst.CombineStone();
@@ -147,6 +176,40 @@ namespace Elevation
             AnimateButtonInactive(downButton.gameObject);
         }
 
+        public class TempTerrainIndicators
+        {
+            public List<Cell> displaying = new List<Cell>();
+
+            private Mesh mesh;
+            private Material material;
+
+
+            public void Init()
+            {
+                material = new Material(Shader.Find("Standard"));
+                material.color = Color.blue;
+
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                mesh = cube.GetComponent<MeshFilter>().sharedMesh;
+                GameObject.Destroy(cube);
+                
+                //mesh = UI.terrainVisualIndicatorPrefab.GetComponent<MeshFilter>().mesh;
+                //material = UI.terrainVisualIndicatorPrefab.GetComponent<MeshRenderer>().material;
+            }
+
+            public void Update()
+            {
+                foreach (Cell cell in displaying)
+                {
+                    CellMeta meta = Grid.Cells.Get(cell);
+                    if (meta)
+                    {
+                        Graphics.DrawMesh(mesh, meta.Center, Quaternion.identity, material, 0);
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(MapEdit), "SetBrushMode")]
         class ResetBrushPatch
         {
@@ -164,8 +227,14 @@ namespace Elevation
         [HarmonyPatch(typeof(MapEdit), "ClearMap")]
         class ClearMapPatch
         {
+            static void Prefix()
+            {
+                _updateMeshes = false;
+            }
+
             static void Postfix()
             {
+                _updateMeshes = true;
                 ElevationManager.RefreshTerrain(true);
             }
         }
@@ -200,6 +269,15 @@ namespace Elevation
                 }
 
                 time += Time.deltaTime;
+                
+                //try
+                //{
+                //    indicators.Update();
+                //}
+                //catch(Exception ex)
+                //{
+                //    Mod.dLog(ex);
+                //}
             }
         }
 
@@ -207,6 +285,7 @@ namespace Elevation
         class CenterCellCorrectionPatch
         {
             private static bool clickThisFrame = false;
+            private static bool unclickThisFrame = false;
 
             static void Prefix(MapEdit __instance)
             {
@@ -221,9 +300,27 @@ namespace Elevation
 
                 clickThisFrame = last != hit && hit != null;
                 clickThisFrame &= InputManager.Primary();
+                unclickThisFrame = InputManager.PrimaryUp();
+
+                //try
+                //{
+                //    if (brush == MapEdit.BrushMode.None && !GameState.inst.mainMenuMode.newMapUI.GetComponent<NewMapUI>().InEditMode)
+                //        return;
+                //}
+                //catch (Exception ex)
+                //{
+
+                //}
+
+                //if (unclickThisFrame && mode != Mode.None && !GameUI.inst.PointerOverUI())
+                //{
+                //    //Mod.dLog("unclick");
+                //    //indicators.displaying.Clear();
+                //    //ElevationManager.RefreshTerrain(true);
+                //}
             }
 
-            static void Postfix(MapEdit __instance)
+            static void Postfix(MapEdit __instance, float ___radius)
             {
                 // If not on a frame where a click has happened, don't execute
                 if (!clickThisFrame)
@@ -234,8 +331,7 @@ namespace Elevation
                 //    .GetValue(__instance) <= 1f)
                 //    return;
 
-                // Corrects an issue where, with a brush size greater than 1, the center cell gets applied an elevation increase twice
-                if (mode != Mode.None)
+                if (__instance.brushMode == MapEdit.BrushMode.None || __instance.brushMode == MapEdit.BrushMode.DeepWater || __instance.brushMode == MapEdit.BrushMode.ShallowWater || __instance.brushMode == MapEdit.BrushMode.Fish)
                 {
                     Ray ray = PointingSystem.GetPointer().GetRay();
                     Plane plane = new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, 0f, 0f));
@@ -245,17 +341,40 @@ namespace Elevation
                     Cell hit = World.inst.GetCellData(point);
 
                     CellMeta meta = Grid.Cells.Get(hit);
-                    if (meta)
+                    if (meta && meta.elevationTier > 0)
                     {
-                        // If hit either of the extremes, no change will be created, and no correction will be neccessary
-                        if (meta.elevationTier == ElevationManager.minElevation || meta.elevationTier == ElevationManager.maxElevation)
-                            return;
-
-                        meta.elevationTier += mode == Mode.Raise ? -1 : 1;
-                        meta.elevationTier = Mathf.Clamp(meta.elevationTier, ElevationManager.minElevation, ElevationManager.maxElevation);
+                        meta.elevationTier = 0;
+                        //indicators.displaying.Add(meta.cell);
                     }
-                    ElevationManager.RefreshTile(hit);
                 }
+
+                // Corrects an issue where, with a brush size greater than 1, the center cell gets applied an elevation increase twice
+                if (___radius > 1f)
+                {
+                    if (mode != Mode.None)
+                    {
+                        Ray ray = PointingSystem.GetPointer().GetRay();
+                        Plane plane = new Plane(new Vector3(0f, 1f, 0f), new Vector3(0f, 0f, 0f));
+                        float distance;
+                        plane.Raycast(ray, out distance);
+                        Vector3 point = ray.GetPoint(distance);
+                        Cell hit = World.inst.GetCellData(point);
+
+                        CellMeta meta = Grid.Cells.Get(hit);
+                        if (meta)
+                        {
+                            // If hit either of the extremes, no change will be created, and no correction will be neccessary
+                            if (meta.elevationTier == ElevationManager.minElevation || meta.elevationTier == ElevationManager.maxElevation)
+                                return;
+
+                            meta.elevationTier += mode == Mode.Raise ? -1 : 1;
+                            meta.elevationTier = Mathf.Clamp(meta.elevationTier, ElevationManager.minElevation, ElevationManager.maxElevation);
+                            //indicators.displaying.Add(meta.cell);
+                        }
+                    }
+                }
+                
+
             }
         }
 

@@ -22,11 +22,14 @@ namespace StatisticsMod.Data
         {
             get
             {
-                return (float)population / (float)foodConsumptionData.timesEaten;
+                return (float)foodConsumptionData.timesEaten / (float)populationEatingTime;
             }
         }
 
         public int population;
+        public float populationEatingTime;
+
+
         public FoodConsumptionData foodConsumptionData;
     }
 

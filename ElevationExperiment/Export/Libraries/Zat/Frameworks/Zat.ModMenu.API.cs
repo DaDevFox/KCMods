@@ -1419,11 +1419,11 @@ namespace Zat.Shared.ModMenu.Interactive
             var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var categories = props
                 .Where(p => p.PropertyType.GetConstructor(Type.EmptyTypes) != null)
-                .Select(p => new Tuple<PropertyInfo, CategoryAttribute>(p, p.GetCustomAttributes(typeof(CategoryAttribute), false).Cast<CategoryAttribute>().FirstOrDefault()))
+                .Select(p => new System.Tuple<PropertyInfo, CategoryAttribute>(p, p.GetCustomAttributes(typeof(CategoryAttribute), false).Cast<CategoryAttribute>().FirstOrDefault()))
                 .Where(t => t.Item2 != null);
             var settings = props
                 .Where(p => p.PropertyType.IsSubclassOf(typeof(InteractiveSetting)))
-                .Select(p => new Tuple<PropertyInfo, SettingAttribute, SpecificSettingAttribute>(
+                .Select(p => new System.Tuple<PropertyInfo, SettingAttribute, SpecificSettingAttribute>(
                     p,
                     p.GetCustomAttributes(typeof(SettingAttribute), false).Cast<SettingAttribute>().FirstOrDefault(),
                     p.GetCustomAttributes(typeof(SpecificSettingAttribute), false).Cast<SpecificSettingAttribute>().FirstOrDefault()))

@@ -15,7 +15,7 @@ namespace Elevation
         // all the class members are public, this is because harmony decided to not work in subclasses specifically for this file, idk why
         // So I had to adjust my code, and it is now awful. 
 
-        public static float maxCamHeight = 100f;
+        public static float maxCamHeight = 150f;
         public static float minCamHeight = 20f;
         public static float startCamHeight = 50f;
 
@@ -105,6 +105,27 @@ namespace Elevation
 
     #endregion
 
+    #region Correction Patches
+
+    [HarmonyPatch(typeof(Cam), "ClampToWorldBounds")]
+    public class CameraTrackTargetYCorrectionPatch
+    {
+        static void Postfix(Vector3 p, ref Vector3 __result)
+        {
+            Cell cell = World.inst.GetCellDataClamped(__result);
+            if (cell == null)
+                return;
+
+            CellMeta meta = Grid.Cells.Get(cell);
+            if (meta == null)
+                return;
+
+            if (__result.y < meta.Elevation)
+                __result.y = meta.Elevation;
+        }
+    }
+
+    #endregion
 
     [HarmonyPatch(typeof(Cam), "Update")]
     public static class MainCamMovementPatch
@@ -124,7 +145,7 @@ namespace Elevation
 
             Vector3 pos = new Vector3(Cam.inst.DesiredTrackingPos.x, TopDownModeCamera.camHeight, Cam.inst.DesiredTrackingPos.z);
 
-            if (TopDownModeCamera.snap > 0f)
+            if (TopDownModeCamera.snap > 0f && !TopDownModeCamera.dragging)
             {
                 pos.x = Utils.Util.RoundToFactor(pos.x, TopDownModeCamera.snap);
                 pos.z = Utils.Util.RoundToFactor(pos.z, TopDownModeCamera.snap);
@@ -187,11 +208,15 @@ namespace Elevation
 
         private static void CalcPos(Vector3 movement, float speed, bool movedThisFrame)
         {
-            Vector3 clampedPos = World.inst.ClampToWorld(Cam.inst.DesiredTrackingPos + (movement * speed));
+            Vector3 clampedPos = (Cam.inst.DesiredTrackingPos + (movement * speed));
 
             Cell cell = World.inst.GetCellDataClamped(clampedPos);
             if (cell != null && Grid.Cells.Get(cell))
+            {
+                clampedPos.x = cell.Center.x;
                 clampedPos.y = Grid.Cells.Get(cell).Elevation;
+                clampedPos.z = cell.Center.z;
+            }
 
 
             Cam.inst.SetDesiredTrackingPos(clampedPos);
@@ -221,14 +246,16 @@ namespace Elevation
                 }
             }
             if (Input.GetMouseButton(1) && !Assets.Settings.inst.LegacyMouseControls && !GameUI.AltHeld())
-            {
                 input = true;
-            }
+            
 
             if (input)
             {
-                TopDownModeCamera.dragging = true;
-                TopDownModeCamera.dragStartPos = GetHit();
+                if (!TopDownModeCamera.dragging)
+                {
+                    TopDownModeCamera.dragging = true;
+                    TopDownModeCamera.dragStartPos = GetHit();
+                }
             }
             else
             {
@@ -241,13 +268,13 @@ namespace Elevation
             if (!TopDownModeCamera.dragging)
                 return;
 
-            DebugExt.dLog("dragging", false, TopDownModeCamera.dragStartPos);
-            DebugExt.dLog("dragging2", false, TopDownModeCamera.dragCurrentPos);
+            DebugExt.dLog("dragging", true, TopDownModeCamera.dragStartPos);
+            DebugExt.dLog("dragging2", true, TopDownModeCamera.dragCurrentPos);
             
             TopDownModeCamera.dragCurrentPos = GetHit();
             Cam.inst.SetDesiredTrackingPos(Cam.inst.DesiredTrackingPos - (TopDownModeCamera.dragCurrentPos - TopDownModeCamera.dragStartPos));
             
-            DebugExt.dLog("dragging3", false, Cam.inst.DesiredTrackingPos);
+            DebugExt.dLog("dragging3", true, Cam.inst.DesiredTrackingPos);
         }
 
 
@@ -285,16 +312,21 @@ namespace Elevation
             }
             else
             {
-                Vector3 clampedPos = Cam.inst.DesiredTrackingPos;
+                if (Cam.inst.OverrideTrack == null)
+                {
+                    Vector3 clampedPos = Cam.inst.DesiredTrackingPos;
 
-                Cell cell = World.inst.GetCellDataClamped(clampedPos);
-                if (cell != null && Grid.Cells.Get(cell))
-                    clampedPos.y = Grid.Cells.Get(cell).Elevation;
+                    Cell cell = World.inst.GetCellDataClamped(clampedPos);
+                    if (cell != null && Grid.Cells.Get(cell))
+                        clampedPos.y = Grid.Cells.Get(cell).Elevation;
 
-                Cam.inst.SetDesiredTrackingPos(clampedPos);
+                    Cam.inst.DesiredTrackingPos = clampedPos;
+                }
             }
             return !TopDownModeCamera.active;
         }
+
+        
     }
 
 }

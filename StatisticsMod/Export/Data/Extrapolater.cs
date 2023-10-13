@@ -66,7 +66,7 @@ namespace StatisticsMod.Data
                         }
                         else
                         {
-                            text += "This year we were blessed with small bellied peasants, however our food storage still proved insubstantial, our food situation is dire!";
+                            text += "This year we were blessed with small-bellied peasants, however our food storage still proved insubstantial, our food situation is dire!";
                         }
                     }
                     text += Environment.NewLine;
@@ -111,16 +111,44 @@ namespace StatisticsMod.Data
                 Environment.NewLine;
         }
 
-        public static string exp_FoodProductionCurrent()
+        public static int FoodConsumptionCurrent() => Analyzer.GetEstimatedRequiredFoodForPeople(Analytics.GetPlayerKingdomPopulation(), DataContainer.GetAllYearData());
+
+        public static string exp_FoodConsumptionCurrent()
         {
             bool enoughData = DataContainer.GetYearDataCount() > sampleDataSignificanceThreshold;
-            return enoughData ? ("Predicted food production with " +
+            return enoughData ? "Predicted food consumption with <color=yellow>" + 
                 Analytics.GetPlayerKingdomPopulation().ToString() +
-                " people: " + 
-                Environment.NewLine +
-                (-Analyzer.GetPredictedFoodInsufficiencyForPeople(Analytics.GetPlayerKingdomPopulation(), DataContainer.GetAllYearData())).ToString() +
-                Environment.NewLine) :
-                "Not enough sample data to predict food consumption" + Environment.NewLine;
+                "</color> people: " +
+                Environment.NewLine + (FoodProductionCurrent() > FoodConsumptionCurrent() ? "<color=green>" : "<color=yellow>") + 
+                Analyzer.GetEstimatedRequiredFoodForPeople(Analytics.GetPlayerKingdomPopulation(), DataContainer.GetAllYearData()).ToString() + "</color>" + 
+                Environment.NewLine :
+                $"Not enough sample data to predict food consumption (<color=yellow>{Analytics.GetPlayerKingdomPopulation()}</color> people)" + Environment.NewLine; 
+        }
+
+        public static int FoodProductionCurrent() => (-Analyzer.GetPredictedFoodInsufficiencyForPeople(Analytics.GetPlayerKingdomPopulation(), DataContainer.GetAllYearData()));
+
+        public static string exp_FoodProductionCurrent()
+        {
+            bool enoughData = true;
+            return enoughData ? ("Estimated food production: " +
+                Environment.NewLine + (FoodProductionCurrent() > FoodConsumptionCurrent() ? "<color=green>" : "<color=yellow>") +
+                (Analyzer.GetFoodProduction()).ToString() + "</color>" + 
+                Environment.NewLine + (Analytics.FoodProductionPollutedByFishingHuts() ? $"<color=red>Figure does not include fishing huts due to irregular yields</color>" + Environment.NewLine : "")
+                ) :
+                $"Not enough sample data to predict food production" + Environment.NewLine;
+        }
+
+
+        public static string exp_FoodConsumptionMax()
+        {
+            bool enoughData = DataContainer.GetYearDataCount() > sampleDataSignificanceThreshold;
+            return enoughData ? "Predicted food consumption with <color=yellow>" +
+                Analytics.GetHousingForKingdom().ToString() +
+                "</color> people: " +
+                Environment.NewLine + (FoodProductionCurrent() > FoodConsumptionCurrent() ? "<color=green>" : "<color=yellow>") +
+                Analyzer.GetEstimatedRequiredFoodForPeople(Analytics.GetHousingForKingdom(), DataContainer.GetAllYearData()).ToString() +
+                Environment.NewLine :
+                $"Not enough sample data to predict food consumption (<color=yellow>{Analytics.GetHousingForKingdom()}</color> people)" + Environment.NewLine;
         }
 
 
@@ -131,9 +159,9 @@ namespace StatisticsMod.Data
                 Analytics.GetHousingForKingdom().ToString() +
                 " people: " +
                 Environment.NewLine +
-                (-Analyzer.GetPredictedFoodInsufficiencyForPeople(Analytics.GetHousingForKingdom(), DataContainer.GetAllYearData())).ToString() +
-                Environment.NewLine):
-                "Not enough sample data to predict food consumption" + Environment.NewLine;
+                (Analyzer.GetFoodProduction()).ToString() +
+                Environment.NewLine+ (Analytics.FoodProductionPollutedByFishingHuts() ? $"<color=red>Figure does not include fishing huts due to irregular yields</color>" + Environment.NewLine : "")):
+                $"Not enough sample data to predict food production (<color=yellow>{Analytics.GetHousingForKingdom()}</color> people)" + Environment.NewLine;
         }
 
         #endregion

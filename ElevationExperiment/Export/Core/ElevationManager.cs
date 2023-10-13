@@ -22,6 +22,9 @@ namespace Elevation
         public static int maxElevation { get; } = 8;
         public static int minElevation { get; } = 0;
 
+        public static float slopingRadius { get; } = 0.1f;
+        public static float roadSlopingRadius { get; } = 0.3f;
+
         public static float elevationPathfindingCost { get; } = 10f;
 
         /// <summary>
@@ -32,6 +35,8 @@ namespace Elevation
         /// <returns></returns>
         public static bool TryProcessElevationChange(Cell cell, int tierChange)
         {
+            if (cell == null)
+                return false;
             CellMeta meta = Grid.Cells.Get(cell);
             bool valid = ValidElevation(meta.elevationTier + tierChange) && ValidTileForElevation(cell);
             
@@ -42,11 +47,11 @@ namespace Elevation
                 RefreshTile(cell, true);
                 WorldRegions.MarkDirty(cell);
 
-                Cell[] neighbors = World.inst.GetNeighborCells(cell);
+                Cell[] neighbors = new Cell[8];
+                World.inst.GetNeighborCells(cell, ref neighbors);
                 foreach (Cell neighbor in neighbors)
                 {
                     RefreshTile(neighbor);
-                    WorldRegions.MarkDirty(neighbor);
                 }
 
                 WorldRegions.UpdateDirty();
@@ -98,6 +103,8 @@ namespace Elevation
         /// <param name="forced"></param>
         public static void RefreshTile(Cell cell, bool forced = false)
         {
+            if (cell == null)
+                return;
             UpdateCellMetaForTile(cell, forced);
             UpdatePatchesForTile(cell);
         }
@@ -112,6 +119,9 @@ namespace Elevation
             UpdateCellMetas(forced);
             UpdatePatches();
 
+            if (World.inst.NumLandMasses > 1 && GameState.inst.IsPlayMode() && Player.inst.keep != null)
+                Player.inst.RefreshVisibility(true);
+            TerrainGen.inst.ClearOverlay(true);
             DebugExt.dLog("terrain refreshed");
         }
 
@@ -124,8 +134,11 @@ namespace Elevation
             Patches.TreeSystemPatch.UpdateCell(cell);
             Patches.RockPatch.UpdateCell(cell);
             Patches.WitchHutPatch.UpdateCell(cell);
-            Patches.WoflDenPatch.UpdateCell(cell);
+            Patches.WolfDenPatch.UpdateCell(cell);
             Patches.EmptyCavePatch.UpdateCell(cell);
+
+            Patches.RoadStairs.Update(cell);
+            BuildingFormatter.UpdateBuildingsOnCell(cell);
         }
 
         /// <summary>
@@ -136,17 +149,23 @@ namespace Elevation
             Patches.TreeSystemPatch.UpdateTrees();
             Patches.RockPatch.UpdateStones();
             Patches.WitchHutPatch.UpdateWitchHuts();
-            Patches.WoflDenPatch.UpdateWolfDens();
+            Patches.WolfDenPatch.UpdateWolfDens();
             Patches.EmptyCavePatch.UpdateEmptyCaves();
+
+            Patches.RoadStairs.UpdateAll();
+            //foreach (BuildingMeta buildingMeta in Grid.Buildings.GetAll())
+            //    BuildingFormatter.UpdateBuilding(buildingMeta.building);
         }
 
         /// <summary>
-        /// Updates only the visuals of an elevation block on a tile
+        /// Updates an elevation block on a tile
         /// </summary>
         /// <param name="cell"></param>
         /// <param name="forced">wether or not to update, even when the elevation of the tile has not changed since the last update</param>
         public static void UpdateCellMetaForTile(Cell cell, bool forced = false)
         {
+            if (cell == null)
+                return;
             CellMeta meta = Grid.Cells.Get(cell);
             if(meta)
             {
@@ -156,25 +175,59 @@ namespace Elevation
         }
 
         /// <summary>
-        /// Updates only the visuals of all elevation blocks in the world
+        /// Updates all elevation blocks in the world
         /// </summary>
         /// <param name="forced"></param>
         public static void UpdateCellMetas(bool forced = false)
         {
+            Rendering.UpdateAll();
             foreach(CellMeta meta in Grid.Cells)
             {
-                meta.UpdateVisuals(forced);
                 meta.UpdatePathing();
+                BuildingFormatter.UpdateBuildingsOnCell(meta.cell);
+
+                // TEMP; colors experiment
+                if (meta.elevationTier == 0)
+                    continue;
+
+                if (WorldRegions.Unreachable.Contains(meta.cell))
+                {
+                    float bias = ColorManager.coloringBias;
+                    Color unreachableColor = ColorManager.unreachableColor;
+                    
+                    ColorManager.GetTileColor(meta.cell.fertile, meta.cell.IrrigationCoverage > 0, out Color basegameNormalColor, out Color basegameWinterColor);
+                    TerrainGen.inst.SetTerrainPixelColor(meta.cell.x, meta.cell.z, Color.Lerp(basegameNormalColor, unreachableColor, bias), Color.Lerp(basegameWinterColor, unreachableColor, bias));
+                }
+                TerrainGen.inst.UpdateTextures();
             }
         }
 
         /// <summary>
         /// Updates the positioning of all buildings in the world
         /// </summary>
-        public static void UpdateBuildings()
+        public static void UpdateBuildings(bool force = false)
         {
             foreach(BuildingMeta meta in Grid.Buildings)
                 BuildingFormatter.UpdateBuilding(meta.building);
+
+            if (force)
+            {
+                foreach(Cell cell in World.inst.GetCellsData())
+                {
+                    Building building = cell.BottomStructure;
+                    if (building == null)
+                        continue;
+
+                    if (building.GetComponent<Road>())
+                        building.GetComponent<Road>().UpdateRotation();
+                    if(building.GetComponent<Cemetery>())
+                        building.GetComponent<Cemetery>().UpdateRotation();
+                    if(building.GetComponent<Garden>())
+                        building.GetComponent<Garden>().UpdateRotation();
+                    if (building.GetComponent<CastleBlock>())
+                        CastleBlock.UpdateBlockStack(cell);
+                }
+            }
         }
 
         /// <summary>

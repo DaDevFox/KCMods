@@ -14,13 +14,20 @@ namespace ReskinEngine.Engine
             WeightedRandom
         }
 
+        public enum VariationType
+        {
+            OnPlace,
+            Prebaked
+        }
+
 
         private static int defaultPriority = 1;
 
         // TODO: Update PrioritizedMods on ModPriority update and trigger event
         public static Dictionary<string, int> ModPriority { get; set; } = new Dictionary<string, int>();
-        public static List<string> PrioritizedMods { get; private set; }
+        public static List<string> PrioritizedMods { get; private set; } = new List<string>();
         public static PriorityType priorityType { get; set; } = PriorityType.Absolute;
+        public static VariationType variationType { get; set; } = VariationType.Prebaked;
 
         public static void Setup()
         {

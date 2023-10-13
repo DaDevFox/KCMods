@@ -1,19 +1,27 @@
 ManifestFileVersion: 0
-CRC: 1295107495
+CRC: 1793715072
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fc1c7ad054700d7ae06afdf13b29a410
+    Hash: 6ce46fabda828b6ed305c0eaa135cf54
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 3520601e1b14fd7103bf51b4df48bad9
+    Hash: 08732c05c7b7c40471171dffa7e73375
 HashAppended: 1
 ClassTypes:
 - Class: 1
   Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
 - Class: 21
   Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
 - Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
@@ -54,4 +62,6 @@ ClassTypes:
 Assets:
 - Assets/Mod/ID/tb_riot.png
 - Assets/Mod/ID/RiotViewer.prefab
+- Assets/Mod/ID/RiotRallyMarker.prefab
+- Assets/Mod/ID/RiotMarkerMat.mat
 Dependencies: []

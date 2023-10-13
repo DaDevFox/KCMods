@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Elevation.Utils;
 
 namespace Elevation
 {
@@ -13,6 +14,7 @@ namespace Elevation
         
         public static GameObject raiseLowerUIPrefab { get; private set; }
         public static GameObject loadingDialogPrefab { get; private set; }
+        public static GameObject terrainVisualIndicatorPrefab { get; private set; }
         
         public static RaiseLowerUI raiseLowerUI { get; private set; }
 
@@ -31,15 +33,22 @@ namespace Elevation
 
         public static void LoadAll()
         {
+            TweeningManager instance = new GameObject("TweeningManager").AddComponent<TweeningManager>();
+
             raiseLowerUIPrefab = ModAssets.DB.GetByName<GameObject>("ElevationRaiseLowerControls");
             loadingDialogPrefab = ModAssets.DB.GetByName<GameObject>("GeneratingOverlay");
+            
+            terrainVisualIndicatorPrefab = ModAssets.DB.GetByName<GameObject>("TerrainIndicator");
 
+            
             loaded = true;
             Mod.dLog("UI Assets Preloaded");
         }
 
         void SceneLoaded()
         {
+            
+
             GameObject raiseLowerUIObj = GameObject.Instantiate(
                 raiseLowerUIPrefab,
                 GameState.inst.mainMenuMode.mapEditUI.transform);
@@ -52,11 +61,10 @@ namespace Elevation
 
             Mod.dLog(GameState.inst.mainMenuMode.mainMenuUI.transform.GetChild(0).name);
 
+            //GameState.inst.mainMenuMode.newMapUI.GetComponent<NewMapUI>().doneButton.onClick.AddListener(() => { GameObject.FindObjectOfType<Mod>().Invoke("PrunePathfindingDeferred", 1f); });
+
             created = true;
             Mod.dLog("UI Created");
         }
-
-
-
     }
 }

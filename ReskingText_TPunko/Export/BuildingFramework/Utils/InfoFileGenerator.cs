@@ -106,166 +106,174 @@ namespace ReskinEngine.API
                             result += $"Jobs: {type.GetCustomAttribute<JobsAttribute>().count}{Environment.NewLine}";
 
 
-                        #region Gather Info
-
-                        List<ModelAttribute> models = new List<ModelAttribute>();
-                        List<AnchorAttribute> anchors = new List<AnchorAttribute>();
-                        List<MaterialAttribute> materials = new List<MaterialAttribute>();
-
-                        FieldInfo[] fields = buildingSkin.GetType().GetFields();
-
-                        // models
-                        foreach (FieldInfo field in fields)
-                        {
-                            if (field.GetCustomAttribute<ModelAttribute>() != null)
-                            {
-                                ModelAttribute attribute = field.GetCustomAttribute<ModelAttribute>();
-                                attribute.name = field.Name;
-
-                                if (field.GetCustomAttribute<SeperatorAttribute>() != null)
-                                    attribute.seperator = true;
-
-                                if (field.GetCustomAttribute<PresetMaterialAttribute>() != null)
-                                    attribute.presetMatName = field.GetCustomAttribute<PresetMaterialAttribute>().name;
-
-                                if (type.GetCustomAttributes<NoteAttribute>() != null && field.GetCustomAttributes<NoteAttribute>().Count() > 0)
-                                    attribute.notes = field.GetCustomAttributes<NoteAttribute>().Select((note) => note.description).ToArray();
-
-                                models.Add(attribute);
-                            }
-                        }
-
-                        // anchors
-                        foreach (FieldInfo field in fields)
-                        {
-                            if (field.GetCustomAttribute<AnchorAttribute>() != null)
-                            {
-                                AnchorAttribute attribute = field.GetCustomAttribute<AnchorAttribute>();
-                                attribute.name = field.Name;
-
-                                if (field.GetCustomAttribute<SeperatorAttribute>() != null)
-                                    attribute.seperator = true;
-
-                                anchors.Add(attribute);
-                            }
-                        }
-
-                        // materials
-                        foreach (FieldInfo field in fields)
-                        {
-                            if (field.GetCustomAttribute<MaterialAttribute>() != null)
-                            {
-                                MaterialAttribute attribute = field.GetCustomAttribute<MaterialAttribute>();
-                                attribute.name = field.Name;
-
-                                if (field.GetCustomAttribute<SeperatorAttribute>() != null)
-                                    attribute.seperator = true;
-
-                                materials.Add(attribute);
-                            }
-                        }
-
-                        #endregion
-
-                        // models
-                        string modelsText = "";
-
-                        if (models.Count > 0)
-                        {
-                            result += $"Models:{Environment.NewLine}";
-
-                            for (int i = 0; i < models.Count; i++)
-                            {
-                                ModelAttribute model = models[i];
-                                if (model.seperator)
-                                {
-                                    if (i > 0)
-                                        modelsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
-                                    else
-                                        modelsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
-                                    modelsText += Environment.NewLine;
-                                }
-
-                                if (!String.IsNullOrEmpty(model.presetMatName))
-                                    modelsText += $"\t[Preset Material ({model.presetMatName})]\n";
-
-                                if (model.notes != null && model.notes.Length > 0)
-                                {
-                                    modelsText += "\tNotes:\n";
-                                    foreach (string note in model.notes)
-                                        modelsText += $"\t{note}\n";
-                                }
-
-
-                                modelsText += $"\t{string.Format("{0,-15}{1,15} | {2,8}", model.name + ":", model.type.ToString(), model.description)}{Environment.NewLine}";
-                            }
-                        }
-
-                        result += modelsText;
-
-                        // anchors
-                        string anchorsText = "";
-
-                        if (anchors.Count > 0)
-                        {
-                            result += $"Anchors:{Environment.NewLine}";
-
-                            for (int i = 0; i < anchors.Count; i++)
-                            {
-                                AnchorAttribute anchor = anchors[i];
-                                if (anchor.seperator)
-                                {
-                                    if (i > 0)
-                                        anchorsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
-                                    else
-                                        anchorsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
-                                    anchorsText += Environment.NewLine;
-                                }
-
-
-                                anchorsText += $"\t{string.Format("{0,-15}{1,15}", anchor.name + ":", anchor.description)}{Environment.NewLine}";
-                            }
-                        }
-
-                        result += anchorsText;
-
-                        // materials
-                        string materialsText = "";
-
-                        if (materials.Count > 0)
-                        {
-                            result += $"Materials:{Environment.NewLine}";
-
-                            for (int i = 0; i < materials.Count; i++)
-                            {
-                                MaterialAttribute material = materials[i];
-                                if (material.seperator)
-                                {
-                                    if (i > 0)
-                                        materialsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
-                                    else
-                                        materialsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
-                                    materialsText += Environment.NewLine;
-                                }
-
-
-                                materialsText += $"\t{string.Format("{0,-15}{1,15}", material.name + ":", material.description)}{Environment.NewLine}";
-                            }
-                        }
-
-                        result += materialsText;
-
-                        if (type.GetCustomAttributes<NoteAttribute>() != null && type.GetCustomAttributes<NoteAttribute>().Count() > 0)
-                        {
-                            result += $"Notes:\n";
-                            foreach (NoteAttribute note in type.GetCustomAttributes<NoteAttribute>())
-                                result += $"\t{note.description}\n";
-                        }
-
-                        result += Environment.NewLine;
-
                         completedBuildings.Add(buildingSkin.UniqueName);
                     }
+                    else
+                    {
+                        result +=
+                            $"Name: {skin.Name}{Environment.NewLine}" +
+                            $"Skin ID: {skin.TypeIdentifier}{Environment.NewLine}";
+                    }
+
+                    #region Gather Info
+
+                    List<ModelAttribute> models = new List<ModelAttribute>();
+                    List<AnchorAttribute> anchors = new List<AnchorAttribute>();
+                    List<MaterialAttribute> materials = new List<MaterialAttribute>();
+
+                    FieldInfo[] fields = skin.GetType().GetFields();
+
+                    // models
+                    foreach (FieldInfo field in fields)
+                    {
+                        if (field.GetCustomAttribute<ModelAttribute>() != null)
+                        {
+                            ModelAttribute attribute = field.GetCustomAttribute<ModelAttribute>();
+                            attribute.name = field.Name;
+
+                            if (field.GetCustomAttribute<SeperatorAttribute>() != null)
+                                attribute.seperator = true;
+
+                            if (field.GetCustomAttribute<PresetMaterialAttribute>() != null)
+                                attribute.presetMatName = field.GetCustomAttribute<PresetMaterialAttribute>().name;
+
+                            if (type.GetCustomAttributes<NoteAttribute>() != null && field.GetCustomAttributes<NoteAttribute>().Count() > 0)
+                                attribute.notes = field.GetCustomAttributes<NoteAttribute>().Select((note) => note.description).ToArray();
+
+                            models.Add(attribute);
+                        }
+                    }
+
+                    // anchors
+                    foreach (FieldInfo field in fields)
+                    {
+                        if (field.GetCustomAttribute<AnchorAttribute>() != null)
+                        {
+                            AnchorAttribute attribute = field.GetCustomAttribute<AnchorAttribute>();
+                            attribute.name = field.Name;
+
+                            if (field.GetCustomAttribute<SeperatorAttribute>() != null)
+                                attribute.seperator = true;
+
+                            anchors.Add(attribute);
+                        }
+                    }
+
+                    // materials
+                    foreach (FieldInfo field in fields)
+                    {
+                        if (field.GetCustomAttribute<MaterialAttribute>() != null)
+                        {
+                            MaterialAttribute attribute = field.GetCustomAttribute<MaterialAttribute>();
+                            attribute.name = field.Name;
+
+                            if (field.GetCustomAttribute<SeperatorAttribute>() != null)
+                                attribute.seperator = true;
+
+                            materials.Add(attribute);
+                        }
+                    }
+
+                    #endregion
+
+                    // models
+                    string modelsText = "";
+
+                    if (models.Count > 0)
+                    {
+                        result += $"Models:{Environment.NewLine}";
+
+                        for (int i = 0; i < models.Count; i++)
+                        {
+                            ModelAttribute model = models[i];
+                            if (model.seperator)
+                            {
+                                if (i > 0)
+                                    modelsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
+                                else
+                                    modelsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
+                                modelsText += Environment.NewLine;
+                            }
+
+                            if (!String.IsNullOrEmpty(model.presetMatName))
+                                modelsText += $"\t[Preset Material ({model.presetMatName})]\n";
+
+                            if (model.notes != null && model.notes.Length > 0)
+                            {
+                                modelsText += "\tNotes:\n";
+                                foreach (string note in model.notes)
+                                    modelsText += $"\t{note}\n";
+                            }
+
+
+                            modelsText += $"\t{string.Format("{0,-15}{1,15} | {2,8}", model.name + ":", model.type.ToString(), model.description)}{Environment.NewLine}";
+                        }
+                    }
+
+                    result += modelsText;
+
+                    // anchors
+                    string anchorsText = "";
+
+                    if (anchors.Count > 0)
+                    {
+                        result += $"Anchors:{Environment.NewLine}";
+
+                        for (int i = 0; i < anchors.Count; i++)
+                        {
+                            AnchorAttribute anchor = anchors[i];
+                            if (anchor.seperator)
+                            {
+                                if (i > 0)
+                                    anchorsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
+                                else
+                                    anchorsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
+                                anchorsText += Environment.NewLine;
+                            }
+
+
+                            anchorsText += $"\t{string.Format("{0,-15}{1,15}", anchor.name + ":", anchor.description)}{Environment.NewLine}";
+                        }
+                    }
+
+                    result += anchorsText;
+
+                    // materials
+                    string materialsText = "";
+
+                    if (materials.Count > 0)
+                    {
+                        result += $"Materials:{Environment.NewLine}";
+
+                        for (int i = 0; i < materials.Count; i++)
+                        {
+                            MaterialAttribute material = materials[i];
+                            if (material.seperator)
+                            {
+                                if (i > 0)
+                                    materialsText += "\t" + new String(SeperatorChar, models[i - 1].name.Length);
+                                else
+                                    materialsText += "\t" + new String(SeperatorChar, SeperatorDefaultCount);
+                                materialsText += Environment.NewLine;
+                            }
+
+
+                            materialsText += $"\t{string.Format("{0,-15}{1,15}", material.name + ":", material.description)}{Environment.NewLine}";
+                        }
+                    }
+
+                    result += materialsText;
+
+                    if (type.GetCustomAttributes<NoteAttribute>() != null && type.GetCustomAttributes<NoteAttribute>().Count() > 0)
+                    {
+                        result += $"Notes:\n";
+                        foreach (NoteAttribute note in type.GetCustomAttributes<NoteAttribute>())
+                            result += $"\t{note.description}\n";
+                    }
+
+                    result += Environment.NewLine;
+                    
+                    
 
                     #endregion
 

@@ -45,6 +45,10 @@ namespace StatisticsMod.Data
         public static void OnYearEnd()
         {
             currentYearData.population = Analytics.GetPlayerKingdomPopulation();
+            currentYearData.populationEatingTime = Analytics.GetPlayerKingdomEatingPopulationTime();
+
+            //DebugExt.Log($"End of year, player pop: {currentYearData.population}, player pop eating time: {currentYearData.populationEatingTime}");
+
             data.Add(currentYearData);
 
             currentYearData = YearData.Empty;

@@ -12,12 +12,33 @@ namespace Elevation
 		NorthEast,
 		NorthWest,
 		SouthEast,
-		SouthWest
+		SouthWest,
+		None
 	}
 
 	public static class Pathing
     {
-        public static int tierPathingCost = 50;
+		public static int unitPathingCostBase = 50;
+		public static int unitPathingAnticost = 1;
+
+		public static bool IsDiagonalXZ(Cell from, Cell to)
+		{
+			return IsDiagonalXZ(from.Center, to.Center);
+		}
+
+		public static bool IsDiagonalXZ(Vector3 from, Vector3 to)
+		{
+			Vector3 difference = (to - from).xz();
+			int count = 0;
+			float epsilon = 0.1f;
+
+			if (Mathf.Abs(difference.x) >= epsilon)
+				count++;
+			if (Mathf.Abs(difference.z) >= epsilon)
+				count++;
+
+			return count == 2;
+		}
 
 		public static bool GetDiagonal(Cell from, Cell to, out Diagonal diagonal)
 		{
@@ -50,7 +71,16 @@ namespace Elevation
 
 			return validDiagonal;
 		}
-		public static bool GetCardinal(Cell from, Cell to, out Direction direction)
+
+        public static CellMeta GetCardinal(CellMeta source, Direction direction)
+        {
+            Cell cell = Pathing.GetCardinal(source.cell, direction);
+            if (cell != null)
+                return Grid.Cells.Get(cell);
+            return null;
+        }
+
+        public static bool GetCardinal(Cell from, Cell to, out Direction direction)
 		{
 			Dictionary<Vector3, Direction> dirs = new Dictionary<Vector3, Direction>()
 			{
@@ -112,11 +142,14 @@ namespace Elevation
 			{
 				if (WorldRegions.Marked)
 				{
-					if (WorldRegions.GetTileRegion(cell) == -1)
+					if (WorldRegions.Unreachable.Contains(cell))
 						blocked = true;
 				}
 
 				if (BlocksForBuilding(cell))
+					blocked = true;
+
+				if (cell.deepWater)
 					blocked = true;
 			}
 			return blocked;
@@ -130,6 +163,7 @@ namespace Elevation
 				c.Type == ResourceType.Stone || 
 				c.Type == ResourceType.UnusableStone || 
 				c.Type == ResourceType.WolfDen || 
+				c.Type == ResourceType.EmptyCave || 
 				c.Type == ResourceType.WitchHut;
 		}
 
@@ -146,5 +180,42 @@ namespace Elevation
 			return false;
         }
 
-	}
+		public static Cell FindNearUnblockedFast(Cell origin, int radius)
+		{
+			if (origin == null || !WorldRegions.Unreachable.Contains(origin))
+				return origin;
+
+			Cell selected = null;
+			World.inst.ForEachTileInRadiusOrDone(origin.x, origin.z, radius, (x, z, cell) =>
+			{
+				if (!WorldRegions.Unreachable.Contains(cell))
+				{
+					selected = cell;
+					return true;
+				}
+				return false;
+			});
+			return selected;
+		}
+
+        public static Cell FindNearestUnblocked(Cell origin, int radius)
+        {
+            if (origin == null || !WorldRegions.Unreachable.Contains(origin))
+                return origin;
+
+            Cell selected = null;
+			float minDistance = float.MaxValue;
+			World.inst.ForEachTileInRadius(origin.x, origin.z, radius, (x, z, cell) =>
+            {
+				float distanceSquared = Mathff.DistSqrdXZ(origin.Center, cell.Center);
+                if (!WorldRegions.Unreachable.Contains(cell) && distanceSquared < minDistance)
+                {
+                    selected = cell;
+					minDistance = distanceSquared;
+                }
+            });
+            return selected;
+        }
+
+    }
 }

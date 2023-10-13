@@ -8,7 +8,7 @@ using TMPro;
 using Fox.Localization;
 using Fox.UI;
 using UnityEngine.UI;
-using DG.Tweening;
+using System.Net;
 
 namespace Elevation
 {
@@ -55,9 +55,11 @@ namespace Elevation
         {
             //Mod.dLog(desiredProgress);
             if (Math.Abs(_progress.fillAmount - desiredProgress) > progressClamp)
-                _progress.fillAmount = Mathf.Lerp(_progress.fillAmount, desiredProgress, Time.deltaTime * smoothing);
+                _progress.fillAmount = Mathf.Lerp(_progress.fillAmount, desiredProgress, Time.unscaledDeltaTime * smoothing);
             else
                 _progress.fillAmount = desiredProgress;
+
+            Cam.inst.Rotate(Time.unscaledDeltaTime * 0.5f, 0f);
         }
 
         /// <summary>
@@ -65,10 +67,17 @@ namespace Elevation
         /// </summary>
         public void Activate()
         {
+            SpeedControlUI.inst.SetSpeed(0);
+            ConfigurableControls.inst.SetControlsActive(false);
+            GameUI.inst.miniMapUI.gameObject.SetActive(false);
+            KingdomLog.inst.Container.SetActive(false);
+            GameState.inst.AlphaNumericHotkeysEnabled = false;
+
             gameObject.SetActive(true);
             UpdateText();
+            // TODO: Find out how Canvas went away in new game verison ?????
             // Normally UI is rendered at the end of a frame, however in this case, we want the ui rendered immediately, this method will force render the loading dialog and any other ui. 
-            Canvas.ForceUpdateCanvases();
+            //Canvas.ForceUpdateCanvases();
         }
 
         /// <summary>
@@ -76,6 +85,12 @@ namespace Elevation
         /// </summary>
         public void Deactivate()
         {
+            SpeedControlUI.inst.SetSpeed(1);
+            ConfigurableControls.inst.SetControlsActive(true);
+            GameUI.inst.miniMapUI.gameObject.SetActive(true);
+            KingdomLog.inst.Container.SetActive(true);
+            GameState.inst.AlphaNumericHotkeysEnabled = true;
+
             gameObject.SetActive(false);
         }
 

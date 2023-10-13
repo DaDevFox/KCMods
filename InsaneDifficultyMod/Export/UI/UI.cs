@@ -16,7 +16,7 @@ namespace InsaneDifficultyMod
         public static ModSettingsUI modSettingsUI;
         
         public static GameObject riotDemandsUIObj;
-        public static RiotDemandsUI riotDemandsUI;
+        public static Events.RiotDemandsUI riotDemandsUI;
 
         public static GameObject riotUIObj;
         public static RiotUI riotUI;
@@ -27,10 +27,9 @@ namespace InsaneDifficultyMod
         public static void Setup() 
         {
             GameObject riotUIPrefab = Mod.assets.GetByName<GameObject>("RiotViewer");
-            riotUIObj = GameObject.Instantiate(riotUIPrefab);
-            riotUIObj.transform.SetParent(GameState.inst.playingMode.GameUIParent.transform, false);
+            riotUIObj = GameObject.Instantiate(riotUIPrefab, GameState.inst.playingMode.GameUIParent.transform);
             riotUI = riotUIObj.AddComponent<RiotUI>();
-
+            //((RectTransform)riotUIObj.transform).
 
             ////ModSettingsUI
             //GameObject modSettingsPrefab = Mod.legacyAssets.GetByName<GameObject>("ModSettings");

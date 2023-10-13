@@ -44,7 +44,7 @@ namespace Elevation.Patches
             if (cell.Type == ResourceType.Stone || cell.Type == ResourceType.UnusableStone || cell.Type == ResourceType.IronDeposit)
             {
                 World.inst.RemoveStone(cell, recombine);
-                World.inst.PlaceStone(cell.x, cell.z, type);
+                World.inst.PlaceStone(cell, type);
             }
         }
 
@@ -68,7 +68,7 @@ namespace Elevation.Patches
             foreach(TrackedRock rock in tracked)
             {
                 World.inst.RemoveStone(rock.cell);
-                World.inst.PlaceStone(rock.cell.x, rock.cell.z, rock.type);
+                World.inst.PlaceStone(rock.cell, rock.type);
             }
         }
 
@@ -109,29 +109,22 @@ namespace Elevation.Patches
 
         public static void UpdateWitchHuts()
         {
-            List<Cell> tracked = new List<Cell>();
             foreach (ArrayExt<Cell> landmass in World.inst.cellsToLandmass)
             {
                 foreach (Cell cell in landmass.data)
                 {
-                    if (cell != null)
+                    if (cell != null && cell.Type == ResourceType.WitchHut)
                     {
-                        if (cell.Type == ResourceType.WitchHut)
-                        {
-                            tracked.Add(cell);
-                        }
+                        CellMeta meta = Grid.Cells.Get(cell);
+                        if (meta == null)
+                            continue;
+
+                        WitchHut witch = World.inst.GetWitchHutAt(cell);
+                        if (witch == null)
+                            continue;
+
+                        witch.transform.position = new Vector3(witch.transform.position.x, meta.Elevation, witch.transform.position.z);
                     }
-                }
-            }
-
-            foreach (Cell cell in tracked)
-            {
-                WitchHut witch = World.inst.GetWitchHutAt(cell);
-                if (witch)
-                {
-                    GameObject.Destroy(witch);
-
-                    World.inst.AddWitchHut(cell.x, cell.z);
                 }
             }
         }
@@ -140,7 +133,7 @@ namespace Elevation.Patches
 
 
     [HarmonyPatch(typeof(World), "AddWolfDen")]
-    class WoflDenPatch
+    class WolfDenPatch
     {
         static void Postfix(WolfDen __result)
         {
@@ -164,9 +157,9 @@ namespace Elevation.Patches
             WolfDen cave = caveObj.GetComponent<WolfDen>();
             if (cave)
             {
-                GameObject.Destroy(caveObj);
-
-                World.inst.AddWolfDen(cell.x, cell.z);
+                CellMeta meta = Grid.Cells.Get(cell);
+                if (meta)
+                    cave.transform.position = new Vector3(cave.transform.position.x, meta.Elevation, cave.transform.position.z);
             }
         }
 
@@ -177,24 +170,10 @@ namespace Elevation.Patches
             {
                 foreach (Cell cell in landmass.data)
                 {
-                    if (cell != null)
+                    if (cell != null && cell.Type == ResourceType.WolfDen)
                     {
-                        if (cell.Type == ResourceType.WolfDen)
-                        {
-                            tracked.Add(cell);
-                        }
+                        UpdateCell(cell);
                     }
-                }
-            }
-
-            foreach (Cell cell in tracked)
-            {
-                GameObject cave = World.inst.GetCaveAt(cell);
-                if (cave && cell.Type == ResourceType.WolfDen)
-                {
-                    GameObject.Destroy(cave);
-
-                    World.inst.AddWolfDen(cell.x, cell.z);
                 }
             }
         }
@@ -227,9 +206,9 @@ namespace Elevation.Patches
             EmptyCave cave = caveObj.GetComponent<EmptyCave>();
             if (cave)
             {
-                GameObject.Destroy(caveObj);
-
-                World.inst.AddEmptyCave(cell.x, cell.z);
+                CellMeta meta = Grid.Cells.Get(cell);
+                if (meta)
+                    cave.transform.position = new Vector3(cave.transform.position.x, meta.Elevation, cave.transform.position.z);
             }
         }
 
@@ -244,15 +223,10 @@ namespace Elevation.Patches
                     {
                         if (cell.Type == ResourceType.EmptyCave)
                         {
-                            tracked.Add(cell);
+                            UpdateCell(cell);
                         }
                     }
                 }
-            }
-
-            foreach (Cell cell in tracked)
-            {
-                UpdateCell(cell);
             }
         }
     }

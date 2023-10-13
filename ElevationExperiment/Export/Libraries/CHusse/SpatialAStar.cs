@@ -85,6 +85,13 @@ namespace CHusse.Pathfinding
 
             public int Compare(PathNode x, PathNode y)
             {
+                if (x == null && y == null)
+                    return 0;
+                if (x == null)
+                    return -1;
+                if (y == null)
+                    return 1;
+
                 if (x.F < y.F)
                     return -1;
                 else if (x.F > y.F)

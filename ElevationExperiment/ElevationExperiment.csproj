@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ElevationExperiment</RootNamespace>
     <AssemblyName>ElevationExperiment</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,23 +33,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="DOTween">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\DOTween.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,90 +54,87 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>D:\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Valve.Newtonsoft.Json">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\Core\Pathfinding\ExternalPathfinder.cs" />
-    <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder%282%29.cs" />
+    <Compile Include="Export\Content\Buildings\Bonuses\Bonuses.cs" />
+    <Compile Include="Export\Content\Combat\VikingLandingPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Connectables\AdjacencyPatches.cs" />
+    <Compile Include="Export\Content\Buildings\TerrainManipulation\Scaffolding.cs" />
+    <Compile Include="Export\Content\Combat\Combat.cs" />
+    <Compile Include="Export\Content\Combat\DamagePatches.cs" />
+    <Compile Include="Export\Content\Combat\SpecialUnitYCorrectionPatches.cs" />
+    <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Crater.cs" />
+    <Compile Include="Export\Content\ModAssets.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\Connectables\RoadSizePatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\BuildingFormatter.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\FieldPatch.cs" />
+    <Compile Include="Export\Core\Patches\Buildings\YCorrection\TransportCartPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\FirePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\FOWCubePatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\ResourceYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Environmental\VillagerYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\CreativeModeResourcePatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\GridIntersectionPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\TreeChopPatch.cs" />
+    <Compile Include="Export\Content\Combat\ArmyUnitYCorrectionPatch.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinder.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinders\ExternalPathfinderModified.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinders\PrebakedPathfinder%282%29.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinders\RoyLibraryPathfinder.cs" />
     <Compile Include="Export\External\API\API.cs" />
     <Compile Include="Export\Content\Assets\AssetBundleManager.cs" />
     <Compile Include="Export\Content\Buildings\Buildings.cs" />
     <Compile Include="Export\External\Submods\Submods.cs" />
     <Compile Include="Export\Libraries\BuildingFramework\BuildingHelper.cs" />
     <Compile Include="Export\Libraries\BuildingFramework\BuildingInfo.cs" />
-    <Compile Include="Export\Content\Buildings\Dugout.cs" />
+    <Compile Include="Export\Content\Buildings\TerrainManipulation\Dugout.cs" />
     <Compile Include="Export\Core\Grid\MetaStructures.cs" />
+    <Compile Include="Export\Libraries\CHusse\Modified\IPathFinder.cs" />
+    <Compile Include="Export\Libraries\CHusse\Modified\PathFinder.cs" />
+    <Compile Include="Export\Libraries\CHusse\Modified\PathFinderFast.cs" />
+    <Compile Include="Export\Libraries\CHusse\Modified\PriorityQueueB.cs" />
     <Compile Include="Export\Libraries\CHusse\PriorityQueue.cs" />
     <Compile Include="Export\Libraries\CHusse\SpatialAStar.cs" />
     <Compile Include="Export\Libraries\Fox\Debugging\DebugLines.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ExceptionTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ExpressionTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\MapData.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\ObserverTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\SolutionValidityTest.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\TestHelper.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\AlgorithmObserverFactory.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\AlgorithmProgress.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\AlgorithmState.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\AStar.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\BestFirstSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\IAlgorithmState.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\IterativeDeepeningAStar.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Algorithms\RecursiveBestFirstSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\CombinedComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ComparerExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\DefaultComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\DistanceHelper.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Extensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ExtensionsOrderBy.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearch.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchBase.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchContains.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchExcept.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchInitial.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchOrderBy.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchSelect.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchSelectMany.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\HeuristicSearchWhere.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IAlgorithm.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IAlgorithmObserverFactory.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\INode.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\INodeComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\IObservableAlgorithm.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Node.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\NormalComparer.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\PointExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\ProgressExtensions.cs" />
-    <Compile Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\VectorExtensions.cs" />
     <Compile Include="Export\Utils\RendererUtil.cs" />
     <Compile Include="Export\Core\Rendering\Rendering.cs" />
     <Compile Include="Export\Libraries\Fox\Profiling\Base\Analyzer.cs" />
@@ -156,15 +151,15 @@
     <Compile Include="Export\Content\MapGeneration\WorldRegions.cs" />
     <Compile Include="Export\Core\Patches\Environmental\WolfPatch.cs" />
     <Compile Include="Export\Core\Patches\Game\WorldGridPatch.cs" />
-    <Compile Include="Export\Core\Patches\Placement\DragSelectPatch.cs" />
+    <Compile Include="Export\Core\Patches\Game\DragSelectPatch.cs" />
     <Compile Include="Export\Core\Pathfinding\PrebakedPathfinder.cs" />
     <Compile Include="Export\Core\Pathfinding\Pathfinder.cs" />
-    <Compile Include="Export\Core\Pathfinding\RuntimePathfinder.cs" />
+    <Compile Include="Export\Core\Pathfinding\Pathfinders\RuntimePathfinder.cs" />
     <Compile Include="Export\Content\Settings\Settings.cs" />
     <Compile Include="Export\Content\UI\Generic\LoadingDialog.cs" />
     <Compile Include="Export\Content\UI\MapEdit\RaiseLowerUI.cs" />
     <Compile Include="Export\Content\UI\UI.cs" />
-    <Compile Include="Export\Utils\ArrayExtensions.cs" />
+    <Compile Include="Export\Utils\EnumerableExtensions.cs" />
     <Compile Include="Export\Utils\DebugExt.cs" />
     <Compile Include="Export\Core\ElevationManager.cs" />
     <Compile Include="Export\Core\Rendering\ColorManager.cs" />
@@ -174,10 +169,10 @@
     <Compile Include="Export\Content\MapGeneration\TerrainFeatures\Pillar.cs" />
     <Compile Include="Export\Content\MapGeneration\TerrainFeatures\TerrainFeature.cs" />
     <Compile Include="Export\Core\Mod.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\YCorrection\BuildingPlacePatch.cs" />
-    <Compile Include="Export\Core\Patches\Placement\BuildingPlacementModePatch.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadAssets.cs" />
-    <Compile Include="Export\Core\Patches\Buildings\Roads\RoadVisualPatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\BuildingPlaceUpdatePatch.cs" />
+    <Compile Include="Export\Core\Patches\Placement\BuildingPlacementPositionPatch.cs" />
+    <Compile Include="Export\Content\Buildings\Roads\RoadAssets.cs" />
+    <Compile Include="Export\Content\Buildings\Roads\RoadStairs.cs" />
     <Compile Include="Export\Content\TopDownModeCamera\TopDownModeCamera.cs" />
     <Compile Include="Export\Core\Patches\Buildings\CastleBlocks\CastleBlockDoorPatch.cs" />
     <Compile Include="Export\Core\Patches\Game\CellPatch.cs" />
@@ -195,6 +190,7 @@
     <Compile Include="Export\Libraries\Zat\Frameworks\Zat.InterModComm.cs" />
     <Compile Include="Export\Libraries\Zat\Frameworks\Zat.ModMenu.API.cs" />
     <Compile Include="Export\Utils\Old\FoxRenderer.cs" />
+    <Compile Include="Export\Utils\Tweening.cs" />
     <Compile Include="Export\Utils\Util.cs" />
     <Compile Include="Export\Libraries\Zat\Utils\Zat.Rendering.cs" />
     <Compile Include="Export\Utils\Vector3Extensions.cs" />
@@ -237,14 +233,9 @@
     <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest" />
     <None Include="Export\Content\Assets\assetbundle\win64\win64.manifest.meta" />
     <None Include="Export\Content\Assets\assetbundle\win64\win64.meta" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\Heuristic.Linq.Test.csproj" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\README.md" />
-    <None Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq\Heuristic.Linq.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.sln" />
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\MapData.txt" />
-    <Content Include="Export\Libraries\rvhuang\Linq-to-AStar\Heuristic.Linq.Test\testdiagram.svg" />
+    <Folder Include="Export\Core\Patches\Units\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

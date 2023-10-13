@@ -1,4 +1,8 @@
-﻿using System;
+﻿//#define ALPHA
+//#define STABLE
+//#define COMMON
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +15,9 @@ namespace ReskinEngine.Engine
 {
     public class Engine
     {
-        public static KCModHelper helper;
+        public static event Action afterSceneLoaded;
+
+        public static KCModHelper helper { get; set; }
         public static bool debug = true;
 
 
@@ -39,7 +45,7 @@ namespace ReskinEngine.Engine
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             if (debug)
-                Application.logMessageReceived += (condition, stack, type) => 
+                Application.logMessageReceived += (condition, stack, type) =>
                 {
                     if (type == LogType.Exception)
                         helper.Log($"ex:{condition} => {stack}");
@@ -57,9 +63,11 @@ namespace ReskinEngine.Engine
 
         #region Utilities
 
+        public static void Log(object message) => helper.Log(message.ToString());
+
         public static void dLog(object message)
         {
-            if(debug)
+            if (debug)
                 helper.Log(message.ToString());
         }
 
@@ -73,7 +81,7 @@ namespace ReskinEngine.Engine
         {
             if (SkinLookup.ContainsKey(identifier))
                 helper.Log("found skin identifier " + identifier);
-            
+
             return SkinLookup.ContainsKey(identifier) ? SkinLookup[identifier] : null;
         }
 
@@ -89,8 +97,16 @@ namespace ReskinEngine.Engine
         /// <returns></returns>
         public static Mod GetPriority(string skinIdentifier)
         {
-            if(Settings.priorityType == Settings.PriorityType.Absolute)
-                return GetMod(Settings.PrioritizedMods.First((mod) => GetMod(mod).Binders.ContainsKey(skinIdentifier)));
+            if (Settings.priorityType == Settings.PriorityType.Absolute && ModIndex.Count > 0)
+            {
+                Mod result = null;
+                foreach (Mod mod in ModIndex.Values)
+                    if (mod.Binders.ContainsKey(skinIdentifier))
+                        if (result == null || (result != null && mod.Priority > result.Priority))
+                            result = mod;
+
+                return result;
+            }
             else
             {
                 return null;
@@ -111,7 +127,7 @@ namespace ReskinEngine.Engine
 
         public static SkinBinder GetRandomBinderFromActive(string identifier)
         {
-            if (!GetPriority(identifier).Binders.ContainsKey(identifier))
+            if (GetPriority(identifier) == null || !GetPriority(identifier).Binders.ContainsKey(identifier))
                 return null;
 
             List<SkinBinder> binders = GetPriority(identifier).Binders[identifier];
@@ -139,6 +155,9 @@ namespace ReskinEngine.Engine
             ReadSkins();
             SetupMods();
             BindAll();
+            BuildingSkinBinder.BindGameInternalPrefabs();
+
+            afterSceneLoaded?.Invoke();
 
             helper.Log("AfterSceneLoaded complete");
         }
@@ -148,7 +167,7 @@ namespace ReskinEngine.Engine
             SkinLookup.Clear();
             Type[] types = Assembly.GetExecutingAssembly().GetTypes();
 
-            foreach(Type type in types)
+            foreach (Type type in types)
             {
                 if (type.GetCustomAttribute<UnregisteredAttribute>() != null)
                     continue;
@@ -158,7 +177,7 @@ namespace ReskinEngine.Engine
                     SkinBinder binder = Activator.CreateInstance(type) as SkinBinder;
                     SkinLookup.Add(binder.TypeIdentifier, binder);
                 }
-                
+
             }
         }
 
@@ -181,7 +200,7 @@ namespace ReskinEngine.Engine
 
                 if (!ModIndex.ContainsKey(binder.ModName))
                     ModIndex.Add(binder.ModName, Mod.Create(binder.ModName, binder.CompatabilityIdentifier));
-                
+
                 ModIndex[binder.ModName].Add(binder);
             }
         }
@@ -199,7 +218,7 @@ namespace ReskinEngine.Engine
 
         private static void BindAll()
         {
-            GetActivePool().Values.Do(binders => binders[0].Bind());
+            GetActivePool().Values.Do(binders => binders.Do((binder) => binder.Bind()));
         }
 
         #endregion

@@ -8,7 +8,6 @@ using System.Reflection;
 using UnityEngine;
 using I2.Loc;
 using Assets.Code;
-using DG.Tweening;
 
 namespace Disasters
 {
@@ -21,21 +20,38 @@ namespace Disasters
         /// <returns></returns>
         public static ResourceAmount Yield(this Building building)
         {
-            return building
-                //.GetComponent<YieldProducer>()
-                .Yield;
+            YieldProducer producer = building.GetComponent<YieldProducer>();
+            YieldProducerSeason seasonalProducer = building.GetComponent<YieldProducerSeason>();
+
+            if (producer)
+                return producer.Yield;
+            if (seasonalProducer)
+                return ResourceAmount.Make(seasonalProducer.YieldType, seasonalProducer.YieldAmt);
+
+            return new ResourceAmount();
         }
 
         /// <summary>
-        /// Sets the yield of a building to a new ResourceAmount
+        /// Sets the yield of a building to a new ResourceAmount. 
+        /// <para>May only be a ResourceAmount with one resource type if targeting a seasonal producer (field/agricultural producer typically). </para>
         /// </summary>
         /// <param name="building"></param>
         /// <param name="amount"></param>
         public static void Yield(this Building building, ResourceAmount amount)
         {
-            building
-                //.GetComponent<YieldProducer>()
-                .Yield = amount;
+            YieldProducer producer = building.GetComponent<YieldProducer>();
+            YieldProducerSeason seasonalProducer = building.GetComponent<YieldProducerSeason>();
+            if (producer)
+                producer.Yield = amount;
+            if (seasonalProducer)
+            {
+                FreeResourceType type = FreeResourceType.Apples;
+                for (int i = 0; i < (int)FreeResourceType.NumTypes; i++)
+                    if (amount.Get((FreeResourceType)i) > 0)
+                        type = (FreeResourceType)i;
+                seasonalProducer.YieldType = type;
+                seasonalProducer.YieldAmt = amount.Get(type);
+            }
         }
     }
 }
@@ -179,95 +195,15 @@ namespace Disasters.Events
         {
             static bool Prefix(global::Weather.WeatherType type)
             {
-                Color originalLightColor = (Color)typeof(global::Weather).GetField("originalLightColor", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
-                float originalLightIntensity = (float)typeof(global::Weather).GetField("originalLightIntensity", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
-                float originalLightShadowStrength = (float)typeof(global::Weather).GetField("originalLightShadowStrength", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
-
-                float calculatedRainEmission = (float)typeof(global::Weather).GetField("calculatedRainEmission", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
-
-                Timer lightningTimer = (Timer)typeof(global::Weather).GetField("lightningTimer", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
-
-                if (type != global::Weather.inst.currentWeather)
-                {
-                    global::Weather.inst.Rain.Stop();
-                    global::Weather.inst.Snow.Stop();
-                    Color endValue = originalLightColor;
-                    float endValue2 = originalLightIntensity;
-                    float endValue3 = originalLightShadowStrength;
-                    float endValue4 = 0f;
-                    if (type != global::Weather.WeatherType.Snow)
-                    {
-                        if (type != global::Weather.WeatherType.NormalRain)
-                        {
-                            if (type == global::Weather.WeatherType.HeavyRain)
-                            {
-                                global::Weather.inst.Rain.emissionRate = calculatedRainEmission;
-                                global::Weather.inst.Rain.startSize = 0.8f;
-                                endValue4 = 1f;
-                                global::Weather.inst.Rain.Play();
-                                endValue = new Color(0.5f, 0.65f, 0.85f);
-                                endValue2 = 0.75f;
-                                endValue3 = 0.4f;
-                            }
-                        }
-                        else
-                        {
-                            global::Weather.inst.Rain.emissionRate = calculatedRainEmission / 3f;
-                            global::Weather.inst.Rain.startSize = 0.5f;
-                            endValue4 = 0.8f;
-                            global::Weather.inst.Rain.Play();
-                            endValue = new Color(0.8f, 0.8f, 1f);
-                            endValue2 = 0.9f;
-                            endValue3 = 0.45f;
-                        }
-                    }
-                    else
-                    {
-                        global::Weather.inst.Snow.Play();
-                    }
-
-
-                    // same as original method
-                    // only addition is this if, prevents lighting transitions while a drought is active
-                    if (!droughtRunning)
-                    {
-
-                        Sequence sequence = DOTween.Sequence();
-                        sequence.Join(DOTween.To(() => global::Weather.inst.Light.color, delegate (Color x)
-                        {
-                            global::Weather.inst.Light.color = x;
-                        }, endValue, global::Weather.inst.TransitionTime));
-                        sequence.Join(DOTween.To(() => global::Weather.inst.Light.intensity, delegate (float x)
-                        {
-                            global::Weather.inst.Light.intensity = x;
-                        }, endValue2, global::Weather.inst.TransitionTime));
-                        sequence.Join(DOTween.To(() => global::Weather.inst.Light.shadowStrength, delegate (float x)
-                        {
-                            global::Weather.inst.Light.shadowStrength = x;
-                        }, endValue3, global::Weather.inst.TransitionTime));
-                        sequence.Join(DOTween.To(() => CloudSystem.inst.stormAlpha, delegate (float x)
-                        {
-                            CloudSystem.inst.stormAlpha = x;
-                        }, endValue4, global::Weather.inst.TransitionTime));
-                        sequence.Play<Sequence>();    
-                    }
-
-                    global::Weather.inst.currentWeather = type;
-                    if (lightningTimer.Enabled && global::Weather.inst.currentWeather != global::Weather.WeatherType.HeavyRain)
-                    {
-                        global::Weather.inst.lightningMadeFire = false;
-                    }
-
-                    lightningTimer.Enabled = (global::Weather.inst.currentWeather == global::Weather.WeatherType.HeavyRain || global::Weather.inst.currentWeather == global::Weather.WeatherType.LightningStorm);
-                    global::Weather.inst.Invoke("DeferNotifyBuildingsWeatherChanged", 5f);
-                }
+                Mod.StartDroughtFadeCoroutine(type);
+                
                 return false;
             }
         }
 
         #endregion
 
-        [HarmonyPatch(typeof(Fire), "Update")]
+        [HarmonyPatch(typeof(Fire), "Tick")]
         static class Fires
         {
             static void Postfix(Fire __instance)
@@ -295,12 +231,12 @@ namespace Disasters.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield.Set(FreeResourceType.Wheat, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Wheat) - Settings.droughtFoodPenalty.Get(FreeResourceType.Wheat));
+                    b.Yield(ResourceAmount.Make(FreeResourceType.Wheat, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Wheat) - Settings.droughtFoodPenalty.Get(FreeResourceType.Wheat)));
                 }
                 else
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName];
+                    b.Yield (foodBuildingYields[b.UniqueName]);
                 }
             }
         }
@@ -315,12 +251,12 @@ namespace Disasters.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield.Set(FreeResourceType.Apples, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Apples) - Settings.droughtFoodPenalty.Get(FreeResourceType.Apples));
+                    b.Yield(ResourceAmount.Make(FreeResourceType.Apples, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Apples) - Settings.droughtFoodPenalty.Get(FreeResourceType.Apples)));
                 }
                 else
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield = foodBuildingYields[b.UniqueName];
+                    b.Yield(foodBuildingYields[b.UniqueName]);
                 }
             }
         }

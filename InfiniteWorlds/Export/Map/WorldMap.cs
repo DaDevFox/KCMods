@@ -85,8 +85,7 @@ namespace Elevation.InfiniteWorlds
 
         public override void Init()
         {
-            WorldMap.bounds = new Vector2Int(7, 5);
-            mapGen.GenerateNewMap();
+            WorldMap.bounds = new Vector2Int(7, 5);;
 
         }
 

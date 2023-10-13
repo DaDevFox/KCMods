@@ -56,7 +56,16 @@ namespace CHusse.Pathfinding
 
         protected virtual int OnCompare(int i, int j)
         {
-            return mComparer.Compare(InnerList[i], InnerList[j]);
+            try
+            {
+                return mComparer.Compare(InnerList[i], InnerList[j]);
+            }
+            catch(Exception ex)
+            {
+                UnityEngine.Debug.LogError($"Error on compare; i:{i}, j:{j}, InnerList:{InnerList.Count}");
+                UnityEngine.Debug.LogException(ex);
+                return 0;
+            }
         }
 
         /// <summary>

@@ -11,7 +11,8 @@ namespace Fox.Rendering
 {
     public class MultiMeshSystem
     {
-        private Dictionary<string, InstanceMeshSystem> _systems = new Dictionary<string, InstanceMeshSystem>();
+        private bool clearDeferred = false;
+        public Dictionary<string, InstanceMeshSystem> _systems = new Dictionary<string, InstanceMeshSystem>();
 
 
         public void AddSystem(string id, Mesh mesh, Material mat) => _systems.Add(id, new InstanceMeshSystem(mesh, mat));
@@ -22,9 +23,26 @@ namespace Fox.Rendering
         {
             foreach (KeyValuePair<string, InstanceMeshSystem> pair in _systems)
                 pair.Value.Update();
+
+            if (clearDeferred)
+            {
+                _systems.Clear();
+                clearDeferred = false;
+            }
         }
 
-        public void Clear() => _systems.Clear();
+        public void Clear()
+        {
+            foreach (InstanceMeshSystem system in _systems.Values)
+                system.Clear();
+
+            _systems.Clear();
+        }
+
+        public void ClearDeferred()
+        {
+            clearDeferred = true;
+        }
 
         public InstanceMeshSystem this[string systemId]
         {
@@ -42,7 +60,13 @@ namespace Fox.Rendering
 
         private Dictionary<int, Dictionary<int, ItemData>> _items = new Dictionary<int, Dictionary<int, ItemData>>();
         private Dictionary<int, Dictionary<int, Matrix4x4>> _matrices = new Dictionary<int, Dictionary<int, Matrix4x4>>();
-        
+
+        private List<Tuple<int, int>> toRemoveDeferred = new List<Tuple<int, int>>();
+
+        private Dictionary<string, Tuple<int, int>> _taggedItems = new Dictionary<string, Tuple<int, int>>();
+
+        public int MatrixCount => _matrices.Count;
+
         public InstanceMeshSystem(Mesh mesh, Material mat)
         {
             this.mesh = mesh;
@@ -52,7 +76,23 @@ namespace Fox.Rendering
             _matrices.Add(0, new Dictionary<int, Matrix4x4>());
         }
 
-        public Tuple<int,int> GetFreeId()
+        public void Clear()
+        {
+            for (int matrix = 0; matrix < _matrices.Count; matrix++)
+                for (int idx = 0; idx < _matrices[matrix].Count; idx++)
+                    RemoveAt(matrix, idx);
+
+            _taggedItems.Clear();
+            _items.Clear();
+            _matrices.Clear();
+
+            toRemoveDeferred.Clear();
+
+            _items.Add(0, new Dictionary<int, ItemData>());
+            _matrices.Add(0, new Dictionary<int, Matrix4x4>());
+        }
+
+        public System.Tuple<int,int> GetFreeId()
         {
             int foundIdx = -1;
             int foundMatrix = -1;
@@ -81,13 +121,13 @@ namespace Fox.Rendering
                 idx++;
             }
 
-            return new Tuple<int, int>(foundMatrix, foundIdx);
+            return new System.Tuple<int, int>(foundMatrix, foundIdx);
         }
 
 
         public ItemData Add()
         {
-            Tuple<int, int> found = GetFreeId();
+            System.Tuple<int, int> found = GetFreeId();
 
             if (found == null)
                 throw new Exception("Could not find free id");
@@ -180,6 +220,9 @@ namespace Fox.Rendering
                 foreach(Dictionary<int, Matrix4x4> matrices in _matrices.Values)
                     foreach (Matrix4x4 matrix in matrices.Values)
                         UnityEngine.Graphics.DrawMesh(mesh, matrix, material, 0);
+
+            foreach (Tuple<int, int> tuple in toRemoveDeferred)
+                RemoveAt(tuple.Item1, tuple.Item2);
         }
 
         private bool Valid(int matrix, int idx)
@@ -215,6 +258,7 @@ namespace Fox.Rendering
                 data.position = position;
                 data.rotation = rotation;
                 data.scale = scale;
+                _items[matrix][idx] = data;
             }
 
             UpdateMatrix(matrix, idx);
@@ -230,6 +274,7 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
@@ -244,6 +289,7 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position, rotation);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
@@ -257,24 +303,14 @@ namespace Fox.Rendering
             {
                 ItemData created = Add(position, rotation, scale);
                 created.tag = tag;
+                _taggedItems.Add(tag, new Tuple<int, int>(created.matrix, created.id));
             }
         }
 
 
         public bool Has(int matrix, int idx) => Valid(matrix, idx);
 
-        public bool Has(string tag)
-        {
-            bool flag = false;
-
-            foreach (Dictionary<int, ItemData> dict in _items.Values)
-                foreach (ItemData item in dict.Values)
-                    if (item.tag == tag)
-                        flag = true;
-
-            return flag;
-        }
-
+        public bool Has(string tag) => _taggedItems.ContainsKey(tag);
 
         public bool Get(int matrix, int idx, out ItemData result)
         {
@@ -289,22 +325,13 @@ namespace Fox.Rendering
 
         public bool Get(string tag, out ItemData result)
         {
-            int matrix = -1;
-            int idx = -1;
-
-            foreach (Dictionary<int, ItemData> dict in _items.Values) 
-            { 
-                foreach (ItemData item in dict.Values)  
-                {
-                    if (item.tag == tag)
-                    {
-                        matrix = item.matrix;
-                        idx = item.id;
-                    }
-                }
+            if (_taggedItems.ContainsKey(tag))
+                return Get(_taggedItems[tag].Item1, _taggedItems[tag].Item2, out result);
+            else
+            {
+                result = new ItemData();
+                return false;
             }
-
-            return Get(matrix, idx, out result);
         }
 
         //NOTE: Potential inefficiency; not shifting down when removing and therefore requiring a loop to search for the next free id (see also GetFreeId)
@@ -314,6 +341,23 @@ namespace Fox.Rendering
                 return;
 
             _matrices[matrix].Remove(idx);
+        }
+        
+        public bool Remove(string tag)
+        {
+            if (Get(tag, out ItemData data))
+            {
+                RemoveAt(data.matrix, data.id);
+                _taggedItems.Remove(tag);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void RemoveAtDeferred(int matrix, int idx)
+        {
+            toRemoveDeferred.Add(new Tuple<int, int>(matrix, idx));
         }
 
 
