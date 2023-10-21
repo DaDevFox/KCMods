@@ -1157,7 +1157,7 @@ namespace Elevation.Patches
 
 namespace Fox.Debugging
 {
-	[HarmonyPatch(typeof(PersonUI), "UpdateInternal")]
+	//[HarmonyPatch(typeof(PersonUI), "UpdateInternal")]
 	public class PeasantPathDebug
 	{
 		private static LineRenderer _line;
