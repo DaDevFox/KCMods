@@ -64,6 +64,7 @@ namespace Elevation
                     {
                         for (int x = 0; x < chunk.SizeX; x++)
                         {
+                            // TerrainChunk x and z are double the world scaling in the base game for some reason
                             CellMeta meta = Grid.Cells.Get(chunk.x/2 + x, chunk.z/2 + z);
                             for (int y = 0; y <= ElevationManager.maxElevation; y++)
                             {
@@ -100,8 +101,6 @@ namespace Elevation
 
                     Mod.dLog($"chunk {i} (x={chunk.x},z={chunk.z},w={chunk.SizeX * 2},h={chunk.SizeZ * 2}): built mesh given {chunkData.Length} voxels and with {chunks[i].mesh.vertexCount} vertices");
                 }
-
-                Mod.dLog("Finished grid setting");
             }
             catch(Exception ex)
             {
