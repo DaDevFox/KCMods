@@ -373,12 +373,12 @@ namespace InsaneDifficultyMod.Events
 
                     foreach(Villager target in residents)
                     {
-                        DebugExt.Log(target.name, true);
+                        DebugExt.dLog(target.name, true);
                         Riot riot = FindRiot(target);
                         if (riot.Add(target))
                         {
                             SetPersonForRiot(target);
-                            DebugExt.Log("confirmed", true);
+                            DebugExt.dLog("confirmed", true);
                         }
                     }
                 }
@@ -399,12 +399,12 @@ namespace InsaneDifficultyMod.Events
 
         private static void SetPersonForRiot(Villager person)
         {
-            //Player.inst.RemovePersonFromWorld(person);
+            //Player.instance.RemovePersonFromWorld(person);
             //person.paralyzed = true;
             //person.QuitJob(false);
             person.LeaveHome();
-            //Player.inst.Workers.Remove(person);
-            //Player.inst.Homeless.Remove(person);
+            //Player.instance.Workers.Remove(person);
+            //Player.instance.Homeless.Remove(person);
         }
 
         public static BuildingMeta GetMeta(string uniqueName)
@@ -548,7 +548,7 @@ namespace InsaneDifficultyMod.Events
             foreach(Villager villager in villagers)
             {
                 Player.inst.ReturnPerson(villager, villager.Pos);
-                //villager.body.GetComponent<MeshRenderer>().material = VillagerSystem.inst.bodyColors[SRand.Range(0, VillagerSystem.inst.bodyColors.Length)];
+                //villager.body.GetComponent<MeshRenderer>().material = VillagerSystem.instance.bodyColors[SRand.Range(0, VillagerSystem.instance.bodyColors.Length)];
             }
             foreach(RiotBuildingMeta meta in orderedBuildings)
             {
@@ -756,7 +756,7 @@ namespace InsaneDifficultyMod.Events
 
             // Target Queues
             List<Cell> searchSpace = World.inst.cellsToLandmass[landmass].data.ToList();
-            //World.inst.GetNonBusyCellInRadius(origin.Center, 6f, ref searchSpace);
+            //World.instance.GetNonBusyCellInRadius(origin.Center, 6f, ref searchSpace);
 
             List<Building>[] targetQueues = new List<Building>[armies.Count];
             for (int i = 0; i < armies.Count; i++) 
@@ -863,7 +863,7 @@ namespace InsaneDifficultyMod.Events
         {
             for (int i = 0; i < villagers.Count; i++)
             {
-                //float delta = Time.deltaTime * Player.inst.timeScale;
+                //float delta = Time.deltaTime * Player.instance.timeScale;
                 Villager villager = villagers[i];
 
                 //villager.textThought = "<color=red>Rioting!</color>";
@@ -1058,7 +1058,7 @@ namespace InsaneDifficultyMod.Events
                     //bool flag;
 
                     //Cell tCell = target.GetCell();
-                    //Cell nearest = World.inst.FindBestSuitedCell(target.GetCell(), false, 2, (cell) => 100 - RadiusBonus.GetHappinessAt(tCell.x, tCell.z, out flag));
+                    //Cell nearest = World.instance.FindBestSuitedCell(target.GetCell(), false, 2, (cell) => 100 - RadiusBonus.GetHappinessAt(tCell.x, tCell.z, out flag));
                     //float happinessWeightage = (100f - (float)RadiusBonus.GetHappinessAt(nearest.x, nearest.z, out flag))/100f;
                     return Reference.priority;
                 }

@@ -31,18 +31,18 @@ namespace InsaneDifficultyMod.Events
         //    this.rioters.Clear();
         //    foreach(Guid guid in data.rioterGuids)
         //    {
-        //        this.rioters.Add(Player.inst.GetWorker(guid));
+        //        this.rioters.Add(Player.instance.GetWorker(guid));
         //    }
 
         //    this.riotersAtRally.Clear();
         //    foreach (Guid guid in data.riotersAtRallyGuids)
         //    {
-        //        this.riotersAtRally.Add(Player.inst.GetWorker(guid));
+        //        this.riotersAtRally.Add(Player.instance.GetWorker(guid));
         //    }
 
         //    allPresentAtRally = data.allAtRally;
 
-        //    //SetRallyPoint(World.inst.GetCellData(data.rallyPointPos));
+        //    //SetRallyPoint(World.instance.GetCellData(data.rallyPointPos));
         //}
 
         //public RiotSpawn(Cell cell)
@@ -52,7 +52,7 @@ namespace InsaneDifficultyMod.Events
 
         //public RiotSpawn(Vector3 pos)
         //{
-        //    //SetRallyPoint(World.inst.GetCellData(pos));
+        //    //SetRallyPoint(World.instance.GetCellData(pos));
         //}
 
         private void SetupRallyMarker() 
