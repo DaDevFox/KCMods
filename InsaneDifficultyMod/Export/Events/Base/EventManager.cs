@@ -11,7 +11,7 @@ namespace InsaneDifficultyMod.Events
         public static List<IDModEvent> events = new List<IDModEvent>()
         {
             new EarthquakeEvent(),
-            new OppressionEvent(),
+            //new OppressionEvent(),
             new DroughtEvent()
         };
         public static void OnYearEnd() 

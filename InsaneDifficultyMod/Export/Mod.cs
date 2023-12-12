@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Harmony;
 using System.Reflection;
+using System.Collections;
 
 namespace InsaneDifficultyMod
 {
@@ -95,7 +96,8 @@ namespace InsaneDifficultyMod
                 if (Input.GetKeyDown(KeyCode.R))
                 {
                     Events.RiotSystem.Iterate();
-                }else if (Input.GetKeyDown(KeyCode.V))
+                }
+                else if (Input.GetKeyDown(KeyCode.V))
                 {
                     Events.RiotSystem.EndAll();
                 }
@@ -107,7 +109,7 @@ namespace InsaneDifficultyMod
                         float activeSpeed = (float)typeof(Villager).GetField("activeSpeed", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(GameUI.inst.personUI.villager);
                         bool ignoreDeferred = (bool)typeof(Villager).GetField("ignoreDeferred", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(GameUI.inst.personUI.villager);
                         DebugExt.Log($"Villager: paralyzed={GameUI.inst.personUI.villager.paralyzed}\ntravelPath={GameUI.inst.personUI.villager.travelPath.Count}\nactiveSpeed={activeSpeed}\nignoreDeferred={ignoreDeferred}");
-                        //GameUI.inst.personUI.villager.MoveToDeferred(World.inst.cellsToLandmass[GameUI.inst.personUI.villager.landMass].RandomElement().Center);
+                        //GameUI.instance.personUI.villager.MoveToDeferred(World.instance.cellsToLandmass[GameUI.instance.personUI.villager.landMass].RandomElement().Center);
                     }
                 }
                 //if (Input.GetKeyDown(KeyCode.E))
@@ -123,6 +125,99 @@ namespace InsaneDifficultyMod
         }
 
 
+        #region Coroutines
+
+        public static void StartDroughtFadeCoroutine(Weather.WeatherType type)
+        {
+            mod.StartCoroutine("DroughtFadeCoroutine", type);
+        }
+
+        private IEnumerator DroughtFadeCoroutine(Weather.WeatherType type)
+        {
+            float time = Weather.inst.TransitionTime;
+            float elapsed = 0f;
+
+            Color originalLightColor = (Color)typeof(global::Weather).GetField("originalLightColor", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
+            float originalLightIntensity = (float)typeof(global::Weather).GetField("originalLightIntensity", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
+            float originalLightShadowStrength = (float)typeof(global::Weather).GetField("originalLightShadowStrength", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
+
+            float calculatedRainEmission = (float)typeof(global::Weather).GetField("calculatedRainEmission", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
+
+            Timer lightningTimer = (Timer)typeof(global::Weather).GetField("lightningTimer", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(global::Weather.inst);
+
+            global::Weather.inst.Rain.Stop();
+            global::Weather.inst.Snow.Stop();
+            Color endValue = originalLightColor;
+            float endValue2 = originalLightIntensity;
+            float endValue3 = originalLightShadowStrength;
+            float endValue4 = 0f;
+            if (type != global::Weather.WeatherType.Snow)
+            {
+                if (type != global::Weather.WeatherType.NormalRain)
+                {
+                    if (type == global::Weather.WeatherType.HeavyRain)
+                    {
+                        global::Weather.inst.Rain.emissionRate = calculatedRainEmission;
+                        global::Weather.inst.Rain.startSize = 0.8f;
+                        endValue4 = 1f;
+                        global::Weather.inst.Rain.Play();
+                        endValue = new Color(0.5f, 0.65f, 0.85f);
+                        endValue2 = 0.75f;
+                        endValue3 = 0.4f;
+                    }
+                }
+                else
+                {
+                    global::Weather.inst.Rain.emissionRate = calculatedRainEmission / 3f;
+                    global::Weather.inst.Rain.startSize = 0.5f;
+                    endValue4 = 0.8f;
+                    global::Weather.inst.Rain.Play();
+                    endValue = new Color(0.8f, 0.8f, 1f);
+                    endValue2 = 0.9f;
+                    endValue3 = 0.45f;
+                }
+            }
+            else
+            {
+                global::Weather.inst.Snow.Play();
+            }
+
+            global::Weather.inst.currentWeather = type;
+            if (lightningTimer.Enabled && global::Weather.inst.currentWeather != global::Weather.WeatherType.HeavyRain)
+            {
+                global::Weather.inst.lightningMadeFire = false;
+            }
+
+            lightningTimer.Enabled = (global::Weather.inst.currentWeather == global::Weather.WeatherType.HeavyRain || global::Weather.inst.currentWeather == global::Weather.WeatherType.LightningStorm);
+            global::Weather.inst.Invoke("DeferNotifyBuildingsWeatherChanged", 5f);
+
+            Color baseLightColor = Color.white;
+            float baseIntensity = -1f;
+            float baseShadowStrength = -1f;
+            float baseStormAlpha = -1f;
+
+            while (elapsed < time)
+            {
+                if (baseLightColor == Color.white)
+                    baseLightColor = Weather.inst.Light.color;
+                Weather.inst.Light.color = Color.Lerp(baseLightColor, endValue, elapsed / time);
+
+                if (baseIntensity == -1f)
+                    baseIntensity = Weather.inst.Light.intensity;
+                Weather.inst.Light.intensity = Mathf.Lerp(baseIntensity, endValue2, elapsed / time);
+                if (baseShadowStrength == -1f)
+                    baseShadowStrength = Weather.inst.Light.shadowStrength;
+                Weather.inst.Light.shadowStrength = Mathf.Lerp(baseShadowStrength, endValue3, elapsed / time);
+                if (baseStormAlpha == -1f)
+                    baseStormAlpha = CloudSystem.inst.stormAlpha;
+                CloudSystem.inst.stormAlpha = Mathf.Lerp(baseStormAlpha, endValue4, elapsed / time);
+
+                elapsed += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        #endregion
     }
 
     #region HarmonyPatches

@@ -13,9 +13,6 @@ namespace InsaneDifficultyMod
 {
     public class ModSettingsUI : MonoBehaviour
     {
-
-
-
         public static GameObject _base;
 
         private Color mainColor = new Color(191, 0, 0);

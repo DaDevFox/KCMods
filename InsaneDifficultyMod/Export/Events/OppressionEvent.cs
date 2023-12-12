@@ -34,7 +34,6 @@ namespace InsaneDifficultyMod.Events
 
             saveID = "oppression";
             saveObject = typeof(OppressionEventSaveData);
-
         }
 
         public override bool Test()
