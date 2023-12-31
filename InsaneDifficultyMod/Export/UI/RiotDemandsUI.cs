@@ -7,7 +7,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-namespace InsaneDifficultyMod
+namespace InsaneDifficultyMod.Events
 {
     public class RiotDemandsUI : MonoBehaviour
     {
@@ -19,7 +19,7 @@ namespace InsaneDifficultyMod
         public Dictionary<string, Transform> resourceObjs = new Dictionary<string, Transform>();
         public Button acceptButton;
 
-        private RiotSpawn riot;
+        private Riot riot;
 
 
         public void Start() 
@@ -50,12 +50,12 @@ namespace InsaneDifficultyMod
             });
         }
 
-        public void Open(RiotSpawn riot) 
+        public void Open(Riot riot) 
         {
             this.riot = riot;
 
             visible = true;
-            description.text = string.Concat(descriptionFormat, riot.rioters.Count);
+            description.text = string.Concat(descriptionFormat, riot.count);
 
             #region Resource Display
 
@@ -170,8 +170,14 @@ namespace InsaneDifficultyMod
             gameObject.SetActive(visible);
             if (visible)
             {
-                Assets.Code.ResourceAmount playerResources = Player.inst.resourcesPerLandmass[riot.GetLandmass()];
-                if (Player.inst.PlayerLandmassOwner.Gold > riot.demand.Get(FreeResourceType.Gold) && playerResources > riot.demand)
+                Assets.Code.ResourceAmount playerResources = Player.inst.resourcesPerLandmass[riot.landmass];
+
+                bool playerCanAfford = true;
+                for (int i = 0; i < (int)FreeResourceType.NumTypes; i++)
+                    if (playerResources.Get((FreeResourceType)i) < riot.demand.Get((FreeResourceType)i))
+                            playerCanAfford = false;
+
+                if (Player.inst.PlayerLandmassOwner.Gold > riot.demand.Get(FreeResourceType.Gold) && playerCanAfford)
                 {
                     acceptButton.interactable = true;
                 }
@@ -184,7 +190,7 @@ namespace InsaneDifficultyMod
 
         private void OnAcceptButtonClicked() 
         {
-            Assets.Code.ResourceAmount playerResources = Player.inst.resourcesPerLandmass[riot.GetLandmass()];
+            Assets.Code.ResourceAmount playerResources = Player.inst.resourcesPerLandmass[riot.landmass];
             Assets.Code.ResourceAmount negativeDemand = new Assets.Code.ResourceAmount();
 
             #region Configuring Negative Demand ResourceAmount
@@ -206,7 +212,12 @@ namespace InsaneDifficultyMod
 
             #endregion
 
-            if (Player.inst.PlayerLandmassOwner.Gold > riot.demand.Get(FreeResourceType.Gold) && playerResources > riot.demand)
+            bool playerCanAfford = true;
+            for (int i = 0; i < (int)FreeResourceType.NumTypes; i++)
+                if (playerResources.Get((FreeResourceType)i) < riot.demand.Get((FreeResourceType)i))
+                    playerCanAfford = false;
+
+            if (Player.inst.PlayerLandmassOwner.Gold > riot.demand.Get(FreeResourceType.Gold) && playerCanAfford)
             {
                 playerResources.Add(negativeDemand);
                 Player.inst.PlayerLandmassOwner.Gold -= riot.demand.Get(FreeResourceType.Gold);

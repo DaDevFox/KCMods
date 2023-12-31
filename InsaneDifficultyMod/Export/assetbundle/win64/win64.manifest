@@ -1,13 +1,7 @@
 ManifestFileVersion: 0
-CRC: 1935305103
+CRC: 3752479375
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
-      Name: custombuilding_cffbce49502340f912f9c09ee307994f
-      Dependencies: {}
-    Info_1:
-      Name: buildingreplacemodeltest_60820a7aa55b015db79ba41101f2a50a
-      Dependencies: {}
-    Info_2:
-      Name: insanedifficultyassets_40694108fb96d214beea50a760018d80
+      Name: fox_insanedifficulty_6ce46fabda828b6ed305c0eaa135cf54
       Dependencies: {}

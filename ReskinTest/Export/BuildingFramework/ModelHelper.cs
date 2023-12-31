@@ -7,7 +7,7 @@ using UnityEngine;
 using Harmony;
 using System.Reflection;
 
-namespace BuildingFramework
+namespace ReskinEngine
 {
     class ModelHelper : MonoBehaviour
     {

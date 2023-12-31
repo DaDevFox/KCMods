@@ -1,3 +1,5 @@
+All require variants in stone and normal versions
+
 Approach 1: 
 
 Straight:
@@ -43,4 +45,7 @@ Fourway:
 Approach 2:
 	Central piece
 	Flat piece
+	Stairs piece
+
+Approach 3:
 	Stairs piece

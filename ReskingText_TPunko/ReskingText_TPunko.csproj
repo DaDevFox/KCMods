@@ -31,22 +31,22 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Export\BuildingFramework\Engine\SkinBinders\Base\SkinBinder.cs</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,32 +54,217 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.InputModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Valve.Newtonsoft.Json">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Kingdoms and Castles\KingdomsAndCastles_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Export\BuildingFramework\BuildingSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\AdvTownSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\Base\BaseSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\CastleSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\FoodSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\MaritimeSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\SpecialSkins.cs" />
+    <Compile Include="Export\BuildingFramework\API\Skins\TownSkins.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\AdvTown\Church.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Base\HiddenBinderAttribute.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Base\SkinBinder.cs" />
+    <Compile Include="Export\BuildingFramework\API\ReskinProfile.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Base\Collection.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Castle\CastleBlocks.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Castle\Towers.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Food\WindmillSkinBinder.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Maritime\DockSkinBinder.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Special\Environmental.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Town\Buildings.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Town\Paths.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\Engine.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\SkinBinders\Buildings\Castle\CastleBuildings.cs" />
+    <Compile Include="Export\BuildingFramework\Engine\Settings.cs" />
     <Compile Include="Export\BuildingFramework\Procedures.cs" />
     <Compile Include="Export\BuildingFramework\ReskinHelper.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Collection.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\CollectionEditor.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ModBuilding\Mod.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ModBuilding\ModBuilder.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Cathedral\CathedralPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Cathedral\CathedralSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Church\ChurchPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Church\ChurchSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\BuildingSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Generic\GenericBuildingPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Generic\GenericBuildingSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Skin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\SkinPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockType.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\StoneCastleBlockPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\StoneCastleBlockSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\WoodCastleBlockPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\WoodCastleBlockSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\Base\GatePreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\Base\GateSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\StoneGatePreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\StoneGateSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\WoodenGatePreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\WoodenGateSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Keep\KeepPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Keep\KeepSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ArcherSchool\ArcherSchoolPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ArcherSchool\ArcherSchoolSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\Barracks\BarracksPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\Barracks\BarracksSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ChamberOfWar\ChamberOfWarPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ChamberOfWar\ChamberOfWarSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\GreatHall\GreatHallPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\GreatHall\GreatHallSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\TreasureRoom\TreasureRoomPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\TreasureRoom\TreasureRoomSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Stairs\CastleStairsPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Stairs\CastleStairsSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special\Tree\TreePreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special\Tree\TreeSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Cottage\CottagePreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Cottage\CottageSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Hovel\HovelPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Hovel\HovelSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Manor\ManorPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Manor\ManorSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Well\WellSkin.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Well\WellSkinPreview.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Utils\BuildAssetBundle.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\ReskinEngine.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Utils\GameObjectExtensions.cs" />
+    <Compile Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Utils\ReflectionExtensions.cs" />
+    <Compile Include="Export\BuildingFramework\Utils\GameProbe\GameProbeMain.cs" />
+    <Compile Include="Export\BuildingFramework\Utils\InfoFileGenerator.cs" />
+    <Compile Include="Export\Mod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Export\BuildingFramework\API\version_manifest.md" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Collection.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\CollectionEditor.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ModBuilding.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ModBuilding\Mod.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ModBuilding\ModBuilder.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ReskinEditor.unity" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\ReskinEditor.unity.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Cathedral.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Cathedral\CathedralPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Cathedral\CathedralSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Church.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Church\ChurchPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\AdvTown\Church\ChurchSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\BuildingSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Generic.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Generic\GenericBuildingPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Generic\GenericBuildingSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\Skin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Base\SkinPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\Base\CastleBlockType.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\StoneCastleBlockPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\StoneCastleBlockSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\WoodCastleBlockPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\CastleBlocks\WoodCastleBlockSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\Base.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\Base\GatePreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\Base\GateSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\StoneGatePreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\StoneGateSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\WoodenGatePreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Gates\WoodenGateSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Keep.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Keep\KeepPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Keep\KeepSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ArcherSchool.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ArcherSchool\ArcherSchoolPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ArcherSchool\ArcherSchoolSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\Barracks.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\Barracks\BarracksPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\Barracks\BarracksSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ChamberOfWar.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ChamberOfWar\ChamberOfWarPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\ChamberOfWar\ChamberOfWarSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\GreatHall.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\GreatHall\GreatHallPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\GreatHall\GreatHallSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\TreasureRoom.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\TreasureRoom\TreasureRoomPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Misc\TreasureRoom\TreasureRoomSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Stairs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Stairs\CastleStairsPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Castle\Stairs\CastleStairsSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special\Tree.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special\Tree\TreePreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Special\Tree\TreeSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Cottage.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Cottage\CottagePreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Cottage\CottageSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Hovel.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Hovel\HovelPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Hovel\HovelSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Manor.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Manor\ManorPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Manor\ManorSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Well.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Well\WellSkin.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Skins\Town\Well\WellSkinPreview.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\UI.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Utils.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\Utils\BuildAssetBundle.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Examples.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\ReskinEngine.asmdef" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\ReskinEngine.asmdef.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\ReskinEngine.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Resources.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Utils.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Utils\GameObjectExtensions.cs.meta" />
+    <None Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Utils\ReflectionExtensions.cs.meta" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Export\BuildingFramework\Unity Plugin\Reskin Engine\Editor\UI\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Export\BuildingFramework\API\version.txt" />
+    <Content Include="Export\BuildingFramework\Engine\version.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
