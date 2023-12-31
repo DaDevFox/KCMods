@@ -21,14 +21,14 @@ namespace Disasters
         {
             if (cell.Type != ResourceType.Water)
             {
-                float height = Settings.waterElevation.Rand();
+                float height = Settings.EarthquakeWaterElevation.Rand();
                 Util.AnnhiliateCell(cell);
                 Util.SetWaterTile(cell, height);
                 Util.SetCellLandmass(cell, landmass);
             }
             else
             {
-                float height = Settings.landElevation.Rand();
+                float height = Settings.EarthquakeLandElevation.Rand();
                 Util.AnnhiliateCell(cell);
                 Util.SetLandTile(cell, 0, height);
                 Util.SetCellLandmass(cell, landmass);

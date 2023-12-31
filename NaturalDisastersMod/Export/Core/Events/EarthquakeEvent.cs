@@ -29,14 +29,14 @@ namespace Disasters.Events
         public override bool Test()
         {
             base.Test();
-            return Util.Randi() < Settings.earthquakeChance;
+            return Util.Randi() < Settings.EarthquakeChance;
         }
 
         public override void Run()
         {
             base.Run();
 
-            if (!Settings.earthquakes)
+            if (!Settings.EarthquakesEnabled)
                 return;
 
             float radius = 1f;
@@ -58,7 +58,7 @@ namespace Disasters.Events
             int distance = (int)(origin.Center - end.Center).magnitude;
             int i = line.Length;
 
-            float magnitude = Util.ExponentialWeightedRandom(Settings.earthquakeStrength.Min, Settings.earthquakeStrength.Max, 0.01f * distance) + Settings.earthquakeVariance.Rand();
+            float magnitude = Util.ExponentialWeightedRandom(Settings.EarthquakeStrength.Min, Settings.EarthquakeStrength.Max, 0.01f * distance) + Settings.EarthquakeMagnitudeSubIntegerVariance.Rand();
             float m_weightage = magnitude / 10f;
             float AOE_terraformChance = 0.5f * m_weightage;
 
@@ -100,7 +100,7 @@ namespace Disasters.Events
 
                             if(currentCell.Type != ResourceType.Water)
                             {
-                                float height = Settings.landElevation.Rand();
+                                float height = Settings.EarthquakeLandElevation.Rand();
 
                                 if (likeType)
                                 {
@@ -110,7 +110,7 @@ namespace Disasters.Events
                                 }
                                 else
                                 {
-                                    height = Settings.waterElevation.Rand();
+                                    height = Settings.EarthquakeWaterElevation.Rand();
                                     Util.AnnhiliateCell(currentCell);
                                     Util.SetWaterTile(currentCell, height);
                                     Util.SetCellLandmass(currentCell, landmass);
@@ -119,7 +119,7 @@ namespace Disasters.Events
                             }
                             else
                             {
-                                float height = Settings.waterElevation.Rand();
+                                float height = Settings.EarthquakeWaterElevation.Rand();
 
                                 if (likeType)
                                 {
@@ -129,7 +129,7 @@ namespace Disasters.Events
                                 }
                                 else
                                 {
-                                    height = Settings.landElevation.Rand();
+                                    height = Settings.EarthquakeLandElevation.Rand();
                                     Util.AnnhiliateCell(currentCell);
                                     Util.SetLandTile(currentCell, 0, height);
                                     Util.SetCellLandmass(currentCell, landmass);
@@ -165,7 +165,7 @@ namespace Disasters.Events
 
                                 if (_cell.Type != ResourceType.Water)
                                 {
-                                    float height = Settings.landElevation.Rand();
+                                    float height = Settings.EarthquakeLandElevation.Rand();
 
                                     if (likeType)
                                     {
@@ -175,7 +175,7 @@ namespace Disasters.Events
                                     }
                                     else
                                     {
-                                        height = Settings.waterElevation.Rand();
+                                        height = Settings.EarthquakeWaterElevation.Rand();
                                         Util.AnnhiliateCell(_cell);
                                         Util.SetWaterTile(_cell, height);
                                         Util.SetCellLandmass(_cell, landmass);
@@ -184,7 +184,7 @@ namespace Disasters.Events
                                 }
                                 else
                                 {
-                                    float height = Settings.waterElevation.Rand();
+                                    float height = Settings.EarthquakeWaterElevation.Rand();
 
                                     if (likeType)
                                     {
@@ -194,7 +194,7 @@ namespace Disasters.Events
                                     }
                                     else
                                     {
-                                        height = Settings.landElevation.Rand();
+                                        height = Settings.EarthquakeLandElevation.Rand();
                                         Util.AnnhiliateCell(_cell);
                                         Util.SetLandTile(_cell, 0, height);
                                         Util.SetCellLandmass(_cell, landmass);
