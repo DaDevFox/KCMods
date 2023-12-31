@@ -31,21 +31,21 @@ namespace Disasters.Events
 
         public override bool Test()
         {
-            return SRand.Range(0f, 1f) < Settings.meteorChance;
+            return SRand.Range(0f, 1f) < Settings.MeteorChance;
         }
 
         public override void Run()
         {
             base.Run();
 
-            if (!Settings.meteors)
+            if (!Settings.MeteorsEnabled)
                 return;
 
 
             int landmass = (int)SRand.Range(0, World.inst.NumLandMasses);
             Cell origin = World.inst.cellsToLandmass[landmass].RandomElement();
 
-            int radius = (int)Settings.meteorSize.Rand();
+            int radius = (int)Settings.MeteorSize.Rand();
 
             int startX = origin.x - radius;
             int startZ = origin.z - radius;

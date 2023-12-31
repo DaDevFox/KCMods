@@ -10,7 +10,6 @@ using Zat.Shared.ModMenu.Interactive;
 using Zat.Shared.ModMenu.API;
 using Assets.Code;
 
-// test
 namespace Disasters
 {
     public abstract class WeightedMinMax
@@ -52,41 +51,48 @@ namespace Disasters
     [Mod("Natural Disasters", "0.1", "Fox")]
     public class Settings
     {
+        public static bool debug = false;
+        
         public static Settings instance { get; private set; }
         public InteractiveConfiguration<Settings> config { get; private set; }
         public ModSettingsProxy proxy { get; private set; }
 
-        public static bool debug = false;
 
         #region Constants
 
         public static float waterRestingHeight { get; } = -0.65f;
-        public static MinMax earthquakeVariance { get; } = new MinMax(0.1f, 0.9f);
-        public static MinMax landElevation { get; } = new MinMax(0f, 0.15f);
-        public static MinMax waterElevation { get; } = new MinMax(-2f, -0.25f);
+        public static MinMax EarthquakeMagnitudeSubIntegerVariance { get; } = new MinMax(0.1f, 0.9f);
+        public static MinMax EarthquakeLandElevation { get; }   = new MinMax(0f, 0.15f);
+        public static MinMax EarthquakeWaterElevation { get; }  = new MinMax(-2f, -0.25f);
 
         #endregion
 
         #region Mod Settings
 
-        // Earthquakes
-        public static bool earthquakes => instance != null ? instance.c_earthquakes.active : true;
-        public static float earthquakeChance => instance != null ? instance.c_earthquakes.chance : 0.15f;
-        public static MinMax earthquakeStrength => instance != null ? new MinMax(instance.c_earthquakes.strengthMin, instance.c_earthquakes.strengthMax) : new MinMax(1f, 4f);
+        /* -------------- EARTHQUAKES -------------- */
+        public static bool EarthquakesEnabled => instance != null ? instance.c_earthquakes.active : true;
+        
+        public static float EarthquakeChance => instance != null ? instance.c_earthquakes.chance : 0.15f;
+        
+        public static MinMax EarthquakeStrength => instance != null ? new MinMax(instance.c_earthquakes.strengthMin, instance.c_earthquakes.strengthMax) : new MinMax(1f, 4f);
 
-        // Droughts
-        public static bool droughts => instance != null ? instance.c_droughts.active : true;
-        public static float droughtChance => instance != null ? instance.c_droughts.chance : 0.05f;
-        public static MinMax droughtLength => instance != null ? new MinMax(instance.c_droughts.lengthMin, instance.c_droughts.lengthMax) : new MinMax(1f, 5f);
-        public static ResourceAmount droughtFoodPenalty
+        /* -------------- DROUGHTS -------------- */
+        public static bool DroughtsEnabled => instance != null ? instance.c_droughts.active : true;
+        
+        public static float DroughtChance => instance != null ? instance.c_droughts.chance : 0.05f;
+        
+        public static MinMax DroughtLength => instance != null ? new MinMax(instance.c_droughts.lengthMin, instance.c_droughts.lengthMax) : new MinMax(1f, 5f);
+        
+        public static bool DroughtsAffectWeather => instance != null ? instance.c_droughts.affectWeather : true;
+        
+        public static bool DroughtsDisableFishing => instance != null ? instance.c_droughts.disableFishing : false;
+        
+        public static ResourceAmount DroughtFoodPenalty
         {
             get
             {
-#if ADVANCED_SETTINGS
-
                 if (instance == null)
                 {
-#endif
 
                     ResourceAmount amount = new ResourceAmount();
 
@@ -94,8 +100,6 @@ namespace Disasters
                     amount.Set(FreeResourceType.Apples, 4);
 
                     return amount;
-#if ADVANCED_SETTINGS    
-
                 }
                 else
                 {
@@ -106,37 +110,16 @@ namespace Disasters
 
                     return amount;
                 }
-#endif
-
             }
-
-
         }
 
+        public static float DroughtFirePenalty => instance != null ? instance.c_droughts.firePenalty : 4f;
 
-
-
-        public static bool droughtsDisableFishing =>
-#if ADVANCED_SETTINGS 
-            instance != null ? instance.c_droughts.disableFishing : 
-#endif
-            false;
-        public static bool droughtsAffectWeather =>
-#if ADVANCED_SETTINGS
-            instance != null ? instance.c_droughts.affectWeather :
-#endif
-            true;
-        public static float droughtFirePenalty =>
-#if ADVANCED_SETTINGS
-            instance != null ? instance.c_droughts.firePenalty :
-#endif
-            4f;
-
-        // Meteors
-        public static bool meteors => instance != null ? instance.c_meteors.active : true;
-        public static float meteorChance => instance != null ? instance.c_meteors.chance : 0.05f;
-        public static MinMax meteorSize = new MinMax(2f, 13f);
-        public static MinMax meteorArmLength = new MinMax(2f, 9f);
+        /* -------------- METEORS -------------- */
+        public static bool MeteorsEnabled => instance != null ? instance.c_meteors.active : true;
+        public static float MeteorChance => instance != null ? instance.c_meteors.chance : 0.05f;
+        public static MinMax MeteorSize { get; } = new MinMax(2f, 13f);
+        public static MinMax MeteorArmLength { get; } = new MinMax(2f, 9f);
 
         // Tornadoes
         public static float tornadoChance = 0.1f;
@@ -163,18 +146,18 @@ namespace Disasters
             public InteractiveToggleSetting s_active { get; private set; }
             public bool active => s_active.Value;
 
-            [Setting("Chance", "Chance of an earthquake happening per year")]
-            [Slider(0.01f, 1f, 0.15f)]
+            [Setting("Formation Chance", "Chance of an earthquake happening per year")]
+            [Slider(0.01f, 1f, 0.05f, "5%")]
             public InteractiveSliderSetting s_chance { get; private set; }
             public float chance => s_chance.Value;
 
-            [Setting("Earthquake Strength Min")]
-            [Slider(0.1f, 4f, 1f)]
+            [Setting("Minimum Strength")]
+            [Slider(1f, 10f, 1f, "1", true)]
             public InteractiveSliderSetting s_strengthMin { get; private set; }
             public float strengthMin => s_strengthMin.Value;
 
-            [Setting("Earthquake Strength Max")]
-            [Slider(0.1f, 8f, 4f)]
+            [Setting("Maximum Strength")]
+            [Slider(1f, 10f, 4f, "4", true)]
             public InteractiveSliderSetting s_strengthMax { get; private set; }
             public float strengthMax => s_strengthMax.Value;
         }
@@ -186,50 +169,46 @@ namespace Disasters
             public InteractiveToggleSetting s_active { get; private set; }
             public bool active => s_active.Value;
 
-            [Setting("Chance", "Chance of a drought happening per year")]
-            [Slider(0.01f, 1f, 0.05f)]
+            [Setting("Formation Chance", "Chance of a drought happening per year")]
+            [Slider(0.01f, 1f, 0.05f, "5%")]
             public InteractiveSliderSetting s_chance { get; private set; }
             public float chance => s_chance.Value;
 
-            [Setting("Drought Length Min")]
-            [Slider(1f, 10f, 1f)]
+            [Setting("Minimum Length")]
+            [Slider(1f, 10f, 1f, "1", true)]
             public InteractiveSliderSetting s_lengthMin { get; private set; }
             public float lengthMin => s_lengthMin.Value;
 
-            [Setting("Drought Length Max")]
-            [Slider(0.1f, 10f, 5f)]
+            [Setting("Maximum Length")]
+            [Slider(1f, 10f, 2f, "2", true)]
             public InteractiveSliderSetting s_lengthMax { get; private set; }
             public float lengthMax => s_lengthMax.Value;
 
-#if ADVANCED_SETTINGS
 
-            [Setting("Advanced/Fields", "How much droughts affect the base output of fields; 100% = nullified, no yield")]
+            [Setting("Field Damage", "How much droughts limit the base output of fields; 100% = nullified, no yield")]
             [Slider(1f, 4f, 4f, "nullified", true)]
             public InteractiveSliderSetting s_fieldPenalty { get; private set; }
             public int fieldPenalty => (int)s_fieldPenalty.Value;
 
-            [Setting("Advanced/Orchards", "How much droughts affect the base output of orchards; 100% = nullified, no yield")]
+            [Setting("Orchard Damage", "How much droughts limit the base output of orchards; 100% = nullified, no yield")]
             [Slider(1f, 18, 4f, "22% penalty", true)]
             public InteractiveSliderSetting s_orchardPenalty { get; private set; }
             public int orchardPenalty => (int)s_orchardPenalty.Value;
 
-            [Setting("Advanced/Disable Fishing Huts")]
+            [Setting("Disable Fishing Huts")]
             [Toggle(false)]
             public InteractiveToggleSetting s_disableFishing { get; private set; }
             public bool disableFishing => (bool)s_disableFishing.Value;
 
-            [Setting("Advanced/Affect Weather")]
+            [Setting("Affect Weather")]
             [Toggle(true)]
             public InteractiveToggleSetting s_affectWeather { get; private set; }
             public bool affectWeather => (bool)s_affectWeather.Value;
 
-            [Setting("Advanced/Fires", "How much faster fires spread")]
-            [Slider(1f, 6f, 4f)]
+            [Setting("Fires", "Fire spread modifier during droughts (100% = no change)")]
+            [Slider(1f, 6f, 4f, "400%")]
             public InteractiveSliderSetting s_firePenalty { get; private set; }
             public float firePenalty => s_firePenalty.Value;
-
-#endif
-
         }
 
         public class Meteors
@@ -240,7 +219,7 @@ namespace Disasters
             public bool active => s_active.Value;
 
             [Setting("Chance", "Chance of a meteor happening per year")]
-            [Slider(0.01f, 1f, 0.05f)]
+            [Slider(0.01f, 1f, 0.05f, "5%")]
             public InteractiveSliderSetting s_chance { get; private set; }
             public float chance => s_chance.Value;
         }
@@ -267,20 +246,45 @@ namespace Disasters
 
         private static void AddListeners()
         {
+            // Earthquakes
             Settings.instance.c_earthquakes.s_chance.OnUpdatedRemotely.AddListener((entry) => UpdatePercentageSlider(entry));
+            Settings.instance.c_earthquakes.s_strengthMin.OnUpdatedRemotely.AddListener(setting =>
+            {
+                UpdateSlider(setting);
+                OnMinMaxUpdate(instance.c_earthquakes.s_strengthMin, instance.c_earthquakes.s_strengthMax);
+            });
+            Settings.instance.c_earthquakes.s_strengthMax.OnUpdatedRemotely.AddListener(setting =>
+            {
+                UpdateSlider(setting);
+                OnMinMaxUpdate(instance.c_earthquakes.s_strengthMin, instance.c_earthquakes.s_strengthMax);
+            });
+
+
+
+            // Droughts
             Settings.instance.c_droughts.s_chance.OnUpdatedRemotely.AddListener((entry) => UpdatePercentageSlider(entry));
-            Settings.instance.c_meteors.s_chance.OnUpdatedRemotely.AddListener((entry) => UpdatePercentageSlider(entry));
-
-#if ADVANCED_SETTINGS
-
+            Settings.instance.c_droughts.s_lengthMin.OnUpdate.AddListener(setting =>
+            {
+                UpdateSlider(setting);
+                OnMinMaxUpdate(instance.c_droughts.s_lengthMin, instance.c_droughts.s_lengthMax);
+            });
+            Settings.instance.c_droughts.s_lengthMax.OnUpdate.AddListener(setting =>
+            {
+                UpdateSlider(setting);
+                OnMinMaxUpdate(instance.c_droughts.s_lengthMin, instance.c_droughts.s_lengthMax);
+            });
             Settings.instance.c_droughts.s_fieldPenalty.OnUpdatedRemotely.AddListener(entry => UpdateYieldPenaltySlider(entry, 4));
             Settings.instance.c_droughts.s_orchardPenalty.OnUpdatedRemotely.AddListener(entry => UpdateYieldPenaltySlider(entry, 18));
             Settings.instance.c_droughts.s_firePenalty.OnUpdatedRemotely.AddListener(entry => SetPercentageSlider(entry, entry.slider.value * 100f));
 
-#endif
 
-            AddMinMaxListeners(Settings.instance.c_earthquakes.s_strengthMin, Settings.instance.c_earthquakes.s_strengthMax);
-            AddMinMaxListeners(Settings.instance.c_droughts.s_lengthMin, Settings.instance.c_droughts.s_lengthMax);
+
+            // Meteors
+            Settings.instance.c_meteors.s_chance.OnUpdatedRemotely.AddListener((entry) => UpdatePercentageSlider(entry));
+
+            
+            //AddMinMaxListeners(Settings.instance.c_earthquakes.s_strengthMin, Settings.instance.c_earthquakes.s_strengthMax);
+            //AddMinMaxListeners(Settings.instance.c_droughts.s_lengthMin, Settings.instance.c_droughts.s_lengthMax);
         }
 
         private static void AddMinMaxListeners(InteractiveSliderSetting min, InteractiveSliderSetting max)
@@ -345,7 +349,7 @@ namespace Disasters
 
         public static void UpdateYieldPenaltySlider(SettingsEntry slider, int maximumYieldLoss = 4)
         {
-            slider.slider.label = (int)slider.slider.value == maximumYieldLoss ? "nullified" :  $"{Util.RoundToFactor(slider.slider.value / maximumYieldLoss, 0.01f)}% penalty";
+            slider.slider.label = (int)slider.slider.value == maximumYieldLoss ? "nullified" :  $"{Util.RoundToFactor(slider.slider.value / maximumYieldLoss, 0.01f) * 100f}% penalty";
             Settings.instance.proxy.UpdateSetting(slider, () => { }, (ex) => Mod.helper.Log(ex.ToString()));
         }
 
@@ -360,13 +364,13 @@ namespace Disasters
             if (min.Value > max.Value)
             {
                 max.Value = min.Value;
-                min.TriggerUpdate();
+                max.TriggerUpdate();
             }
 
             if (max.Value < min.Value)
             {
                 min.Value = max.Value;
-                max.TriggerUpdate();
+                min.TriggerUpdate();
             }
         }
 

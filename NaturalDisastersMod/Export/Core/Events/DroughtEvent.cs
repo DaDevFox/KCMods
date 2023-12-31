@@ -92,7 +92,7 @@ namespace Disasters.Events
         {
             base.Test();
             
-            if (SRand.Range(0, 1f) < Settings.droughtChance)
+            if (SRand.Range(0, 1f) < Settings.DroughtChance)
                 return true;
 
             timeRemaining -= 1;
@@ -116,10 +116,10 @@ namespace Disasters.Events
         {
             base.Run();
 
-            if (!Settings.droughts)
+            if (!Settings.DroughtsEnabled)
                 return;
 
-            timeRemaining = (int)Settings.droughtLength.Rand();
+            timeRemaining = (int)Settings.DroughtLength.Rand();
             droughtRunning = true;
 
             KingdomLog.TryLog("drought", "My Lord, a terrible drought has struck our land, for the next <color=yellow>" + timeRemaining.ToString() + " " + (timeRemaining == 1 ? "year" : "years") + "</color>, our harvest will be poor!", KingdomLog.LogStatus.Neutral, 1f);
@@ -182,7 +182,7 @@ namespace Disasters.Events
 
                 // Don't allow rain
                 if(droughtRunning)
-                    if (Settings.droughtsAffectWeather)
+                    if (Settings.DroughtsAffectWeather)
                         if (global::Weather.CurrentWeather == global::Weather.WeatherType.NormalRain || global::Weather.CurrentWeather == global::Weather.WeatherType.HeavyRain || global::Weather.CurrentWeather == global::Weather.WeatherType.LightningStorm)
                             global::Weather.CurrentWeather = global::Weather.WeatherType.None;
 
@@ -209,7 +209,7 @@ namespace Disasters.Events
             static void Postfix(Fire __instance)
             {
                 if (droughtRunning)
-                    typeof(Fire).GetField("spreadTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(__instance, 15f / (2.5f * Settings.droughtFirePenalty));
+                    typeof(Fire).GetField("spreadTime", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(__instance, 15f / (2.5f * Settings.DroughtFirePenalty));
             }
 
             public static void End()
@@ -231,7 +231,7 @@ namespace Disasters.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield(ResourceAmount.Make(FreeResourceType.Wheat, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Wheat) - Settings.droughtFoodPenalty.Get(FreeResourceType.Wheat)));
+                    b.Yield(ResourceAmount.Make(FreeResourceType.Wheat, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Wheat) - Settings.DroughtFoodPenalty.Get(FreeResourceType.Wheat)));
                 }
                 else
                 {
@@ -251,7 +251,7 @@ namespace Disasters.Events
                 if (DroughtEvent.droughtRunning)
                 {
                     Building b = __instance.GetComponent<Building>();
-                    b.Yield(ResourceAmount.Make(FreeResourceType.Apples, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Apples) - Settings.droughtFoodPenalty.Get(FreeResourceType.Apples)));
+                    b.Yield(ResourceAmount.Make(FreeResourceType.Apples, foodBuildingYields[b.UniqueName].Get(FreeResourceType.Apples) - Settings.DroughtFoodPenalty.Get(FreeResourceType.Apples)));
                 }
                 else
                 {
@@ -270,7 +270,7 @@ namespace Disasters.Events
         {
             static void Prefix(FishingShip __instance)
             {
-                if (droughtRunning && Settings.droughtsDisableFishing)
+                if (droughtRunning && Settings.DroughtsDisableFishing)
                     __instance.status = FishingShip.Status.WaitAtHutFull;
             }
         }
@@ -284,7 +284,7 @@ namespace Disasters.Events
         {
             static void Postfix(ref string __result)
             {
-                if (droughtRunning && Settings.droughtsDisableFishing)
+                if (droughtRunning && Settings.DroughtsDisableFishing)
                     __result = "<color=yellow>Waters too shallow to fish: waiting until drought ends to resume </color>";
             }
         }
@@ -295,7 +295,7 @@ namespace Disasters.Events
         {
             static void Postfix(ref string __result)
             {
-                if (droughtRunning && Settings.droughtFoodPenalty.Get(FreeResourceType.Apples) == 18)
+                if (droughtRunning && Settings.DroughtFoodPenalty.Get(FreeResourceType.Apples) == 18)
                     __result = "<color=yellow>Orchard infertile due to drought; no yield will be produced </color>";
             }
         }
@@ -306,7 +306,7 @@ namespace Disasters.Events
         {
             static void Postfix(ref string __result)
             {
-                if (droughtRunning && Settings.droughtFoodPenalty.Get(FreeResourceType.Wheat) == 4)
+                if (droughtRunning && Settings.DroughtFoodPenalty.Get(FreeResourceType.Wheat) == 4)
                     __result = "<color=yellow>Fields dry due to drought; no yield will be produced </color>";
             }
         }
